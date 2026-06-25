@@ -220,9 +220,9 @@ body{background:#0f2d1a}
 <button id="switch-user-btn" onclick="logout()">↩ Trocar usuário</button>
 
 <!-- COVER SCREEN -->
-<div id="cover-screen" style="display:none;position:fixed;inset:0;background:#0f2d1a;background-image:repeating-linear-gradient(45deg,transparent,transparent 40px,rgba(255,255,255,0.03) 40px,rgba(255,255,255,0.03) 41px);align-items:center;justify-content:center;z-index:50;cursor:pointer;transition:opacity 0.4s" onclick="openAlbum()">
-  <div id="cover-card" style="width:420px;height:580px;border-radius:12px;overflow:hidden;box-shadow:0 30px 80px rgba(0,0,0,0.6);position:relative"></div>
-  <div style="position:absolute;bottom:40px;left:50%;transform:translateX(-50%);background:rgba(0,0,0,0.4);color:#fff;padding:10px 22px;border-radius:24px;font-size:.9rem;white-space:nowrap;pointer-events:none">👆 Clique para abrir o álbum</div>
+<div id="cover-screen" style="display:none;position:fixed;inset:0;background:#0a1a0f;align-items:center;justify-content:center;z-index:50;cursor:pointer;transition:opacity 0.4s" onclick="openAlbum()">
+  <img src="capa.png" style="height:90vh;max-height:820px;width:auto;border-radius:8px;box-shadow:0 40px 100px rgba(0,0,0,0.7);display:block" alt="Seleção do Design 2026" draggable="false">
+  <div style="position:absolute;bottom:32px;left:50%;transform:translateX(-50%);background:rgba(0,0,0,0.5);color:#fff;padding:10px 24px;border-radius:24px;font-size:.9rem;white-space:nowrap;pointer-events:none;backdrop-filter:blur(4px)">👆 Clique para abrir o álbum</div>
 </div>
 
 <!-- BOOK SCENE -->
@@ -1039,7 +1039,6 @@ function showApp() {
     updateDots();
   } else {
     const cs = document.getElementById('cover-screen');
-    document.getElementById('cover-card').innerHTML = renderPageHTML('cover');
     cs.style.opacity = '0';
     cs.style.display = 'flex';
     setTimeout(() => { cs.style.opacity = '1'; }, 10);
