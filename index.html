@@ -352,13 +352,14 @@ const TEAM = [
 ];
 
 const SPREADS = [
-  { left: null,   right: 'cover' },
-  { left: 1,      right: 2       },
-  { left: 3,      right: 4       },
-  { left: 5,      right: 6       },
-  { left: 7,      right: 8       },
-  { left: 9,      right: 10      },
-  { left: 11,     right: null    },
+  { left: null,          right: 'cover'         },
+  { left: 'cc-left',    right: 'cc-right'       },  // contra capa + sumário
+  { left: 1,             right: 2               },
+  { left: 3,             right: 4               },
+  { left: 5,             right: 6               },
+  { left: 7,             right: 8               },
+  { left: 9,             right: 10              },
+  { left: 11,            right: null            },
 ];
 
 // flat list of all pages for mobile navigation
@@ -501,11 +502,13 @@ function renderCardHTML(player, opts) {
 // PAGE RENDERERS
 // ============================================================
 function renderPageHTML(page) {
-  if (page === null)    return renderDecoPage();
-  if (page === 'cover') return renderCoverPage();
+  if (page === null)      return renderDecoPage();
+  if (page === 'cover')   return renderCoverPage();
+  if (page === 'cc-left') return `<div style="width:100%;height:100%;background:url('contra-capa.png') left center/200% 100% no-repeat"></div>`;
+  if (page === 'cc-right')return `<div style="width:100%;height:100%;background:url('contra-capa.png') right center/200% 100% no-repeat"></div>`;
   if (page >= 1 && page <= 9) return renderSquadPage(page);
-  if (page === 10)      return renderTecnicoPage();
-  if (page === 11)      return renderDreamPage();
+  if (page === 10)        return renderTecnicoPage();
+  if (page === 11)        return renderDreamPage();
   return renderDecoPage();
 }
 
