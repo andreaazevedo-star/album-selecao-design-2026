@@ -47,14 +47,14 @@ body{background:#0f2d1a}
 .flip-face.back{transform:rotateY(180deg)}
 
 /* Nav */
-.nav-btn{position:absolute;top:50%;transform:translateY(-50%);width:44px;height:44px;border-radius:50%;background:rgba(255,255,255,0.15);backdrop-filter:blur(8px);color:#fff;font-size:1.5rem;border:none;cursor:pointer;z-index:30;transition:.2s;display:flex;align-items:center;justify-content:center}
-.nav-btn:hover{background:rgba(255,255,255,0.25);transform:translateY(-50%) scale(1.05)}
-.nav-btn:disabled{opacity:.3;cursor:default;pointer-events:none}
-#nav-prev{left:-60px}
-#nav-next{right:-60px}
+.nav-btn{position:fixed;top:50%;transform:translateY(-50%);width:52px;height:52px;border-radius:50%;background:rgba(255,255,255,0.18);backdrop-filter:blur(10px);color:#fff;font-size:1.8rem;border:2px solid rgba(255,255,255,0.2);cursor:pointer;z-index:30;transition:.2s;display:flex;align-items:center;justify-content:center;box-shadow:0 4px 16px rgba(0,0,0,0.3)}
+.nav-btn:hover{background:rgba(255,255,255,0.32);transform:translateY(-50%) scale(1.08)}
+.nav-btn:disabled{opacity:.2;cursor:default;pointer-events:none}
+#nav-prev{left:24px}
+#nav-next{right:24px}
 
 /* Dots */
-#dots{position:absolute;bottom:-44px;left:50%;transform:translateX(-50%);display:flex;gap:8px}
+#dots{position:fixed;bottom:28px;left:50%;transform:translateX(-50%);display:flex;gap:8px;z-index:30}
 .dot{width:10px;height:10px;border-radius:50%;background:rgba(255,255,255,0.3);cursor:pointer;transition:.2s}
 .dot.active{background:#fff;width:20px;border-radius:5px}
 
@@ -193,10 +193,10 @@ body{background:#0f2d1a}
   #p-right.mobile-hide{display:none}
   #flipper{display:none!important}
   #book::before{display:none}
-  #nav-prev{left:-48px}
-  #nav-next{right:-48px}
+  #nav-prev{left:8px}
+  #nav-next{right:8px}
   .nav-btn{width:38px;height:38px;font-size:1.2rem}
-  #dots{bottom:-36px}
+  #dots{bottom:16px}
   .cover-page{border-radius:6px}
 }
 </style>
@@ -1016,6 +1016,13 @@ function logout() {
   document.getElementById('switch-user-btn').style.display = 'none';
 }
 
+function setNavVisible(visible) {
+  const d = visible ? '' : 'none';
+  document.getElementById('nav-prev').style.display = d;
+  document.getElementById('nav-next').style.display = d;
+  document.getElementById('dots').style.display    = visible ? 'flex' : 'none';
+}
+
 function openAlbum() {
   const cs = document.getElementById('cover-screen');
   cs.style.opacity = '0';
@@ -1025,6 +1032,7 @@ function openAlbum() {
     currentSpread = 1;
     document.getElementById('p-left').innerHTML  = renderPageHTML(SPREADS[1].left);
     document.getElementById('p-right').innerHTML = renderPageHTML(SPREADS[1].right);
+    setNavVisible(true);
     updateDots();
   }, 400);
 }
@@ -1040,9 +1048,11 @@ function showApp() {
 
   if (isMobile) {
     document.getElementById('book-scene').style.display = 'flex';
+    setNavVisible(true);
     renderMobilePage();
     updateDots();
   } else {
+    setNavVisible(false);
     const cs = document.getElementById('cover-screen');
     cs.style.opacity = '0';
     cs.style.display = 'flex';
