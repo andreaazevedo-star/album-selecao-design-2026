@@ -219,6 +219,12 @@ body{background:#0f2d1a}
 <!-- SWITCH USER -->
 <button id="switch-user-btn" onclick="logout()">↩ Trocar usuário</button>
 
+<!-- COVER SCREEN -->
+<div id="cover-screen" style="display:none;position:fixed;inset:0;background:#0f2d1a;background-image:repeating-linear-gradient(45deg,transparent,transparent 40px,rgba(255,255,255,0.03) 40px,rgba(255,255,255,0.03) 41px);align-items:center;justify-content:center;z-index:50;cursor:pointer;transition:opacity 0.4s" onclick="openAlbum()">
+  <div id="cover-card" style="width:420px;height:580px;border-radius:12px;overflow:hidden;box-shadow:0 30px 80px rgba(0,0,0,0.6);position:relative"></div>
+  <div style="position:absolute;bottom:40px;left:50%;transform:translateX(-50%);background:rgba(0,0,0,0.4);color:#fff;padding:10px 22px;border-radius:24px;font-size:.9rem;white-space:nowrap;pointer-events:none">👆 Clique para abrir o álbum</div>
+</div>
+
 <!-- BOOK SCENE -->
 <div id="book-scene" style="display:none">
   <button id="nav-prev" class="nav-btn" onclick="goBackward()">‹</button>
@@ -1005,22 +1011,21 @@ function logout() {
   document.getElementById('switch-user-btn').style.display = 'none';
 }
 
-function openBook() {
-  const book = document.getElementById('book');
-  if (!book.classList.contains('closed')) return;
-  book.classList.remove('closed');
-  document.getElementById('nav-prev').style.display = '';
-  document.getElementById('nav-next').style.display = '';
-  document.getElementById('dots').style.display = '';
-  currentSpread = 1;
-  document.getElementById('p-left').innerHTML  = renderPageHTML(SPREADS[1].left);
-  document.getElementById('p-right').innerHTML = renderPageHTML(SPREADS[1].right);
-  updateDots();
+function openAlbum() {
+  const cs = document.getElementById('cover-screen');
+  cs.style.opacity = '0';
+  setTimeout(() => {
+    cs.style.display = 'none';
+    document.getElementById('book-scene').style.display = 'flex';
+    currentSpread = 1;
+    document.getElementById('p-left').innerHTML  = renderPageHTML(SPREADS[1].left);
+    document.getElementById('p-right').innerHTML = renderPageHTML(SPREADS[1].right);
+    updateDots();
+  }, 400);
 }
 
 function showApp() {
   document.getElementById('login-screen').style.display = 'none';
-  document.getElementById('book-scene').style.display = 'flex';
   document.getElementById('fab').style.display = 'flex';
   document.getElementById('switch-user-btn').style.display = 'block';
 
@@ -1029,16 +1034,15 @@ function showApp() {
   mobilePageIndex = 0;
 
   if (isMobile) {
+    document.getElementById('book-scene').style.display = 'flex';
     renderMobilePage();
+    updateDots();
   } else {
-    const book = document.getElementById('book');
-    book.classList.add('closed');
-    document.getElementById('nav-prev').style.display = 'none';
-    document.getElementById('nav-next').style.display = 'none';
-    document.getElementById('dots').style.display = 'none';
-    document.getElementById('p-left').innerHTML = '';
-    document.getElementById('p-right').innerHTML = renderPageHTML('cover') + '<div class="hint-open">👆 Clique para abrir o álbum</div>';
-    book.onclick = function() { openBook(); book.onclick = null; };
+    const cs = document.getElementById('cover-screen');
+    document.getElementById('cover-card').innerHTML = renderPageHTML('cover');
+    cs.style.opacity = '0';
+    cs.style.display = 'flex';
+    setTimeout(() => { cs.style.opacity = '1'; }, 10);
   }
   updateFAB();
 }
