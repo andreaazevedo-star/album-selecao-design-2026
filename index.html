@@ -1,0 +1,1084 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Seleção do Design 2026</title>
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+html,body{height:100%;overflow:hidden;font-family:'Segoe UI',system-ui,sans-serif}
+body{background:#0f2d1a}
+
+/* ===== LOGIN ===== */
+#login-screen{position:fixed;inset:0;background:linear-gradient(160deg,#064e3b 0%,#065f46 50%,#047857 100%);display:flex;align-items:center;justify-content:center;z-index:999}
+.login-card{background:rgba(255,255,255,0.07);backdrop-filter:blur(20px);border:1px solid rgba(255,255,255,0.15);border-radius:20px;padding:40px 36px;text-align:center;min-width:320px;max-width:380px;width:90%}
+.login-card h1{color:#fff;font-size:1.6rem;font-weight:800;margin-bottom:4px}
+.login-card p{color:rgba(255,255,255,0.6);font-size:0.95rem;margin-bottom:24px}
+#login-select{width:100%;padding:12px 14px;border-radius:10px;border:1.5px solid rgba(255,255,255,0.2);background:rgba(255,255,255,0.1);color:#fff;font-size:0.95rem;margin-bottom:16px;outline:none;appearance:none;cursor:pointer}
+#login-select option{background:#065f46;color:#fff}
+.login-btn{width:100%;padding:13px;background:#00b06f;color:#fff;border:none;border-radius:10px;font-size:1rem;font-weight:700;cursor:pointer;transition:.2s}
+.login-btn:hover{background:#00c97e;transform:translateY(-1px)}
+
+/* ===== SWITCH USER BTN ===== */
+#switch-user-btn{position:fixed;top:12px;right:16px;background:rgba(0,0,0,0.3);color:#fff;border:none;border-radius:6px;padding:6px 12px;cursor:pointer;font-size:0.85rem;z-index:40;display:none;transition:.2s}
+#switch-user-btn:hover{background:rgba(0,0,0,0.5)}
+
+/* ===== BOOK SCENE ===== */
+#book-scene{width:100vw;height:100vh;background:#0f2d1a;background-image:repeating-linear-gradient(45deg,transparent,transparent 40px,rgba(255,255,255,0.03) 40px,rgba(255,255,255,0.03) 41px);display:flex;align-items:center;justify-content:center;perspective:3000px;position:relative}
+
+#book{width:1100px;height:720px;position:relative;transform-style:preserve-3d;box-shadow:0 30px 80px rgba(0,0,0,0.5),0 0 0 1px rgba(0,0,0,0.1);border-radius:6px}
+#book::before{content:'';position:absolute;left:calc(50% - 4px);top:0;width:8px;height:100%;background:#065f46;z-index:10;box-shadow:inset -2px 0 4px rgba(0,0,0,0.3),inset 2px 0 4px rgba(255,255,255,0.1)}
+
+.static-page{position:absolute;width:calc(50% - 4px);height:100%;overflow-y:auto;background:#fafaf8}
+#p-left{left:0;border-radius:6px 0 0 6px;box-shadow:inset -8px 0 20px rgba(0,0,0,0.1)}
+#p-right{right:0;border-radius:0 6px 6px 0}
+
+/* Flip */
+#flipper{position:absolute;width:calc(50% - 4px);height:100%;transform-style:preserve-3d;transition:transform 0.75s cubic-bezier(0.4,0,0.2,1);z-index:20;pointer-events:none;display:none}
+#flipper.flip-forward{left:calc(50% + 4px);transform-origin:left center}
+#flipper.flip-backward{right:0;left:auto;transform-origin:right center}
+.flip-face{position:absolute;width:100%;height:100%;backface-visibility:hidden;overflow:hidden;background:#fafaf8}
+.flip-face.back{transform:rotateY(180deg)}
+
+/* Nav */
+.nav-btn{position:absolute;top:50%;transform:translateY(-50%);width:44px;height:44px;border-radius:50%;background:rgba(255,255,255,0.15);backdrop-filter:blur(8px);color:#fff;font-size:1.5rem;border:none;cursor:pointer;z-index:30;transition:.2s;display:flex;align-items:center;justify-content:center}
+.nav-btn:hover{background:rgba(255,255,255,0.25);transform:translateY(-50%) scale(1.05)}
+.nav-btn:disabled{opacity:.3;cursor:default;pointer-events:none}
+#nav-prev{left:-60px}
+#nav-next{right:-60px}
+
+/* Dots */
+#dots{position:absolute;bottom:-44px;left:50%;transform:translateX(-50%);display:flex;gap:8px}
+.dot{width:10px;height:10px;border-radius:50%;background:rgba(255,255,255,0.3);cursor:pointer;transition:.2s}
+.dot.active{background:#fff;width:20px;border-radius:5px}
+
+/* ===== COVER PAGE ===== */
+.cover-page{width:100%;height:100%;background:linear-gradient(160deg,#064e3b 0%,#065f46 50%,#047857 100%);display:flex;flex-direction:column;align-items:center;justify-content:center;color:#fff;padding:24px;text-align:center;border-radius:0 6px 6px 0}
+.cover-shield{width:100px;height:120px;margin-bottom:16px}
+.cover-title{font-size:2.2rem;font-weight:800;margin-bottom:4px}
+.cover-year{font-size:3.5rem;font-weight:900;color:#00b06f;line-height:1}
+.cover-sub{font-size:.9rem;color:rgba(255,255,255,.7);margin-bottom:16px}
+.cover-divider{width:40%;height:1px;background:rgba(255,255,255,.3);margin:12px auto}
+.cover-progress-label{font-size:.8rem;color:rgba(255,255,255,.7);margin-bottom:6px}
+.cover-progress-bar{width:80%;height:8px;background:rgba(255,255,255,.2);border-radius:4px;overflow:hidden;margin:0 auto 12px}
+.cover-progress-fill{height:100%;background:#00b06f;border-radius:4px;transition:width .4s}
+.cover-packs{font-size:.85rem;color:rgba(255,255,255,.6)}
+
+/* ===== SQUAD PAGE ===== */
+.squad-page{width:100%;min-height:100%;padding:0 0 16px 0}
+.squad-header{display:flex;align-items:center;gap:12px;padding:14px 16px;color:#fff;position:sticky;top:0;z-index:5}
+.squad-emoji{font-size:2rem;flex-shrink:0}
+.squad-header h2{font-size:1.1rem;font-weight:800;line-height:1.2}
+.squad-header p{font-size:.75rem;opacity:.85;margin-top:2px}
+.squad-count{margin-left:auto;background:rgba(255,255,255,.2);border-radius:20px;padding:4px 10px;font-size:.8rem;font-weight:700;white-space:nowrap}
+.squad-note{font-size:.78rem;color:#6b7280;font-style:italic;padding:6px 16px 4px;background:#f0f0ec;border-left:3px solid #d1fae5;margin-bottom:4px}
+.squad-page section{padding:8px 12px 4px}
+.squad-page section h3{font-size:.78rem;font-weight:700;color:#374151;margin-bottom:8px;text-transform:uppercase;letter-spacing:.05em}
+.cards-grid{display:flex;flex-wrap:wrap;gap:8px}
+.cards-grid-tecnico{display:flex;flex-wrap:wrap;gap:10px}
+
+/* ===== CARD ===== */
+.card{width:80px;height:115px;border-radius:8px;overflow:hidden;position:relative;box-shadow:0 2px 8px rgba(0,0,0,0.15);background:#fff;flex-shrink:0;cursor:pointer;transition:.15s}
+.card:hover{transform:translateY(-2px);box-shadow:0 4px 16px rgba(0,0,0,.2)}
+.card-tecnico-lg{width:88px;height:126px}
+.card-strip{height:24px;display:flex;align-items:center;justify-content:flex-end;padding:0 6px}
+.card-num{color:rgba(255,255,255,.8);font-size:.55rem;font-weight:700}
+.card-avatar{width:52px;height:52px;border-radius:50%;margin:6px auto 4px;display:flex;align-items:center;justify-content:center;color:#fff;font-size:1rem;font-weight:700}
+.card-tecnico-lg .card-avatar{width:58px;height:58px;font-size:1.1rem}
+.card-info{text-align:center;padding:0 4px}
+.card-name{font-size:.57rem;font-weight:700;line-height:1.2;color:#1a1a1a;overflow:hidden;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical}
+.card-role{font-size:.48rem;color:#6b7280;margin-top:1px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.card-squad-tag{font-size:.46rem;font-weight:600;margin-top:2px}
+.card.not-collected{filter:grayscale(1);opacity:.38}
+.card.is-special{border:2.5px solid #d97706}
+.card.is-special::after{content:'⭐';position:absolute;top:2px;right:2px;font-size:.55rem;background:rgba(255,255,255,.9);border-radius:50%;width:14px;height:14px;display:flex;align-items:center;justify-content:center;line-height:1}
+.card.is-new::before{content:'🆕';position:absolute;top:2px;left:2px;font-size:.55rem;z-index:2}
+.card.is-tecnico-card{border:2px solid var(--sc);box-shadow:0 0 0 1px var(--sc)}
+
+/* ===== TECNICO PAGE ===== */
+.tecnico-page{width:100%;min-height:100%;background:#0a0a0a;color:#fff;padding:16px;overflow-y:auto}
+.tecnico-page h2{color:#d97706;font-weight:800;font-size:1.2rem;text-align:center;margin-bottom:16px}
+.tecnico-section{margin-bottom:16px}
+.tecnico-section h3{font-size:.8rem;font-weight:700;color:#fbbf24;text-transform:uppercase;letter-spacing:.08em;margin-bottom:8px}
+.tecnico-cards-center{display:flex;justify-content:center;gap:12px;flex-wrap:wrap}
+.tecnico-cards{display:flex;flex-wrap:wrap;gap:6px}
+.card-dark{background:#1a1a1a!important;border:1.5px solid #d97706!important}
+.card-dark .card-name,.card-dark .card-role{color:#fef3c7!important}
+.card-dark .card-squad-tag{color:#fbbf24!important}
+.card-dark .card-avatar{background:#b45309!important}
+
+/* ===== DECORATIVE PAGE ===== */
+.deco-page{width:100%;height:100%;background:#0a2218;display:flex;align-items:center;justify-content:center;background-image:repeating-linear-gradient(45deg,transparent,transparent 20px,rgba(255,255,255,.03) 20px,rgba(255,255,255,.03) 21px)}
+.deco-ds{font-size:8rem;font-weight:900;color:rgba(255,255,255,.15);user-select:none}
+
+/* ===== DREAM TEAM PAGE ===== */
+.dream-page{width:100%;height:100%;background:#0f2d1a;padding:10px;overflow-y:auto}
+.dream-header{text-align:center;padding-bottom:8px;border-bottom:1px solid rgba(255,255,255,.1);margin-bottom:8px}
+.dream-header h2{color:#fff;font-size:1rem;font-weight:800}
+.dream-rules{color:rgba(255,255,255,.5);font-size:.65rem;margin-top:2px}
+.dream-coach-row{display:flex;align-items:center;gap:8px;padding:6px 8px;background:rgba(0,0,0,.2);border-radius:8px;margin-bottom:8px}
+.dream-coach-label{color:#d97706;font-size:.7rem;font-weight:700;white-space:nowrap}
+.dream-field{background:#166534;border-radius:4px;padding:8px 4px;position:relative;margin-bottom:8px;overflow:hidden}
+.dream-field::before{content:'';position:absolute;top:50%;left:10%;right:10%;height:1px;background:rgba(255,255,255,.2);pointer-events:none}
+.dream-field::after{content:'';position:absolute;top:calc(50% - 24px);left:50%;transform:translateX(-50%);width:48px;height:48px;border-radius:50%;border:1px solid rgba(255,255,255,.2);pointer-events:none}
+.field-row{display:flex;align-items:center;justify-content:center;gap:6px;padding:4px 0;position:relative}
+.row-label{color:rgba(255,255,255,.5);font-size:.55rem;font-weight:700;width:24px;text-align:center;flex-shrink:0}
+.dream-slot{width:52px;height:52px;border-radius:50%;border:2px dashed rgba(255,255,255,.4);display:flex;flex-direction:column;align-items:center;justify-content:center;color:rgba(255,255,255,.4);font-size:1.1rem;cursor:pointer;transition:.15s;flex-shrink:0;position:relative}
+.dream-slot:hover{border-color:rgba(255,255,255,.7);color:rgba(255,255,255,.7);transform:scale(1.05)}
+.dream-slot.filled{border:none;color:#fff;font-size:.65rem;font-weight:700}
+.slot-name{font-size:.46rem;color:rgba(255,255,255,.85);max-width:54px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;text-align:center;margin-top:1px}
+.slot-initials{font-size:.68rem;font-weight:800}
+.captain-badge{position:absolute;top:-2px;right:-2px;background:#d97706;color:#fff;border-radius:50%;width:16px;height:16px;font-size:.5rem;display:flex;align-items:center;justify-content:center;z-index:2}
+.share-btn{display:block;width:calc(100% - 16px);margin:8px auto 0;padding:10px;background:#00b06f;color:#fff;border:none;border-radius:8px;font-size:.85rem;font-weight:700;cursor:pointer;transition:.2s}
+.share-btn:hover{background:#00c97e}
+
+/* ===== FAB ===== */
+#fab{position:fixed;bottom:24px;right:24px;z-index:50;background:#00b06f;color:#fff;border:none;border-radius:50px;padding:12px 20px;display:flex;align-items:center;gap:10px;font-size:1rem;font-weight:700;cursor:pointer;box-shadow:0 4px 16px rgba(0,176,111,.4);transition:.2s}
+#fab:hover{transform:translateY(-2px);box-shadow:0 6px 20px rgba(0,176,111,.5)}
+#fab:disabled{background:#9ca3af;box-shadow:none;cursor:default;transform:none}
+.fab-label{line-height:1.2}
+.fab-counter{font-size:.75rem;opacity:.85;font-weight:600}
+
+/* ===== PACK OVERLAY ===== */
+#pack-overlay{position:fixed;inset:0;background:rgba(0,0,0,.88);display:flex;flex-direction:column;align-items:center;justify-content:center;z-index:100}
+#pack-overlay h2{color:#fff;font-size:1.5rem;font-weight:800;margin-bottom:24px}
+#pack-cards-row{display:flex;gap:12px;flex-wrap:wrap;justify-content:center}
+.pack-card{width:100px;height:140px;border-radius:10px;overflow:hidden;position:relative;background:#fff;flex-shrink:0;box-shadow:0 4px 20px rgba(0,0,0,.3);animation:popIn .3s ease backwards}
+@keyframes popIn{from{transform:scale(.5) translateY(20px);opacity:0}to{transform:scale(1);opacity:1}}
+.pack-card .card-strip{height:28px}
+.pack-card .card-avatar{width:58px;height:58px;font-size:1.1rem;margin:8px auto 4px}
+.badge-nova{position:absolute;top:4px;left:4px;background:#00b06f;color:#fff;font-size:.55rem;padding:2px 5px;border-radius:4px;font-weight:700;z-index:2}
+.badge-rep{position:absolute;top:4px;right:4px;background:rgba(0,0,0,.6);color:#fff;font-size:.6rem;padding:2px 5px;border-radius:4px;font-weight:700;z-index:2}
+#pack-save-btn{margin-top:32px;background:#00b06f;color:#fff;padding:14px 32px;border-radius:10px;font-size:1rem;font-weight:700;border:none;cursor:pointer;transition:.2s}
+#pack-save-btn:hover{background:#00c97e;transform:translateY(-1px)}
+
+/* ===== PLAYER PICKER ===== */
+#player-picker{position:fixed;inset:0;background:rgba(0,0,0,.8);display:flex;align-items:center;justify-content:center;z-index:60}
+.picker-panel{background:#fff;border-radius:16px;padding:24px;max-width:640px;max-height:80vh;overflow-y:auto;position:relative;width:calc(100% - 32px)}
+.picker-panel h3{font-size:1.1rem;font-weight:800;margin-bottom:4px;color:#111}
+.picker-sub{font-size:.8rem;color:#6b7280;margin-bottom:16px}
+.picker-grid{display:flex;flex-wrap:wrap;gap:8px}
+.picker-close{position:absolute;top:12px;right:12px;background:none;border:none;font-size:1.4rem;cursor:pointer;color:#374151;width:32px;height:32px;display:flex;align-items:center;justify-content:center;border-radius:50%;transition:.2s}
+.picker-close:hover{background:#f3f4f6}
+.picker-card{cursor:pointer;transition:.2s}
+.picker-card:hover{transform:scale(1.07);box-shadow:0 8px 24px rgba(0,0,0,.25)!important}
+.picker-empty{color:#6b7280;font-size:.9rem;line-height:1.6}
+
+/* ===== TOAST ===== */
+.toast{position:fixed;bottom:80px;left:50%;transform:translateX(-50%);background:rgba(0,0,0,.85);color:#fff;padding:12px 24px;border-radius:30px;font-size:.9rem;z-index:200;opacity:0;transition:opacity .3s;white-space:nowrap;pointer-events:none}
+.toast.show{opacity:1}
+
+/* ===== SCROLLBAR ===== */
+.static-page::-webkit-scrollbar{width:4px}
+.static-page::-webkit-scrollbar-thumb{background:rgba(0,0,0,.2);border-radius:2px}
+.tecnico-page::-webkit-scrollbar{width:4px}
+.tecnico-page::-webkit-scrollbar-thumb{background:rgba(255,255,255,.2);border-radius:2px}
+.dream-page::-webkit-scrollbar{width:4px}
+.dream-page::-webkit-scrollbar-thumb{background:rgba(255,255,255,.2);border-radius:2px}
+
+/* ===== MOBILE ===== */
+@media(max-width:900px){
+  #book-scene{perspective:none}
+  #book{width:calc(100vw - 32px);max-width:380px;height:calc(100vh - 110px)}
+  .static-page{position:absolute;width:100%;border-radius:6px}
+  #p-left{display:none}
+  #p-right{right:0;left:0;width:100%;border-radius:6px}
+  #p-left.mobile-show{display:block}
+  #p-right.mobile-hide{display:none}
+  #flipper{display:none!important}
+  #book::before{display:none}
+  #nav-prev{left:-48px}
+  #nav-next{right:-48px}
+  .nav-btn{width:38px;height:38px;font-size:1.2rem}
+  #dots{bottom:-36px}
+  .cover-page{border-radius:6px}
+}
+</style>
+</head>
+<body>
+
+<!-- LOGIN -->
+<div id="login-screen">
+  <div class="login-card">
+    <div style="font-size:3rem;margin-bottom:8px">⚽</div>
+    <h1>Seleção do Design</h1>
+    <p>Álbum 2026</p>
+    <select id="login-select">
+      <option value="">Selecione seu nome...</option>
+    </select>
+    <button id="login-btn" class="login-btn" onclick="doLogin()">Entrar →</button>
+  </div>
+</div>
+
+<!-- SWITCH USER -->
+<button id="switch-user-btn" onclick="logout()">↩ Trocar usuário</button>
+
+<!-- BOOK SCENE -->
+<div id="book-scene" style="display:none">
+  <button id="nav-prev" class="nav-btn" onclick="goBackward()">‹</button>
+  <div id="book">
+    <div id="p-left" class="static-page"></div>
+    <div id="p-right" class="static-page"></div>
+    <div id="flipper">
+      <div class="flip-face front"></div>
+      <div class="flip-face back"></div>
+    </div>
+  </div>
+  <button id="nav-next" class="nav-btn" onclick="goForward()">›</button>
+  <div id="dots"></div>
+</div>
+
+<!-- FAB -->
+<button id="fab" style="display:none" onclick="openPack()">
+  <span>⚽</span>
+  <div class="fab-label">
+    <div>Abrir Pacote</div>
+    <div class="fab-counter" id="fab-counter">0/7</div>
+  </div>
+</button>
+
+<!-- PACK OVERLAY -->
+<div id="pack-overlay" style="display:none">
+  <h2>✨ Novas figurinhas!</h2>
+  <div id="pack-cards-row"></div>
+  <button id="pack-save-btn" onclick="savePack()">Guardar no álbum</button>
+</div>
+
+<!-- PLAYER PICKER -->
+<div id="player-picker" style="display:none">
+  <div class="picker-panel">
+    <button class="picker-close" onclick="closePicker()">✕</button>
+    <h3 id="picker-title">Escolha um jogador</h3>
+    <p class="picker-sub" id="picker-sub"></p>
+    <div class="picker-grid" id="picker-grid"></div>
+  </div>
+</div>
+
+<script>
+// ============================================================
+// DATA
+// ============================================================
+const SQUADS = {
+  1: { name: 'Gen AI',           emoji: '🤖', color: '#7c3aed' },
+  2: { name: 'Distribution',     emoji: '📦', color: '#f97316' },
+  3: { name: 'Cross Journeys',   emoji: '🧭', color: '#0891b2' },
+  4: { name: 'Commerce',         emoji: '🛒', color: '#16a34a', note: 'A menor delegação da Copa. Pequena em número, gigante em impacto.' },
+  5: { name: 'Payments',         emoji: '💸', color: '#2563eb' },
+  6: { name: 'Banking',          emoji: '🏦', color: '#065f46' },
+  7: { name: 'Crédito',          emoji: '💳', color: '#dc2626' },
+  8: { name: 'Cartões',          emoji: '💎', color: '#d97706' },
+  9: { name: 'Novos Negócios',   emoji: '🚀', color: '#db2777' },
+};
+
+const TEAM = [
+  { id:1,  name:'Thamya Moreira',       role:'Design Diretora',       squad:0, squads:[],    isTecnico:true,  isSpecial:false, isCross:false },
+  { id:2,  name:'André Albuquerque',    role:'Designer Manager',      squad:6, squads:[6],   isTecnico:true,  isSpecial:false, isCross:false },
+  { id:3,  name:'Junca',                role:'Designer Manager',      squad:7, squads:[7],   isTecnico:true,  isSpecial:false, isCross:false },
+  { id:4,  name:'Melissa Costa',        role:'Designer Manager',      squad:9, squads:[9],   isTecnico:true,  isSpecial:false, isCross:false },
+  { id:5,  name:'Josi Portela',         role:'Designer Manager',      squad:8, squads:[8],   isTecnico:true,  isSpecial:false, isCross:false },
+  { id:6,  name:'Paula Pintos',         role:'Designer Manager',      squad:1, squads:[1],   isTecnico:true,  isSpecial:false, isCross:false },
+  { id:7,  name:'Juliana do Vale',      role:'Designer Manager',      squad:2, squads:[2],   isTecnico:true,  isSpecial:false, isCross:false },
+  { id:8,  name:'Daniel Ito',           role:'Designer Manager',      squad:5, squads:[5],   isTecnico:true,  isSpecial:false, isCross:false },
+  { id:9,  name:'Tatiana Yamada',       role:'Designer Manager',      squad:3, squads:[3],   isTecnico:true,  isSpecial:false, isCross:false },
+  { id:10, name:'Fausto Junior',        role:'Designer Manager',      squad:4, squads:[4],   isTecnico:true,  isSpecial:false, isCross:false },
+  { id:11, name:'Deia Duarte',          role:'Designer Lead',         squad:6, squads:[6],   isTecnico:true,  isSpecial:false, isCross:false },
+  { id:12, name:'Jorge Lira',           role:'Designer Lead',         squad:2, squads:[2],   isTecnico:true,  isSpecial:false, isCross:false },
+  { id:13, name:'Julia Garcia',         role:'Design Manager',        squad:5, squads:[5],   isTecnico:true,  isSpecial:false, isCross:false },
+  { id:14, name:'Kiko Herrschaft',      role:'Designer Manager',      squad:3, squads:[3],   isTecnico:true,  isSpecial:false, isCross:false },
+  { id:15, name:'Rodrigo Silva',        role:'Designer Lead',         squad:2, squads:[2],   isTecnico:true,  isSpecial:false, isCross:false },
+  { id:18, name:'Gabi Martins',         role:'Service Designer',      squad:1, squads:[1,3], isTecnico:false, isSpecial:true,  isCross:true  },
+  { id:19, name:'Fê Souza',             role:'Service Designer',      squad:1, squads:[1,3,9],isTecnico:false,isSpecial:true,  isCross:true  },
+  { id:20, name:'Erika Neves',          role:'Content Designer',      squad:2, squads:[2],   isTecnico:false, isSpecial:true,  isCross:false },
+  { id:21, name:'Tamiz Freitas',        role:'Content Designer',      squad:6, squads:[6],   isTecnico:false, isSpecial:true,  isCross:false },
+  { id:22, name:'Tici',                 role:'Content Designer',      squad:7, squads:[7,8], isTecnico:false, isSpecial:true,  isCross:true  },
+  { id:16, name:'Lillian Koyama',       role:'Designer Conversation', squad:1, squads:[1],   isTecnico:false, isSpecial:false, isCross:false },
+  { id:17, name:'Jana Vallim',          role:'Designer Conversation', squad:1, squads:[1],   isTecnico:false, isSpecial:false, isCross:false },
+  { id:24, name:'Felipe Sampaio',       role:'Product Designer',      squad:1, squads:[1],   isTecnico:false, isSpecial:false, isCross:false },
+  { id:25, name:'Marco Carolino',       role:'Product Designer',      squad:1, squads:[1],   isTecnico:false, isSpecial:false, isCross:false },
+  { id:26, name:'Nagella dos Santos',   role:'Product Designer',      squad:2, squads:[2],   isTecnico:false, isSpecial:false, isCross:false },
+  { id:37, name:'Flavio Benassi',       role:'Product Designer',      squad:2, squads:[2],   isTecnico:false, isSpecial:false, isCross:false },
+  { id:27, name:'Alexandre Caetano',    role:'Product Designer',      squad:2, squads:[2],   isTecnico:false, isSpecial:false, isCross:false },
+  { id:38, name:'Karen Monteiro',       role:'Product Designer',      squad:2, squads:[2],   isTecnico:false, isSpecial:false, isCross:false },
+  { id:28, name:'Vinicius Thomé',       role:'Product Designer',      squad:2, squads:[2],   isTecnico:false, isSpecial:false, isCross:false },
+  { id:39, name:'Rebeca Coutinho',      role:'Product Designer',      squad:2, squads:[2],   isTecnico:false, isSpecial:false, isCross:false },
+  { id:40, name:'Marco Ribeiro',        role:'Product Designer',      squad:2, squads:[2],   isTecnico:false, isSpecial:false, isCross:false },
+  { id:30, name:'Nanda Dias',           role:'Product Designer',      squad:2, squads:[2],   isTecnico:false, isSpecial:false, isCross:false },
+  { id:32, name:'Nayara Braga',         role:'Product Designer',      squad:2, squads:[2],   isTecnico:false, isSpecial:false, isCross:false },
+  { id:35, name:'Marina Vaccari',       role:'Product Designer',      squad:2, squads:[2],   isTecnico:false, isSpecial:false, isCross:false },
+  { id:47, name:'Pietra Brito',         role:'Product Designer',      squad:2, squads:[2],   isTecnico:false, isSpecial:false, isCross:false, isNew:true },
+  { id:48, name:'Michel Percegarolli',  role:'Product Designer',      squad:2, squads:[2],   isTecnico:false, isSpecial:false, isCross:false, isNew:true },
+  { id:49, name:'Suzi Sarmento',        role:'Product Designer',      squad:2, squads:[2],   isTecnico:false, isSpecial:false, isCross:false },
+  { id:50, name:'Alexandre Quattrucci', role:'Product Designer',      squad:2, squads:[2],   isTecnico:false, isSpecial:false, isCross:false },
+  { id:31, name:'Samara Oliveira',      role:'Product Designer',      squad:2, squads:[2],   isTecnico:false, isSpecial:false, isCross:false },
+  { id:36, name:'Juliene Alves',        role:'Product Designer',      squad:3, squads:[3],   isTecnico:false, isSpecial:false, isCross:false },
+  { id:33, name:'Andre Rodrigues',      role:'Product Designer',      squad:3, squads:[3],   isTecnico:false, isSpecial:false, isCross:false },
+  { id:34, name:'André Rolla',          role:'Product Designer',      squad:3, squads:[3],   isTecnico:false, isSpecial:false, isCross:false },
+  { id:29, name:'Rafaela Lopes',        role:'Product Designer',      squad:4, squads:[4],   isTecnico:false, isSpecial:false, isCross:false },
+  { id:41, name:'Celso Junior',         role:'Product Designer',      squad:5, squads:[5],   isTecnico:false, isSpecial:false, isCross:false },
+  { id:43, name:'Caroline Ribeiro',     role:'Product Designer',      squad:5, squads:[5],   isTecnico:false, isSpecial:false, isCross:false },
+  { id:42, name:'Juliana Ribeiro',      role:'Product Designer',      squad:5, squads:[5],   isTecnico:false, isSpecial:false, isCross:false },
+  { id:44, name:'Vinicius Alcantara',   role:'Product Designer',      squad:5, squads:[5],   isTecnico:false, isSpecial:false, isCross:false },
+  { id:46, name:'Redlhey Maciel',       role:'Product Designer',      squad:5, squads:[5],   isTecnico:false, isSpecial:false, isCross:false },
+  { id:45, name:'Victor Carvalho',      role:'Product Designer',      squad:5, squads:[5],   isTecnico:false, isSpecial:false, isCross:false },
+  { id:51, name:'Carla Medeiros',       role:'Product Designer',      squad:6, squads:[6],   isTecnico:false, isSpecial:false, isCross:false },
+  { id:56, name:'Adriano Ayres',        role:'Product Designer',      squad:6, squads:[6],   isTecnico:false, isSpecial:false, isCross:false },
+  { id:52, name:'Caroline Pintos',      role:'Product Designer',      squad:6, squads:[6],   isTecnico:false, isSpecial:false, isCross:false },
+  { id:23, name:'Leonardo de Souza',    role:'Design III',            squad:6, squads:[6],   isTecnico:false, isSpecial:false, isCross:false },
+  { id:53, name:'Juliana Pordeus',      role:'Product Designer',      squad:6, squads:[6],   isTecnico:false, isSpecial:false, isCross:false },
+  { id:54, name:'Isadora Carolina',     role:'Product Designer',      squad:6, squads:[6],   isTecnico:false, isSpecial:false, isCross:false },
+  { id:55, name:'Rafael Bressan',       role:'Product Designer',      squad:6, squads:[6],   isTecnico:false, isSpecial:false, isCross:false },
+  { id:59, name:'Lucas Veronese',       role:'Product Designer',      squad:7, squads:[7],   isTecnico:false, isSpecial:false, isCross:false },
+  { id:60, name:'Tharine',              role:'Product Designer',      squad:7, squads:[7],   isTecnico:false, isSpecial:false, isCross:false },
+  { id:61, name:'Brunão',               role:'Product Designer',      squad:7, squads:[7],   isTecnico:false, isSpecial:false, isCross:false },
+  { id:57, name:'Nepo',                 role:'Product Designer',      squad:8, squads:[8],   isTecnico:false, isSpecial:false, isCross:false },
+  { id:58, name:'Thaminne',             role:'Product Designer',      squad:8, squads:[8],   isTecnico:false, isSpecial:false, isCross:false },
+  { id:62, name:'Flora Lins',           role:'Product Designer',      squad:9, squads:[9],   isTecnico:false, isSpecial:false, isCross:false },
+  { id:63, name:'Raffael Costa',        role:'Product Designer',      squad:9, squads:[9],   isTecnico:false, isSpecial:false, isCross:false },
+  { id:64, name:'Sérgio Fontes',        role:'Product Designer',      squad:9, squads:[9],   isTecnico:false, isSpecial:false, isCross:false },
+];
+
+const SPREADS = [
+  { left: null,   right: 'cover' },
+  { left: 1,      right: 2       },
+  { left: 3,      right: 4       },
+  { left: 5,      right: 6       },
+  { left: 7,      right: 8       },
+  { left: 9,      right: 10      },
+  { left: 11,     right: null    },
+];
+
+// flat list of all pages for mobile navigation
+const MOBILE_PAGES = SPREADS.flatMap(s => [s.left, s.right]);
+
+// ============================================================
+// STATE
+// ============================================================
+let currentUser = null;
+let currentSpread = 0;
+let isFlipping = false;
+let isMobile = false;
+let mobilePageIndex = 0;
+let pendingPackCards = [];
+let pickerCallback = null;
+let pickerFilter = 'all';
+const TOTAL_PACKS = 7;
+
+// ============================================================
+// HELPERS
+// ============================================================
+function getInitials(name) {
+  return name.split(' ').slice(0,2).map(w=>w[0]).join('').toUpperCase();
+}
+function getSquadColor(p) {
+  if (p && p.squad && SQUADS[p.squad]) return SQUADS[p.squad].color;
+  return '#065f46';
+}
+function getPlayer(id) { return (id != null) ? TEAM.find(p => p.id === id) || null : null; }
+
+function getCollectedKey() { return 'album_collected_' + currentUser; }
+function getDreamKey()     { return 'album_dream_'      + currentUser; }
+function getCaptainKey()   { return 'album_captain_'    + currentUser; }
+
+function getCollected() {
+  try { return JSON.parse(localStorage.getItem(getCollectedKey()) || '[]'); } catch(e) { return []; }
+}
+function saveCollected(arr) { localStorage.setItem(getCollectedKey(), JSON.stringify(arr)); }
+
+function getDream() {
+  try {
+    return JSON.parse(localStorage.getItem(getDreamKey()) || 'null') ||
+      { coach:[null], fwd:[null,null,null], mid:[null,null,null], def:[null,null,null,null], gk:[null] };
+  } catch(e) {
+    return { coach:[null], fwd:[null,null,null], mid:[null,null,null], def:[null,null,null,null], gk:[null] };
+  }
+}
+function saveDream(d) { localStorage.setItem(getDreamKey(), JSON.stringify(d)); }
+
+function getCaptain() {
+  const v = localStorage.getItem(getCaptainKey());
+  return v ? parseInt(v) : null;
+}
+function saveCaptain(id) {
+  if (id == null) localStorage.removeItem(getCaptainKey());
+  else localStorage.setItem(getCaptainKey(), String(id));
+}
+
+function getPacksToday() {
+  const today = new Date().toISOString().split('T')[0];
+  return parseInt(localStorage.getItem('album_packs_' + currentUser + '_' + today) || '0');
+}
+function incPacksToday() {
+  const today = new Date().toISOString().split('T')[0];
+  const key = 'album_packs_' + currentUser + '_' + today;
+  localStorage.setItem(key, String(getPacksToday() + 1));
+}
+
+function showToast(msg) {
+  const t = document.createElement('div');
+  t.className = 'toast';
+  t.textContent = msg;
+  document.body.appendChild(t);
+  setTimeout(() => t.classList.add('show'), 10);
+  setTimeout(() => { t.classList.remove('show'); setTimeout(() => t.remove(), 300); }, 2500);
+}
+
+// ============================================================
+// DRAW CARDS (weighted probability)
+// ============================================================
+function drawCards(n) {
+  const weights = TEAM.map(p => {
+    let w;
+    if (p.id === 1)       w = 1/20;   // Diretora — mais rara
+    else if (p.isTecnico) w = 1/15;
+    else if (p.isSpecial) w = 1/25;
+    else                  w = 1/40;
+    return { player: p, w };
+  });
+  const total = weights.reduce((s,x) => s + x.w, 0);
+  const result = [];
+  for (let i = 0; i < n; i++) {
+    let rand = Math.random() * total;
+    let found = false;
+    for (const { player, w } of weights) {
+      rand -= w;
+      if (rand <= 0) { result.push(player); found = true; break; }
+    }
+    if (!found) result.push(TEAM[Math.floor(Math.random() * TEAM.length)]);
+  }
+  return result;
+}
+
+// ============================================================
+// CARD HTML
+// ============================================================
+function renderCardHTML(player, opts) {
+  const { large=false, dark=false, inPack=false, noGray=false } = opts || {};
+  const collected = getCollected();
+  const isCollected = collected.includes(player.id) || inPack || noGray;
+  const sq = player.squad && SQUADS[player.squad] ? SQUADS[player.squad] : null;
+  const color = sq ? sq.color : '#065f46';
+  const squadName = sq ? sq.name : (player.squad === 0 ? 'Diretoria' : '');
+
+  let classes = ['card'];
+  if (inPack)                         classes.push('pack-card');
+  if (!isCollected)                   classes.push('not-collected');
+  if (player.isSpecial)               classes.push('is-special');
+  if (player.isNew)                   classes.push('is-new');
+  if (player.isTecnico && !dark)      classes.push('is-tecnico-card');
+  if (dark)                           classes.push('card-dark');
+  if (large)                          classes.push('card-tecnico-lg');
+
+  const styleVar = (player.isTecnico && !dark) ? `--sc:${color};` : '';
+
+  return `<div class="${classes.join(' ')}" style="${styleVar}" title="${player.name}">
+    <div class="card-strip" style="background:${dark?'#b45309':color}">
+      <span class="card-num">#${player.id}</span>
+    </div>
+    <div class="card-avatar" style="background:${dark?'#b45309':color}">${getInitials(player.name)}</div>
+    <div class="card-info">
+      <div class="card-name">${player.name}</div>
+      <div class="card-role">${player.role}</div>
+      ${squadName ? `<div class="card-squad-tag" style="color:${dark?'#fbbf24':color}">${squadName}</div>` : ''}
+    </div>
+  </div>`;
+}
+
+// ============================================================
+// PAGE RENDERERS
+// ============================================================
+function renderPageHTML(page) {
+  if (page === null)    return renderDecoPage();
+  if (page === 'cover') return renderCoverPage();
+  if (page >= 1 && page <= 9) return renderSquadPage(page);
+  if (page === 10)      return renderTecnicoPage();
+  if (page === 11)      return renderDreamPage();
+  return renderDecoPage();
+}
+
+function renderDecoPage() {
+  return `<div class="deco-page"><div class="deco-ds">DS</div></div>`;
+}
+
+function renderCoverPage() {
+  const collected = getCollected();
+  const total = TEAM.length;
+  const cnt = collected.length;
+  const pct = total > 0 ? Math.round((cnt/total)*100) : 0;
+  const packs = getPacksToday();
+  return `<div class="cover-page">
+    <svg class="cover-shield" viewBox="0 0 100 120" fill="none" xmlns="http://www.w3.org/2000/svg">
+      <path d="M50 4L8 22V60C8 84 26 106 50 116C74 106 92 84 92 60V22L50 4Z" fill="rgba(255,255,255,0.15)" stroke="rgba(255,255,255,0.4)" stroke-width="2"/>
+      <circle cx="50" cy="60" r="22" fill="rgba(255,255,255,0.1)" stroke="rgba(255,255,255,0.4)" stroke-width="1.5"/>
+      <text x="50" y="66" text-anchor="middle" fill="white" font-size="14" font-weight="900" font-family="system-ui">DS</text>
+    </svg>
+    <div class="cover-title">Seleção do Design</div>
+    <div class="cover-year">2026</div>
+    <div class="cover-sub">Copa do Design Stone</div>
+    <div class="cover-divider"></div>
+    <div class="cover-progress-label">${cnt} / ${total} figurinhas coletadas (${pct}%)</div>
+    <div class="cover-progress-bar"><div class="cover-progress-fill" style="width:${pct}%"></div></div>
+    <div class="cover-packs">Pacotes hoje: ${packs}/${TOTAL_PACKS}</div>
+  </div>`;
+}
+
+function renderSquadPage(squadId) {
+  const sq = SQUADS[squadId];
+  if (!sq) return renderDecoPage();
+  const collected = getCollected();
+  const manager = TEAM.find(p => p.isTecnico && p.squads.includes(squadId));
+  const players = TEAM.filter(p => p.squads.includes(squadId));
+  const tecnicos = players.filter(p => p.isTecnico);
+  const specials = players.filter(p => !p.isTecnico && p.isSpecial);
+  const regulars = players.filter(p => !p.isTecnico && !p.isSpecial);
+  const totalInSquad = players.length;
+  const collectedInSquad = players.filter(p => collected.includes(p.id)).length;
+
+  let html = `<div class="squad-page">
+    <div class="squad-header" style="background:${sq.color}">
+      <span class="squad-emoji">${sq.emoji}</span>
+      <div>
+        <h2>${sq.name}</h2>
+        <p>Técnico/a: ${manager ? manager.name : '—'}</p>
+      </div>
+      <span class="squad-count">${collectedInSquad}/${totalInSquad}</span>
+    </div>`;
+
+  if (sq.note) {
+    html += `<p class="squad-note">${sq.note}</p>`;
+  }
+
+  if (tecnicos.length > 0) {
+    html += `<section><h3>🎯 Técnico/a</h3><div class="cards-grid-tecnico">`;
+    tecnicos.forEach(p => { html += renderCardHTML(p, {large:true}); });
+    html += `</div></section>`;
+  }
+
+  if (regulars.length > 0) {
+    html += `<section><h3>⚽ Jogadores</h3><div class="cards-grid">`;
+    regulars.forEach(p => { html += renderCardHTML(p); });
+    html += `</div></section>`;
+  }
+
+  if (specials.length > 0) {
+    html += `<section><h3>⭐ Cartas Especiais</h3><div class="cards-grid">`;
+    specials.forEach(p => { html += renderCardHTML(p); });
+    html += `</div></section>`;
+  }
+
+  html += `</div>`;
+  return html;
+}
+
+function renderTecnicoPage() {
+  const diretora = TEAM.find(p => p.id === 1);
+  const managers = TEAM.filter(p => p.isTecnico && p.id !== 1 && p.role.toLowerCase().includes('manager'));
+  const leads = TEAM.filter(p => p.isTecnico && p.id !== 1 && !p.role.toLowerCase().includes('manager'));
+
+  let html = `<div class="tecnico-page"><h2>⭐ Comissão Técnica</h2>`;
+
+  if (diretora) {
+    html += `<div class="tecnico-section">
+      <h3>👑 Diretora</h3>
+      <div class="tecnico-cards-center">${renderCardHTML(diretora, {large:true, dark:true})}</div>
+    </div>`;
+  }
+
+  if (managers.length > 0) {
+    html += `<div class="tecnico-section"><h3>🎖️ Managers</h3><div class="tecnico-cards">`;
+    managers.forEach(p => { html += renderCardHTML(p, {dark:true}); });
+    html += `</div></div>`;
+  }
+
+  if (leads.length > 0) {
+    html += `<div class="tecnico-section"><h3>🎖️ Leads</h3><div class="tecnico-cards">`;
+    leads.forEach(p => { html += renderCardHTML(p, {dark:true}); });
+    html += `</div></div>`;
+  }
+
+  html += `</div>`;
+  return html;
+}
+
+function renderDreamPage() {
+  const dream = getDream();
+  const captain = getCaptain();
+
+  function slotHTML(row, idx) {
+    const pid = dream[row][idx];
+    const p = getPlayer(pid);
+    if (p) {
+      const color = getSquadColor(p);
+      const isCap = captain === p.id;
+      return `<div class="dream-slot filled" style="background:${color}"
+                   onclick="handleSlotClick('${row}',${idx})" title="${p.name} (clique para capitão)">
+        ${isCap ? '<div class="captain-badge">©</div>' : ''}
+        <span class="slot-initials">${getInitials(p.name)}</span>
+        <span class="slot-name">${p.name.split(' ')[0]}</span>
+      </div>`;
+    }
+    return `<div class="dream-slot" onclick="handleSlotClick('${row}',${idx})">＋</div>`;
+  }
+
+  const coachPid = dream.coach[0];
+  const coachP = getPlayer(coachPid);
+  const coachColor = coachP ? getSquadColor(coachP) : null;
+  const coachIsCap = coachP && captain === coachP.id;
+  const coachSlot = coachP
+    ? `<div class="dream-slot filled" style="background:${coachColor}"
+            onclick="handleSlotClick('coach',0)" title="${coachP.name} (clique para capitão)">
+        ${coachIsCap ? '<div class="captain-badge">©</div>' : ''}
+        <span class="slot-initials">${getInitials(coachP.name)}</span>
+        <span class="slot-name">${coachP.name.split(' ')[0]}</span>
+       </div>`
+    : `<div class="dream-slot" onclick="handleSlotClick('coach',0)">＋</div>`;
+
+  return `<div class="dream-page">
+    <div class="dream-header">
+      <h2>🏆 Minha Seleção dos Sonhos</h2>
+      <p class="dream-rules">máx. 2 por squad · 1 coach (Comissão Técnica) · máx. 2 cartas especiais · clique num jogador para capitão</p>
+    </div>
+    <div class="dream-coach-row">
+      <span class="dream-coach-label">🎯 Coach</span>
+      ${coachSlot}
+    </div>
+    <div class="dream-field">
+      <div class="field-row"><span class="row-label">FWD</span>${slotHTML('fwd',0)}${slotHTML('fwd',1)}${slotHTML('fwd',2)}</div>
+      <div class="field-row"><span class="row-label">MID</span>${slotHTML('mid',0)}${slotHTML('mid',1)}${slotHTML('mid',2)}</div>
+      <div class="field-row"><span class="row-label">DEF</span>${slotHTML('def',0)}${slotHTML('def',1)}${slotHTML('def',2)}${slotHTML('def',3)}</div>
+      <div class="field-row"><span class="row-label">GK</span>${slotHTML('gk',0)}</div>
+    </div>
+    <button class="share-btn" onclick="shareLineup()">📤 Compartilhar escalação</button>
+  </div>`;
+}
+
+// ============================================================
+// DREAM TEAM LOGIC
+// ============================================================
+function handleSlotClick(row, idx) {
+  const dream = getDream();
+  const currentId = dream[row][idx];
+
+  if (currentId != null) {
+    // toggle captain
+    const cap = getCaptain();
+    saveCaptain(cap === currentId ? null : currentId);
+    refreshCurrentPage();
+    return;
+  }
+
+  pickerFilter = (row === 'coach') ? 'tecnico' : 'all';
+  pickerCallback = function(player) {
+    if (row === 'coach' && !player.isTecnico) {
+      showToast('Apenas Comissão Técnica pode ser Coach!');
+      return false;
+    }
+    const d = getDream();
+    // max 2 per squad
+    if (player.squad) {
+      const allIds = Object.values(d).flat().filter(x => x != null);
+      const sameSquad = allIds.filter(id => {
+        const pp = getPlayer(id);
+        return pp && pp.squad === player.squad;
+      });
+      if (sameSquad.length >= 2) {
+        showToast('Máximo 2 jogadores do mesmo squad!');
+        return false;
+      }
+    }
+    // max 2 specials (não coach)
+    if (player.isSpecial && row !== 'coach') {
+      const allIds = Object.values(d).flat().filter(x => x != null);
+      const specCount = allIds.filter(id => {
+        const pp = getPlayer(id);
+        return pp && pp.isSpecial;
+      }).length;
+      if (specCount >= 2) {
+        showToast('Máximo 2 cartas especiais!');
+        return false;
+      }
+    }
+    d[row][idx] = player.id;
+    saveDream(d);
+    refreshCurrentPage();
+    return true;
+  };
+
+  const label = row === 'coach' ? 'Coach' : row.toUpperCase() + ' ' + (idx+1);
+  openPicker('Posição: ' + label);
+}
+
+function shareLineup() {
+  const dream = getDream();
+  const captain = getCaptain();
+  const n = id => getPlayer(id)?.name || '—';
+  const lines = [
+    '⚽ Minha Seleção dos Sonhos — Álbum Design Stone 2026\n',
+    '🧤 GK: '  + n(dream.gk[0]),
+    '🛡️ DEF: ' + dream.def.map(n).join(', '),
+    '⚡ MID: '  + dream.mid.map(n).join(', '),
+    '🔥 FWD: '  + dream.fwd.map(n).join(', '),
+    '🎯 Coach: '+ n(dream.coach[0]),
+  ];
+  if (captain) lines.push('⭐ Capitão: ' + n(captain));
+  navigator.clipboard.writeText(lines.join('\n'))
+    .then(()  => showToast('Escalação copiada! 📋'))
+    .catch(() => showToast('Erro ao copiar — verifique permissões'));
+}
+
+// ============================================================
+// PLAYER PICKER
+// ============================================================
+function openPicker(title) {
+  const collected = getCollected();
+  const players = pickerFilter === 'tecnico'
+    ? TEAM.filter(p => p.isTecnico && collected.includes(p.id))
+    : TEAM.filter(p => collected.includes(p.id));
+
+  document.getElementById('picker-title').textContent = 'Escolha: ' + title;
+  document.getElementById('picker-sub').textContent = players.length + ' carta(s) disponível(is)';
+
+  const grid = document.getElementById('picker-grid');
+  grid.innerHTML = '';
+
+  if (players.length === 0) {
+    grid.innerHTML = '<p class="picker-empty">Nenhuma carta disponível.<br>Abra mais pacotes!</p>';
+  } else {
+    players.forEach(p => {
+      const wrap = document.createElement('div');
+      wrap.innerHTML = renderCardHTML(p, {noGray:true});
+      const card = wrap.firstChild;
+      card.classList.add('picker-card');
+      card.classList.remove('not-collected');
+      card.addEventListener('click', () => {
+        const ok = pickerCallback && pickerCallback(p);
+        if (ok !== false) closePicker();
+      });
+      grid.appendChild(card);
+    });
+  }
+
+  document.getElementById('player-picker').style.display = 'flex';
+}
+
+function closePicker() {
+  document.getElementById('player-picker').style.display = 'none';
+  pickerCallback = null;
+}
+
+// ============================================================
+// PACK OPENING
+// ============================================================
+function openPack() {
+  if (getPacksToday() >= TOTAL_PACKS) {
+    showToast('Todos os pacotes de hoje abertos! Volte amanhã 🌅');
+    return;
+  }
+  const drawn = drawCards(5);
+  pendingPackCards = drawn;
+  showPackOverlay(drawn);
+}
+
+function showPackOverlay(cards) {
+  const collected = getCollected();
+  const row = document.getElementById('pack-cards-row');
+  row.innerHTML = '';
+
+  const idsBeforeThis = [];
+  cards.forEach((p, i) => {
+    const alreadyHad = collected.includes(p.id);
+    const dupInDraw = idsBeforeThis.includes(p.id);
+    idsBeforeThis.push(p.id);
+
+    const sq = p.squad && SQUADS[p.squad] ? SQUADS[p.squad] : null;
+    const color = sq ? sq.color : '#065f46';
+    const squadName = sq ? sq.name : (p.squad === 0 ? 'Diretoria' : '');
+
+    const div = document.createElement('div');
+    div.className = 'pack-card' + (p.isSpecial ? ' is-special' : '') + (p.isNew ? ' is-new' : '');
+    div.style.animationDelay = (i * 0.1) + 's';
+    div.innerHTML =
+      (!alreadyHad && !dupInDraw ? '<div class="badge-nova">NOVA</div>' : '') +
+      (alreadyHad ? '<div class="badge-rep">dup</div>' : '') +
+      `<div class="card-strip" style="background:${color}"><span class="card-num">#${p.id}</span></div>
+       <div class="card-avatar" style="background:${color};width:58px;height:58px;border-radius:50%;margin:8px auto 4px;display:flex;align-items:center;justify-content:center;color:#fff;font-size:1.1rem;font-weight:700">${getInitials(p.name)}</div>
+       <div class="card-info" style="text-align:center;padding:0 4px">
+         <div class="card-name" style="font-size:.6rem;font-weight:700;line-height:1.2;color:#1a1a1a">${p.name}</div>
+         <div class="card-role" style="font-size:.5rem;color:#6b7280;margin-top:1px">${p.role}</div>
+         ${squadName ? `<div style="font-size:.48rem;color:${color};font-weight:600;margin-top:2px">${squadName}</div>` : ''}
+       </div>`;
+    row.appendChild(div);
+  });
+
+  document.getElementById('pack-overlay').style.display = 'flex';
+}
+
+function savePack() {
+  const collected = getCollected();
+  let newCount = 0;
+  pendingPackCards.forEach(p => {
+    if (!collected.includes(p.id)) { collected.push(p.id); newCount++; }
+  });
+  saveCollected(collected);
+  incPacksToday();
+  pendingPackCards = [];
+  document.getElementById('pack-overlay').style.display = 'none';
+  updateFAB();
+  refreshCurrentPage();
+  showToast(newCount > 0
+    ? `+${newCount} figurinha${newCount>1?'s':''} nova${newCount>1?'s':''}! 🎉`
+    : 'Pacote guardado (sem novas figurinhas)');
+}
+
+// ============================================================
+// NAVIGATION
+// ============================================================
+function updateDots() {
+  const dots = document.getElementById('dots');
+  dots.innerHTML = '';
+  SPREADS.forEach((_, i) => {
+    const d = document.createElement('div');
+    d.className = 'dot' + (i === currentSpread ? ' active' : '');
+    d.onclick = () => jumpToSpread(i);
+    dots.appendChild(d);
+  });
+  document.getElementById('nav-prev').disabled = (isMobile ? mobilePageIndex === 0 : currentSpread === 0);
+  document.getElementById('nav-next').disabled = (isMobile ? mobilePageIndex === MOBILE_PAGES.length - 1 : currentSpread === SPREADS.length - 1);
+}
+
+function jumpToSpread(idx) {
+  if (isFlipping) return;
+  if (isMobile) {
+    mobilePageIndex = idx * 2;
+    currentSpread = idx;
+    renderMobilePage();
+  } else {
+    if (idx === currentSpread) return;
+    currentSpread = idx;
+    document.getElementById('p-left').innerHTML  = renderPageHTML(SPREADS[currentSpread].left);
+    document.getElementById('p-right').innerHTML = renderPageHTML(SPREADS[currentSpread].right);
+    updateDots();
+  }
+}
+
+function goForward() {
+  if (isFlipping) return;
+  if (isMobile) { goMobileForward(); return; }
+  if (currentSpread >= SPREADS.length - 1) return;
+
+  isFlipping = true;
+  const nextSpread = currentSpread + 1;
+  const flipper = document.getElementById('flipper');
+  flipper.className = 'flip-forward';
+  flipper.style.cssText = 'display:block;left:calc(50% + 4px);right:auto;transform-origin:left center;transform:rotateY(0deg);';
+
+  flipper.querySelector('.front').innerHTML = document.getElementById('p-right').innerHTML;
+  flipper.querySelector('.back').innerHTML  = renderPageHTML(SPREADS[nextSpread].left);
+  document.getElementById('p-right').style.visibility = 'hidden';
+
+  requestAnimationFrame(() => requestAnimationFrame(() => {
+    flipper.style.transform = 'rotateY(-180deg)';
+  }));
+
+  flipper.addEventListener('transitionend', function handler() {
+    flipper.removeEventListener('transitionend', handler);
+    currentSpread = nextSpread;
+    document.getElementById('p-left').innerHTML  = renderPageHTML(SPREADS[currentSpread].left);
+    document.getElementById('p-right').innerHTML = renderPageHTML(SPREADS[currentSpread].right);
+    document.getElementById('p-right').style.visibility = '';
+    flipper.style.display = 'none';
+    flipper.style.transform = '';
+    updateDots();
+    isFlipping = false;
+  }, { once: true });
+}
+
+function goBackward() {
+  if (isFlipping) return;
+  if (isMobile) { goMobileBackward(); return; }
+  if (currentSpread <= 0) return;
+
+  isFlipping = true;
+  const prevSpread = currentSpread - 1;
+  const flipper = document.getElementById('flipper');
+  flipper.className = 'flip-backward';
+  flipper.style.cssText = 'display:block;right:0;left:auto;transform-origin:right center;transform:rotateY(0deg);';
+
+  flipper.querySelector('.front').innerHTML = document.getElementById('p-left').innerHTML;
+  flipper.querySelector('.back').innerHTML  = renderPageHTML(SPREADS[prevSpread].right);
+  document.getElementById('p-left').style.visibility = 'hidden';
+
+  requestAnimationFrame(() => requestAnimationFrame(() => {
+    flipper.style.transform = 'rotateY(180deg)';
+  }));
+
+  flipper.addEventListener('transitionend', function handler() {
+    flipper.removeEventListener('transitionend', handler);
+    currentSpread = prevSpread;
+    document.getElementById('p-left').innerHTML  = renderPageHTML(SPREADS[currentSpread].left);
+    document.getElementById('p-right').innerHTML = renderPageHTML(SPREADS[currentSpread].right);
+    document.getElementById('p-left').style.visibility = '';
+    flipper.style.display = 'none';
+    flipper.style.transform = '';
+    updateDots();
+    isFlipping = false;
+  }, { once: true });
+}
+
+// ============================================================
+// MOBILE NAVIGATION
+// ============================================================
+function goMobileForward() {
+  if (mobilePageIndex >= MOBILE_PAGES.length - 1) return;
+  mobilePageIndex++;
+  currentSpread = Math.floor(mobilePageIndex / 2);
+  renderMobilePage();
+}
+
+function goMobileBackward() {
+  if (mobilePageIndex <= 0) return;
+  mobilePageIndex--;
+  currentSpread = Math.floor(mobilePageIndex / 2);
+  renderMobilePage();
+}
+
+function renderMobilePage() {
+  const page = MOBILE_PAGES[mobilePageIndex];
+  document.getElementById('p-right').innerHTML = renderPageHTML(page);
+  updateDots();
+}
+
+// ============================================================
+// REFRESH CURRENT PAGE
+// ============================================================
+function refreshCurrentPage() {
+  if (isMobile) {
+    renderMobilePage();
+  } else {
+    document.getElementById('p-left').innerHTML  = renderPageHTML(SPREADS[currentSpread].left);
+    document.getElementById('p-right').innerHTML = renderPageHTML(SPREADS[currentSpread].right);
+  }
+}
+
+// ============================================================
+// FAB
+// ============================================================
+function updateFAB() {
+  const used = getPacksToday();
+  document.getElementById('fab-counter').textContent = used + '/' + TOTAL_PACKS;
+  document.getElementById('fab').disabled = used >= TOTAL_PACKS;
+}
+
+// ============================================================
+// LOGIN / LOGOUT
+// ============================================================
+function populateLoginSelect() {
+  const sel = document.getElementById('login-select');
+  const sorted = [...TEAM].sort((a,b) => a.name.localeCompare(b.name, 'pt-BR'));
+  sorted.forEach(p => {
+    const opt = document.createElement('option');
+    opt.value = p.id;
+    opt.textContent = p.name;
+    sel.appendChild(opt);
+  });
+}
+
+function doLogin() {
+  const sel = document.getElementById('login-select');
+  if (!sel.value) { showToast('Selecione seu nome!'); return; }
+  currentUser = sel.value;
+  localStorage.setItem('album_current_user', currentUser);
+  showApp();
+}
+
+function logout() {
+  currentUser = null;
+  localStorage.removeItem('album_current_user');
+  document.getElementById('login-screen').style.display = 'flex';
+  document.getElementById('book-scene').style.display = 'none';
+  document.getElementById('fab').style.display = 'none';
+  document.getElementById('switch-user-btn').style.display = 'none';
+}
+
+function showApp() {
+  document.getElementById('login-screen').style.display = 'none';
+  document.getElementById('book-scene').style.display = 'flex';
+  document.getElementById('fab').style.display = 'flex';
+  document.getElementById('switch-user-btn').style.display = 'block';
+
+  isMobile = window.innerWidth < 900;
+  currentSpread = 0;
+  mobilePageIndex = 0;
+
+  if (isMobile) {
+    renderMobilePage();
+  } else {
+    document.getElementById('p-left').innerHTML  = renderPageHTML(SPREADS[0].left);
+    document.getElementById('p-right').innerHTML = renderPageHTML(SPREADS[0].right);
+  }
+  updateDots();
+  updateFAB();
+}
+
+// ============================================================
+// SWIPE (mobile)
+// ============================================================
+let touchStartX = 0;
+let touchStartY = 0;
+document.addEventListener('touchstart', e => {
+  touchStartX = e.touches[0].clientX;
+  touchStartY = e.touches[0].clientY;
+}, { passive: true });
+document.addEventListener('touchend', e => {
+  if (!isMobile || !currentUser) return;
+  const dx = e.changedTouches[0].clientX - touchStartX;
+  const dy = e.changedTouches[0].clientY - touchStartY;
+  if (Math.abs(dx) > Math.abs(dy) && Math.abs(dx) > 50) {
+    if (dx < 0) goMobileForward();
+    else goMobileBackward();
+  }
+}, { passive: true });
+
+// ============================================================
+// RESIZE
+// ============================================================
+window.addEventListener('resize', () => {
+  if (!currentUser) return;
+  const wasMobile = isMobile;
+  isMobile = window.innerWidth < 900;
+  if (wasMobile !== isMobile) {
+    if (isMobile) {
+      mobilePageIndex = currentSpread * 2;
+      // reset p-left visibility
+      document.getElementById('p-left').classList.remove('mobile-show');
+      document.getElementById('p-right').classList.remove('mobile-hide');
+      renderMobilePage();
+    } else {
+      document.getElementById('p-left').innerHTML  = renderPageHTML(SPREADS[currentSpread].left);
+      document.getElementById('p-right').innerHTML = renderPageHTML(SPREADS[currentSpread].right);
+    }
+    updateDots();
+  }
+});
+
+// ============================================================
+// PICKER CLOSE ON BACKDROP
+// ============================================================
+document.getElementById('player-picker').addEventListener('click', function(e) {
+  if (e.target === this) closePicker();
+});
+
+// ============================================================
+// INIT
+// ============================================================
+populateLoginSelect();
+
+const savedUser = localStorage.getItem('album_current_user');
+if (savedUser) {
+  currentUser = savedUser;
+  const sel = document.getElementById('login-select');
+  sel.value = savedUser;
+  showApp();
+}
+</script>
+</body>
+</html>
