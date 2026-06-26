@@ -190,11 +190,34 @@ body{background:#0f2d1a}
 .share-btn:hover{background:#00c97e}
 
 /* ===== FAB ===== */
-#fab{position:fixed;bottom:24px;right:24px;z-index:50;background:#00b06f;color:#fff;border:none;border-radius:50px;padding:12px 20px;display:flex;align-items:center;gap:10px;font-size:1rem;font-weight:700;cursor:pointer;box-shadow:0 4px 16px rgba(0,176,111,.4);transition:.2s}
-#fab:hover{transform:translateY(-2px);box-shadow:0 6px 20px rgba(0,176,111,.5)}
-#fab:disabled{background:#9ca3af;box-shadow:none;cursor:default;transform:none}
+#fab{position:fixed;bottom:24px;right:24px;z-index:50;
+  background:linear-gradient(135deg,#0d3d1c 0%,#1a5c30 100%);
+  color:#fff;border:2px solid rgba(200,168,60,0.55);border-radius:50px;padding:11px 20px;
+  display:flex;align-items:center;gap:10px;font-size:.95rem;font-weight:700;cursor:pointer;
+  box-shadow:0 4px 20px rgba(0,0,0,0.5),0 0 0 1px rgba(200,168,60,0.15);transition:.2s}
+#fab:hover{transform:translateY(-2px);border-color:rgba(200,168,60,0.85);box-shadow:0 6px 28px rgba(0,0,0,0.6)}
+#fab:disabled{background:#374151;border-color:rgba(255,255,255,0.1);box-shadow:none;cursor:default;transform:none;opacity:0.5}
+.fab-icon{font-size:1.2rem}
 .fab-label{line-height:1.2}
-.fab-counter{font-size:.75rem;opacity:.85;font-weight:600}
+.fab-title{font-size:.85rem;font-weight:800;letter-spacing:.03em}
+.fab-counter{font-size:.7rem;color:rgba(200,168,60,0.9);font-weight:700}
+
+/* ===== SUA SELEÇÃO PAGE ===== */
+.ss-page{width:100%;height:100%;background:linear-gradient(160deg,#071f0f 0%,#0a2e16 100%);display:flex;flex-direction:column;overflow:hidden}
+.ss-header{padding:14px 16px 10px;border-bottom:1px solid rgba(200,168,60,0.2);flex-shrink:0}
+.ss-header-title{font-size:.8rem;font-weight:900;text-transform:uppercase;letter-spacing:.1em;
+  background:linear-gradient(90deg,#c8a83c,#f0d060,#c8a83c);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text}
+.ss-header-sub{color:rgba(255,255,255,0.4);font-size:.6rem;letter-spacing:.08em;margin-top:1px}
+.ss-tabs{display:flex;border-bottom:1px solid rgba(255,255,255,0.08);flex-shrink:0}
+.ss-tab{flex:1;padding:8px 4px;font-size:.72rem;font-weight:700;color:rgba(255,255,255,0.45);border:none;background:none;cursor:pointer;border-bottom:2px solid transparent;transition:.2s;letter-spacing:.03em}
+.ss-tab.active{color:#c8a83c;border-bottom-color:#c8a83c}
+.ss-body{flex:1;overflow-y:auto;padding:8px}
+.ss-body::-webkit-scrollbar{width:3px}
+.ss-body::-webkit-scrollbar-thumb{background:rgba(200,168,60,0.3);border-radius:2px}
+.trade-info{color:rgba(255,255,255,0.5);font-size:.65rem;text-align:center;padding:8px 4px 12px;line-height:1.4}
+.trade-cards{display:flex;flex-wrap:wrap;gap:6px;justify-content:center}
+.trade-offer-btn{margin-top:3px;width:100%;padding:3px;font-size:.52rem;font-weight:700;background:rgba(200,168,60,0.15);border:1px solid rgba(200,168,60,0.35);border-radius:4px;color:#c8a83c;cursor:pointer;transition:.15s}
+.trade-offer-btn:hover{background:rgba(200,168,60,0.28)}
 
 /* ===== PACK OVERLAY ===== */
 #pack-overlay{position:fixed;inset:0;background:rgba(0,0,0,.88);display:flex;flex-direction:column;align-items:center;justify-content:center;z-index:100}
@@ -345,9 +368,9 @@ body{background:#0f2d1a}
 
 <!-- FAB -->
 <button id="fab" style="display:none" onclick="openPack()">
-  <span>⚽</span>
+  <span class="fab-icon">🃏</span>
   <div class="fab-label">
-    <div>Abrir Pacote</div>
+    <div class="fab-title">Abrir Pacote</div>
     <div class="fab-counter" id="fab-counter">0/7</div>
   </div>
 </button>
@@ -475,6 +498,7 @@ let currentUser = null;
 let currentSpread = 0;
 let isFlipping = false;
 let isMobile = false;
+let suaSelecaoTab = 'selecao';
 let mobilePageIndex = 0;
 let pendingPackCards = [];
 let pickerCallback = null;
@@ -622,7 +646,7 @@ function renderPageHTML(page) {
   if (page === 'nt-left')  return `<div style="width:100%;height:100%;background-image:url('novo-tecnico.png');background-size:200% 100%;background-position:left center;background-repeat:no-repeat"></div>`;
   if (page === 'nt-right') return `<div style="width:100%;height:100%;background-image:url('novo-tecnico.png');background-size:200% 100%;background-position:right center;background-repeat:no-repeat"></div>`;
   if (page === 'ms-left')  return `<div style="width:100%;height:100%;background-image:url('monte-selecao.png');background-size:200% 100%;background-position:left center;background-repeat:no-repeat"></div>`;
-  if (page === 'ms-right') return `<div style="width:100%;height:100%;background-image:url('monte-selecao.png');background-size:200% 100%;background-position:right center;background-repeat:no-repeat"></div>`;
+  if (page === 'ms-right') return renderSuaSelecaoPage();
   if (page === 'qc-left')  return `<div style="width:100%;height:100%;background-image:url('quarta-capa.png');background-size:200% 100%;background-position:left center;background-repeat:no-repeat"></div>`;
   if (page === 'qc-right') return `<div style="width:100%;height:100%;background-image:url('quarta-capa.png');background-size:200% 100%;background-position:right center;background-repeat:no-repeat"></div>`;
   if (page >= 1 && page <= 9) return renderSquadPage(page);
@@ -785,6 +809,56 @@ function renderDreamPage() {
     </div>
     <button class="share-btn" onclick="shareLineup()">📤 Compartilhar escalação</button>
   </div>`;
+}
+
+function switchSuaSelecaoTab(tab) {
+  suaSelecaoTab = tab;
+  refreshCurrentPage();
+}
+
+function renderSuaSelecaoPage() {
+  const collected = getCollected();
+  const tabSelecao = suaSelecaoTab === 'selecao';
+
+  const dreamContent = tabSelecao ? renderDreamPage() : '';
+
+  const tradeContent = !tabSelecao ? (() => {
+    const cards = TEAM.filter(p => collected.includes(p.id));
+    if (!cards.length) return `<p class="trade-info">Colete figurinhas primeiro para oferecer trocas.</p>`;
+    const rows = cards.map(p => {
+      const color = getSquadColor(p);
+      const msg = encodeURIComponent(`Oi! Tenho a figurinha *${p.name}* (${p.squad || p.role}) para trocar no Álbum da Seleção de Design 🃏 Me chama se quiser trocar!`);
+      return `<div style="display:flex;flex-direction:column;align-items:center;width:72px">
+        <div class="card" style="width:72px;height:104px;flex-shrink:0">
+          <div class="card-strip" style="background:${color}"><span class="card-num">#${p.id}</span></div>
+          <div class="card-avatar" style="background:${color};width:44px;height:44px;font-size:.85rem;margin:5px auto 3px">${getInitials(p.name)}</div>
+          <div class="card-info"><div class="card-name" style="font-size:.5rem">${p.name}</div></div>
+        </div>
+        <button class="trade-offer-btn" onclick="copyTrade('${p.name.replace(/'/g,"\\'")}','${(p.squad||p.role||'').replace(/'/g,"\\'")}')">Oferecer</button>
+      </div>`;
+    }).join('');
+    return `<p class="trade-info">Clique em "Oferecer" para copiar a mensagem e colar no Slack.</p>
+      <div class="trade-cards">${rows}</div>`;
+  })() : '';
+
+  return `<div class="ss-page">
+    <div class="ss-header">
+      <div class="ss-header-title">Álbum da Seleção de Design</div>
+      <div class="ss-header-sub">2026</div>
+    </div>
+    <div class="ss-tabs">
+      <button class="ss-tab ${tabSelecao ? 'active' : ''}" onclick="switchSuaSelecaoTab('selecao')">🏆 Minha Seleção</button>
+      <button class="ss-tab ${!tabSelecao ? 'active' : ''}" onclick="switchSuaSelecaoTab('trocar')">🔄 Trocar Figurinhas</button>
+    </div>
+    <div class="ss-body">
+      ${tabSelecao ? dreamContent : tradeContent}
+    </div>
+  </div>`;
+}
+
+function copyTrade(name, squad) {
+  const msg = `Oi! Tenho a figurinha *${name}* (${squad}) para trocar no Álbum da Seleção de Design 🃏 Me chama se quiser trocar!`;
+  navigator.clipboard.writeText(msg).then(() => showToast('Mensagem copiada! Cole no Slack 🎉')).catch(() => showToast('Copie: ' + msg));
 }
 
 // ============================================================
