@@ -359,7 +359,7 @@ const SPREADS = [
   { left: 'cc2-left',    right: 'cc2-right'      },  // Cross + Commerce
   { left: 'pb-left',     right: 'pb-right'       },  // Payments + Banking
   { left: 'cred-left',   right: 'cred-right'     },  // Crédito + Cartões
-  { left: 11,            right: null            },
+  { left: 'nt-left',     right: 'nt-right'       },  // Novos Negócios + Comissão Técnica
 ];
 
 // flat list of all pages for mobile navigation
@@ -516,6 +516,8 @@ function renderPageHTML(page) {
   if (page === 'pb-right')  return `<div style="width:100%;height:100%;background-image:url('payments-banking.png');background-size:200% 100%;background-position:right center;background-repeat:no-repeat"></div>`;
   if (page === 'cred-left') return `<div style="width:100%;height:100%;background-image:url('credito-cartoes.png');background-size:200% 100%;background-position:left center;background-repeat:no-repeat"></div>`;
   if (page === 'cred-right')return `<div style="width:100%;height:100%;background-image:url('credito-cartoes.png');background-size:200% 100%;background-position:right center;background-repeat:no-repeat"></div>`;
+  if (page === 'nt-left')  return `<div style="width:100%;height:100%;background-image:url('novo-tecnico.png');background-size:200% 100%;background-position:left center;background-repeat:no-repeat"></div>`;
+  if (page === 'nt-right') return `<div style="width:100%;height:100%;background-image:url('novo-tecnico.png');background-size:200% 100%;background-position:right center;background-repeat:no-repeat"></div>`;
   if (page >= 1 && page <= 9) return renderSquadPage(page);
   if (page === 10)        return renderTecnicoPage();
   if (page === 11)        return renderDreamPage();
