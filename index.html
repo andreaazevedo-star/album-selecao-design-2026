@@ -54,11 +54,9 @@ body{background:#0f2d1a}
 #nav-next{right:24px}
 
 /* Dots */
-#nav-footer{position:fixed;bottom:16px;left:50%;transform:translateX(-50%);display:flex;flex-direction:column;align-items:center;gap:6px;z-index:30}
-#dots{display:flex;gap:8px}
+#dots{position:fixed;bottom:28px;left:50%;transform:translateX(-50%);display:flex;gap:8px;z-index:30}
 .dot{width:10px;height:10px;border-radius:50%;background:rgba(255,255,255,0.3);cursor:pointer;transition:.2s}
 .dot.active{background:#fff;width:20px;border-radius:5px}
-#page-label{background:rgba(0,0,0,0.45);backdrop-filter:blur(8px);color:rgba(255,255,255,0.85);font-size:0.72rem;font-weight:600;padding:3px 12px;border-radius:20px;white-space:nowrap;letter-spacing:0.03em;pointer-events:none}
 
 /* ===== COVER PAGE ===== */
 .cover-page{width:100%;height:100%;background:linear-gradient(160deg,#064e3b 0%,#065f46 50%,#047857 100%);display:flex;flex-direction:column;align-items:center;justify-content:center;color:#fff;padding:24px;text-align:center;border-radius:0 6px 6px 0}
@@ -241,10 +239,7 @@ body{background:#0f2d1a}
     </div>
   </div>
   <button id="nav-next" class="nav-btn" onclick="goForward()">›</button>
-  <div id="nav-footer">
-    <div id="page-label"></div>
-    <div id="dots"></div>
-  </div>
+  <div id="dots"></div>
 </div>
 
 <!-- FAB -->
@@ -371,19 +366,6 @@ const SPREADS = [
 
 // flat list of all pages for mobile navigation
 const MOBILE_PAGES = SPREADS.flatMap(s => [s.left, s.right]);
-
-const SPREAD_LABELS = [
-  null,
-  'Contra Capa · Sumário',
-  '01-02 · Gen AI + Distribution Aquisição Digital',
-  '03-04 · Distribution Atendimento + Distribution Cross',
-  '05-06 · Cross Journeys + Commerce',
-  '07-08 · Payments + Banking',
-  '09-10 · Crédito + Cartões',
-  '11-12 · Novos Negócios + Comissão Técnica',
-  '13-14 · Monte sua Seleção + Sua Seleção',
-  'Quarta Capa',
-];
 
 // ============================================================
 // STATE
@@ -894,12 +876,6 @@ function updateDots() {
     d.onclick = () => jumpToSpread(i);
     dots.appendChild(d);
   });
-  const label = document.getElementById('page-label');
-  if (label) {
-    const txt = SPREAD_LABELS[currentSpread];
-    label.textContent = txt || '';
-    label.style.display = txt ? '' : 'none';
-  }
   document.getElementById('nav-prev').disabled = (isMobile ? mobilePageIndex === 0 : currentSpread === 0);
   document.getElementById('nav-next').disabled = (isMobile ? mobilePageIndex === MOBILE_PAGES.length - 1 : currentSpread === SPREADS.length - 1);
 }
@@ -1062,7 +1038,7 @@ function setNavVisible(visible) {
   const d = visible ? '' : 'none';
   document.getElementById('nav-prev').style.display = d;
   document.getElementById('nav-next').style.display = d;
-  document.getElementById('nav-footer').style.display = visible ? 'flex' : 'none';
+  document.getElementById('dots').style.display    = visible ? 'flex' : 'none';
 }
 
 function openAlbum() {
