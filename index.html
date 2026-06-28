@@ -1054,6 +1054,13 @@ function updateDots() {
   });
   document.getElementById('nav-prev').disabled = (isMobile ? mobilePageIndex === 0 : currentSpread === 0);
   document.getElementById('nav-next').disabled = (isMobile ? mobilePageIndex === MOBILE_PAGES.length - 1 : currentSpread === SPREADS.length - 1);
+  updateBookClosed();
+}
+
+function updateBookClosed() {
+  const book = document.getElementById('book');
+  const isLast = currentSpread === SPREADS.length - 1;
+  book.classList.toggle('closed', isLast);
 }
 
 function jumpToSpread(idx) {
