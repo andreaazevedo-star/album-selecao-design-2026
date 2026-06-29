@@ -22,6 +22,14 @@ body{background:#0f2d1a}
 .lh-btn-outline:hover{background:rgba(200,168,60,0.12)}
 .lh-btn-solid{background:linear-gradient(135deg,#0d3d1c,#1a5c30);border:1.5px solid rgba(200,168,60,0.5);color:#f0d060}
 .lh-btn-solid:hover{background:linear-gradient(135deg,#1a5c30,#0d3d1c)}
+.trade-tab{flex:1;padding:9px;border-radius:8px;font-size:.78rem;font-weight:700;cursor:pointer;border:1.5px solid rgba(200,168,60,.3);background:transparent;color:rgba(255,255,255,.5);transition:.2s}
+.trade-tab.active{background:rgba(200,168,60,.15);border-color:rgba(200,168,60,.7);color:#f0d060}
+.trade-dupe-card{border-radius:8px;overflow:hidden;cursor:pointer;border:2px solid transparent;transition:.2s;background:#0a2218}
+.trade-dupe-card:hover{border-color:#c8a83c;transform:translateY(-2px)}
+.trade-dupe-card .tdc-strip{height:22px}
+.trade-dupe-card .tdc-avatar{width:44px;height:44px;border-radius:50%;margin:6px auto 4px;display:flex;align-items:center;justify-content:center;font-size:1.1rem}
+.trade-dupe-card .tdc-name{font-size:.58rem;font-weight:700;color:#fff;text-align:center;padding:0 4px 2px;line-height:1.2}
+.trade-dupe-card .tdc-badge{text-align:center;padding:3px 0 5px;font-size:.6rem;color:#c8a83c;font-weight:700}
 /* ===== LOGIN ===== */
 #login-screen{position:fixed;inset:0;display:flex;align-items:center;justify-content:center;z-index:999;overflow:hidden;
   background:radial-gradient(ellipse 120% 80% at 50% 100%, #0a3d1f 0%, #051a0d 60%, #020d06 100%)}
@@ -293,7 +301,7 @@ body{background:#0f2d1a}
 <div id="login-header">
   <div id="login-header-title">🏆 Seleção de Design 2026 🏆</div>
   <div id="login-header-btns">
-    <button class="lh-btn lh-btn-outline">🔄 Troca de Figurinhas</button>
+    <button class="lh-btn lh-btn-outline" onclick="openTrade()">🔄 Troca de Figurinhas</button>
     <button class="lh-btn lh-btn-solid">⭐ Minha Seleção</button>
   </div>
 </div>
@@ -401,6 +409,41 @@ body{background:#0f2d1a}
   <h2>✨ Novas figurinhas!</h2>
   <div id="pack-cards-row"></div>
   <button id="pack-save-btn" onclick="savePack()">Guardar no álbum</button>
+</div>
+
+<!-- TRADE MODAL -->
+<div id="trade-modal" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,.92);z-index:200;flex-direction:column;align-items:center;overflow-y:auto;padding:20px 16px 40px">
+  <div style="width:100%;max-width:520px">
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:16px">
+      <h2 style="color:#f0d060;font-size:1.2rem;font-weight:900">🔄 Troca de Figurinhas</h2>
+      <button onclick="closeTrade()" style="background:none;border:none;color:#fff;font-size:1.4rem;cursor:pointer;opacity:.7">✕</button>
+    </div>
+    <!-- tabs -->
+    <div style="display:flex;gap:8px;margin-bottom:20px">
+      <button class="trade-tab active" id="tab-minhas" onclick="switchTradeTab('minhas')">📦 Minhas repetidas</button>
+      <button class="trade-tab" id="tab-resgatar" onclick="switchTradeTab('resgatar')">🎁 Resgatar código</button>
+    </div>
+    <!-- aba minhas repetidas -->
+    <div id="trade-panel-minhas">
+      <p style="color:rgba(255,255,255,.5);font-size:.8rem;margin-bottom:14px">Clique numa figurinha para gerar o código de troca. O código expira quando for resgatado.</p>
+      <div id="trade-dupes-grid" style="display:grid;grid-template-columns:repeat(auto-fill,minmax(90px,1fr));gap:10px"></div>
+      <div id="trade-code-box" style="display:none;margin-top:20px;background:rgba(200,168,60,.1);border:1.5px solid rgba(200,168,60,.4);border-radius:10px;padding:14px">
+        <p style="color:#f0d060;font-size:.75rem;font-weight:700;margin-bottom:8px">CÓDIGO GERADO — compartilhe no Slack:</p>
+        <div style="display:flex;gap:8px;align-items:center">
+          <code id="trade-code-text" style="flex:1;background:rgba(0,0,0,.4);border-radius:6px;padding:8px 10px;font-size:.78rem;color:#fff;word-break:break-all;font-family:monospace"></code>
+          <button onclick="copyTradeCode()" style="background:#c8a83c;border:none;border-radius:6px;padding:8px 10px;color:#000;font-weight:800;font-size:.75rem;cursor:pointer;white-space:nowrap">📋 Copiar</button>
+        </div>
+        <p style="color:rgba(255,255,255,.4);font-size:.68rem;margin-top:8px">A figurinha foi removida do seu estoque ao gerar o código.</p>
+      </div>
+    </div>
+    <!-- aba resgatar -->
+    <div id="trade-panel-resgatar" style="display:none">
+      <p style="color:rgba(255,255,255,.5);font-size:.8rem;margin-bottom:14px">Cole o código que alguém compartilhou com você para receber a figurinha.</p>
+      <textarea id="trade-input" placeholder="Cole o código aqui..." style="width:100%;height:90px;background:rgba(255,255,255,.07);border:1.5px solid rgba(200,168,60,.35);border-radius:8px;color:#fff;padding:10px;font-size:.82rem;resize:none;box-sizing:border-box;font-family:monospace"></textarea>
+      <button onclick="redeemTradeCode()" style="margin-top:10px;width:100%;background:linear-gradient(135deg,#0d3d1c,#1a5c30);border:1.5px solid rgba(200,168,60,.5);color:#f0d060;font-weight:800;padding:12px;border-radius:8px;font-size:.9rem;cursor:pointer">🎁 Resgatar figurinha</button>
+      <div id="trade-redeem-result" style="display:none;margin-top:14px;border-radius:8px;padding:12px;text-align:center"></div>
+    </div>
+  </div>
 </div>
 
 <!-- PLAYER PICKER -->
@@ -540,6 +583,12 @@ function getPlayer(id) { return (id != null) ? TEAM.find(p => p.id === id) || nu
 function getCollectedKey() { return 'album_collected_' + currentUser; }
 function getDreamKey()     { return 'album_dream_'      + currentUser; }
 function getCaptainKey()   { return 'album_captain_'    + currentUser; }
+function getDupesKey()     { return 'album_dupes_'      + currentUser; }
+
+function getDupes() {
+  try { return JSON.parse(localStorage.getItem(getDupesKey()) || '[]'); } catch(e) { return []; }
+}
+function saveDupes(arr) { localStorage.setItem(getDupesKey(), JSON.stringify(arr)); }
 
 function getCollected() {
   try { return JSON.parse(localStorage.getItem(getCollectedKey()) || '[]'); } catch(e) { return []; }
@@ -1045,19 +1094,22 @@ function showPackOverlay(cards) {
 
 function savePack() {
   const collected = getCollected();
-  let newCount = 0;
+  const dupes = getDupes();
+  let newCount = 0, dupeCount = 0;
   pendingPackCards.forEach(p => {
     if (!collected.includes(p.id)) { collected.push(p.id); newCount++; }
+    else { dupes.push(p.id); dupeCount++; }
   });
   saveCollected(collected);
+  saveDupes(dupes);
   incPacksToday();
   pendingPackCards = [];
   document.getElementById('pack-overlay').style.display = 'none';
   updateFAB();
   refreshCurrentPage();
-  showToast(newCount > 0
-    ? `+${newCount} figurinha${newCount>1?'s':''} nova${newCount>1?'s':''}! 🎉`
-    : 'Pacote guardado (sem novas figurinhas)');
+  let msg = newCount > 0 ? `+${newCount} figurinha${newCount>1?'s':''} nova${newCount>1?'s':''}! 🎉` : 'Nenhuma figurinha nova.';
+  if (dupeCount > 0) msg += ` +${dupeCount} repetida${dupeCount>1?'s':''} para trocar 🔄`;
+  showToast(msg);
 }
 
 // ============================================================
@@ -1200,6 +1252,104 @@ function refreshCurrentPage() {
 // ============================================================
 // FAB
 // ============================================================
+/* ===== TRADE ===== */
+function openTrade() {
+  if (!currentUser) { showToast('Faça login primeiro!'); return; }
+  document.getElementById('trade-modal').style.display = 'flex';
+  switchTradeTab('minhas');
+}
+function closeTrade() {
+  document.getElementById('trade-modal').style.display = 'none';
+  document.getElementById('trade-code-box').style.display = 'none';
+  document.getElementById('trade-input').value = '';
+  document.getElementById('trade-redeem-result').style.display = 'none';
+}
+function switchTradeTab(tab) {
+  document.getElementById('trade-panel-minhas').style.display   = tab==='minhas'   ? '' : 'none';
+  document.getElementById('trade-panel-resgatar').style.display = tab==='resgatar' ? '' : 'none';
+  document.getElementById('tab-minhas').classList.toggle('active',   tab==='minhas');
+  document.getElementById('tab-resgatar').classList.toggle('active', tab==='resgatar');
+  if (tab==='minhas') renderDupesGrid();
+}
+function renderDupesGrid() {
+  const dupes = getDupes();
+  const grid = document.getElementById('trade-dupes-grid');
+  document.getElementById('trade-code-box').style.display = 'none';
+  if (!dupes.length) {
+    grid.innerHTML = '<p style="color:rgba(255,255,255,.4);font-size:.82rem;grid-column:1/-1">Nenhuma figurinha repetida ainda. Abra mais pacotes! 📦</p>';
+    return;
+  }
+  const counts = {};
+  dupes.forEach(id => counts[id] = (counts[id]||0)+1);
+  const unique = [...new Set(dupes)];
+  grid.innerHTML = unique.map(id => {
+    const p = getPlayer(id);
+    if (!p) return '';
+    const sq = SQUADS[p.squad] || {color:'#555',emoji:'⚽'};
+    return `<div class="trade-dupe-card" onclick="selectDupeForTrade(${id})">
+      <div class="tdc-strip" style="background:${sq.color}"></div>
+      <div class="tdc-avatar" style="background:${sq.color}22">${sq.emoji}</div>
+      <div class="tdc-name">${p.name}</div>
+      <div class="tdc-badge">×${counts[id]}</div>
+    </div>`;
+  }).join('');
+}
+function selectDupeForTrade(id) {
+  const dupes = getDupes();
+  const idx = dupes.indexOf(id);
+  if (idx === -1) { showToast('Figurinha não encontrada no estoque.'); renderDupesGrid(); return; }
+  dupes.splice(idx, 1);
+  saveDupes(dupes);
+  const p = getPlayer(id);
+  const payload = { v:1, id, from: currentUser, name: p ? p.name : '?' };
+  const code = btoa(unescape(encodeURIComponent(JSON.stringify(payload))));
+  document.getElementById('trade-code-text').textContent = code;
+  document.getElementById('trade-code-box').style.display = '';
+  renderDupesGrid();
+}
+let _lastTradeCode = '';
+function copyTradeCode() {
+  const code = document.getElementById('trade-code-text').textContent;
+  const p = JSON.parse(decodeURIComponent(escape(atob(code))));
+  const msg = `🔄 Troca de figurinha — ${p.name}\nCódigo: ${code}`;
+  navigator.clipboard.writeText(msg).then(() => showToast('Código copiado! Cole no Slack 🎉')).catch(() => showToast('Copie o código acima'));
+}
+function redeemTradeCode() {
+  const raw = document.getElementById('trade-input').value.trim();
+  const res = document.getElementById('trade-redeem-result');
+  if (!raw) { showToast('Cole um código primeiro!'); return; }
+  let payload;
+  try { payload = JSON.parse(decodeURIComponent(escape(atob(raw)))); } catch(e) { showResult(res,'error','Código inválido. Verifique se copiou corretamente.'); return; }
+  if (!payload.v || !payload.id || !payload.from) { showResult(res,'error','Código corrompido.'); return; }
+  if (payload.from === currentUser) { showResult(res,'error','Esse código é seu! Compartilhe com outra pessoa.'); return; }
+  const p = getPlayer(payload.id);
+  if (!p) { showResult(res,'error','Figurinha não reconhecida.'); return; }
+  const collected = getCollected();
+  const dupes = getDupes();
+  if (collected.includes(payload.id)) {
+    dupes.push(payload.id);
+    saveDupes(dupes);
+    showResult(res,'warn',`Você já tem ${p.name}! A figurinha foi para seu estoque de repetidas.`);
+  } else {
+    collected.push(payload.id);
+    saveCollected(collected);
+    refreshCurrentPage();
+    showResult(res,'ok',`✅ ${p.name} adicionado à sua coleção! Enviado por ${payload.from} 🎉`);
+  }
+  document.getElementById('trade-input').value = '';
+}
+function showResult(el, type, msg) {
+  const colors = { ok:'rgba(0,160,80,.2)', warn:'rgba(200,168,60,.2)', error:'rgba(220,50,50,.2)' };
+  const borders = { ok:'rgba(0,160,80,.5)', warn:'rgba(200,168,60,.5)', error:'rgba(220,50,50,.5)' };
+  el.style.display = '';
+  el.style.background = colors[type];
+  el.style.border = '1.5px solid ' + borders[type];
+  el.style.color = '#fff';
+  el.style.fontSize = '.82rem';
+  el.textContent = msg;
+}
+/* ===== END TRADE ===== */
+
 function updateFAB() {
   const used = getPacksToday();
   document.getElementById('fab-counter').textContent = used + '/' + TOTAL_PACKS;
