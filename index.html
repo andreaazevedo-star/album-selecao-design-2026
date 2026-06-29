@@ -476,7 +476,6 @@ const TEAM = [
 ];
 
 const SPREADS = [
-  { left: null,          right: 'cover'         },
   { left: 'cc-left',    right: 'cc-right'       },  // contra capa + sumário
   { left: 'gd-left',    right: 'gd-right'       },  // Gen AI + Distribution
   { left: 'dc-left',    right: 'dc-right'       },  // Dist. Atendimento + Dist. Cross
@@ -1230,7 +1229,7 @@ function openAlbum() {
   setTimeout(() => {
     cs.style.display = 'none';
     document.getElementById('book-scene').style.display = 'flex';
-    currentSpread = 1;
+    currentSpread = 0;
     document.getElementById('p-left').innerHTML  = renderPageHTML(SPREADS[1].left);
     document.getElementById('p-right').innerHTML = renderPageHTML(SPREADS[1].right);
     setNavVisible(true);
