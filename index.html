@@ -10,6 +10,18 @@ html,body{height:100%;overflow:hidden;font-family:'Segoe UI',system-ui,sans-seri
 body{background:#0f2d1a}
 
 /* ===== LOGIN ===== */
+/* ===== LOGIN HEADER ===== */
+#login-header{position:fixed;top:0;left:0;right:0;z-index:1000;display:flex;align-items:center;justify-content:space-between;
+  padding:12px 20px;background:rgba(5,22,12,0.85);backdrop-filter:blur(12px);
+  border-bottom:1px solid rgba(200,168,60,0.25)}
+#login-header-title{font-size:1rem;font-weight:900;color:#f0d060;letter-spacing:0.08em;text-transform:uppercase}
+#login-header-btns{display:flex;gap:10px}
+.lh-btn{padding:7px 14px;border-radius:20px;font-size:0.72rem;font-weight:700;letter-spacing:0.06em;cursor:pointer;border:none;
+  text-transform:uppercase;transition:all 0.2s}
+.lh-btn-outline{background:transparent;border:1.5px solid rgba(200,168,60,0.6);color:#f0d060}
+.lh-btn-outline:hover{background:rgba(200,168,60,0.12)}
+.lh-btn-solid{background:linear-gradient(135deg,#0d3d1c,#1a5c30);border:1.5px solid rgba(200,168,60,0.5);color:#f0d060}
+.lh-btn-solid:hover{background:linear-gradient(135deg,#1a5c30,#0d3d1c)}
 /* ===== LOGIN ===== */
 #login-screen{position:fixed;inset:0;display:flex;align-items:center;justify-content:center;z-index:999;overflow:hidden;
   background:radial-gradient(ellipse 120% 80% at 50% 100%, #0a3d1f 0%, #051a0d 60%, #020d06 100%)}
@@ -276,6 +288,15 @@ body{background:#0f2d1a}
 </style>
 </head>
 <body>
+
+<!-- LOGIN HEADER -->
+<div id="login-header">
+  <div id="login-header-title">🏆 Seleção de Design 2026 🏆</div>
+  <div id="login-header-btns">
+    <button class="lh-btn lh-btn-outline">🔄 Troca de Figurinhas</button>
+    <button class="lh-btn lh-btn-solid">⭐ Minha Seleção</button>
+  </div>
+</div>
 
 <!-- LOGIN -->
 <div id="login-screen">
