@@ -11,7 +11,7 @@ body{background:#0f2d1a}
 
 /* ===== LOGIN ===== */
 /* ===== LOGIN HEADER ===== */
-#login-header{position:fixed;top:0;left:0;right:0;z-index:9999;display:flex;align-items:center;justify-content:space-between;
+#login-header{position:fixed;top:0;left:0;right:0;z-index:9999;display:none;align-items:center;justify-content:space-between;
   padding:12px 20px;background:rgba(5,22,12,0.92);backdrop-filter:blur(12px);
   border-bottom:1px solid rgba(200,168,60,0.35)}
 #login-header-title{font-size:1rem;font-weight:900;color:#f0d060;letter-spacing:0.08em;text-transform:uppercase}
@@ -1382,6 +1382,7 @@ function logout() {
   currentUser = null;
   localStorage.removeItem('album_current_user');
   document.getElementById('login-screen').style.display = 'flex';
+  document.getElementById('login-header').style.display = 'none';
   document.getElementById('book-scene').style.display = 'none';
   document.getElementById('fab').style.display = 'none';
   document.getElementById('switch-user-btn').style.display = 'none';
@@ -1410,6 +1411,7 @@ function openAlbum() {
 
 function showApp() {
   document.getElementById('login-screen').style.display = 'none';
+  document.getElementById('login-header').style.display = 'flex';
   document.getElementById('fab').style.display = 'flex';
   document.getElementById('switch-user-btn').style.display = 'block';
 
