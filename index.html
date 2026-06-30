@@ -1419,12 +1419,13 @@ function setNavVisible(visible) {
 }
 
 function showCover() {
+  isFlipping = false;
   document.getElementById('book-scene').style.display = 'none';
   setNavVisible(false);
   const cs = document.getElementById('cover-screen');
-  cs.style.opacity = '0';
   cs.style.display = 'flex';
-  setTimeout(() => { cs.style.opacity = '1'; }, 10);
+  cs.style.opacity = '1';
+  cs.style.zIndex = '500';
 }
 
 function openAlbum() {
