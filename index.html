@@ -468,36 +468,51 @@ body{background:#4a6b4a}
 </div>
 
 <!-- TRADE MODAL -->
-<div id="trade-modal" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,.92);z-index:200;flex-direction:column;align-items:center;overflow-y:auto;padding:20px 16px 40px">
-  <div style="width:100%;max-width:520px">
+<div id="trade-modal" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,.93);z-index:200;flex-direction:column;align-items:center;overflow-y:auto;padding:20px 16px 40px">
+  <div style="width:100%;max-width:540px">
     <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:16px">
       <h2 style="color:#f0d060;font-size:1.2rem;font-weight:900">🔄 Troca de Figurinhas</h2>
       <button onclick="closeTrade()" style="background:none;border:none;color:#fff;font-size:1.4rem;cursor:pointer;opacity:.7">✕</button>
     </div>
-    <!-- tabs -->
-    <div style="display:flex;gap:8px;margin-bottom:20px">
-      <button class="trade-tab active" id="tab-minhas" onclick="switchTradeTab('minhas')">📦 Minhas repetidas</button>
-      <button class="trade-tab" id="tab-resgatar" onclick="switchTradeTab('resgatar')">🎁 Resgatar código</button>
+    <div style="display:flex;gap:6px;margin-bottom:20px">
+      <button class="trade-tab active" id="tab-perfil"   onclick="switchTradeTab('perfil')">📦 Meu Perfil</button>
+      <button class="trade-tab"        id="tab-propor"   onclick="switchTradeTab('propor')">🤝 Propor Troca</button>
+      <button class="trade-tab"        id="tab-responder" onclick="switchTradeTab('responder')">📬 Responder</button>
     </div>
-    <!-- aba minhas repetidas -->
-    <div id="trade-panel-minhas">
-      <p style="color:rgba(255,255,255,.5);font-size:.8rem;margin-bottom:14px">Clique numa figurinha para gerar o código de troca. O código expira quando for resgatado.</p>
-      <div id="trade-dupes-grid" style="display:grid;grid-template-columns:repeat(auto-fill,minmax(90px,1fr));gap:10px"></div>
-      <div id="trade-code-box" style="display:none;margin-top:20px;background:rgba(200,168,60,.1);border:1.5px solid rgba(200,168,60,.4);border-radius:10px;padding:14px">
-        <p style="color:#f0d060;font-size:.75rem;font-weight:700;margin-bottom:8px">CÓDIGO GERADO — compartilhe no Slack:</p>
-        <div style="display:flex;gap:8px;align-items:center">
-          <code id="trade-code-text" style="flex:1;background:rgba(0,0,0,.4);border-radius:6px;padding:8px 10px;font-size:.78rem;color:#fff;word-break:break-all;font-family:monospace"></code>
-          <button onclick="copyTradeCode()" style="background:#c8a83c;border:none;border-radius:6px;padding:8px 10px;color:#000;font-weight:800;font-size:.75rem;cursor:pointer;white-space:nowrap">📋 Copiar</button>
+
+    <!-- ── TAB: MEU PERFIL ── -->
+    <div id="trade-panel-perfil">
+      <p style="color:rgba(255,255,255,.5);font-size:.78rem;margin-bottom:12px">Gere seu perfil e compartilhe no Slack. Outros designers vão ver suas repetidas e o que você precisa.</p>
+      <button onclick="genAndShowProfile()" style="width:100%;background:linear-gradient(135deg,#0d3d1c,#1a5c30);border:1.5px solid rgba(200,168,60,.5);color:#f0d060;font-weight:800;padding:11px;border-radius:8px;font-size:.88rem;cursor:pointer;margin-bottom:14px">📤 Gerar meu perfil de trocas</button>
+      <div id="profile-code-box" style="display:none;background:rgba(200,168,60,.08);border:1.5px solid rgba(200,168,60,.35);border-radius:10px;padding:14px;margin-bottom:16px">
+        <p style="color:#f0d060;font-size:.72rem;font-weight:700;margin-bottom:8px">PERFIL GERADO — compartilhe no Slack:</p>
+        <div style="display:flex;gap:8px;align-items:flex-start">
+          <code id="profile-code-text" style="flex:1;background:rgba(0,0,0,.4);border-radius:6px;padding:8px 10px;font-size:.7rem;color:#fff;word-break:break-all;font-family:monospace;max-height:80px;overflow-y:auto"></code>
+          <button onclick="copyProfileCode()" style="background:#c8a83c;border:none;border-radius:6px;padding:8px 10px;color:#000;font-weight:800;font-size:.72rem;cursor:pointer;white-space:nowrap;flex-shrink:0">📋 Copiar</button>
         </div>
-        <p style="color:rgba(255,255,255,.4);font-size:.68rem;margin-top:8px">A figurinha foi removida do seu estoque ao gerar o código.</p>
       </div>
+      <p style="color:rgba(255,255,255,.45);font-size:.72rem;margin-bottom:10px">Minhas repetidas disponíveis:</p>
+      <div id="my-dupes-grid" style="display:grid;grid-template-columns:repeat(auto-fill,minmax(88px,1fr));gap:8px"></div>
     </div>
-    <!-- aba resgatar -->
-    <div id="trade-panel-resgatar" style="display:none">
-      <p style="color:rgba(255,255,255,.5);font-size:.8rem;margin-bottom:14px">Cole o código que alguém compartilhou com você para receber a figurinha.</p>
-      <textarea id="trade-input" placeholder="Cole o código aqui..." style="width:100%;height:90px;background:rgba(255,255,255,.07);border:1.5px solid rgba(200,168,60,.35);border-radius:8px;color:#fff;padding:10px;font-size:.82rem;resize:none;box-sizing:border-box;font-family:monospace"></textarea>
-      <button onclick="redeemTradeCode()" style="margin-top:10px;width:100%;background:linear-gradient(135deg,#0d3d1c,#1a5c30);border:1.5px solid rgba(200,168,60,.5);color:#f0d060;font-weight:800;padding:12px;border-radius:8px;font-size:.9rem;cursor:pointer">🎁 Resgatar figurinha</button>
-      <div id="trade-redeem-result" style="display:none;margin-top:14px;border-radius:8px;padding:12px;text-align:center"></div>
+
+    <!-- ── TAB: PROPOR TROCA ── -->
+    <div id="trade-panel-propor" style="display:none">
+      <p style="color:rgba(255,255,255,.5);font-size:.78rem;margin-bottom:10px">Cole o perfil de outro designer para ver as repetidas dele e propor uma troca.</p>
+      <div style="display:flex;gap:8px;margin-bottom:14px">
+        <textarea id="propor-input" placeholder="Cole o código de perfil aqui..." style="flex:1;height:70px;background:rgba(255,255,255,.07);border:1.5px solid rgba(200,168,60,.35);border-radius:8px;color:#fff;padding:10px;font-size:.78rem;resize:none;font-family:monospace"></textarea>
+        <button onclick="loadProfile()" style="background:#c8a83c;border:none;border-radius:8px;padding:0 14px;color:#000;font-weight:800;font-size:.8rem;cursor:pointer;flex-shrink:0">Ver →</button>
+      </div>
+      <div id="propor-result"></div>
+    </div>
+
+    <!-- ── TAB: RESPONDER ── -->
+    <div id="trade-panel-responder" style="display:none">
+      <p style="color:rgba(255,255,255,.5);font-size:.78rem;margin-bottom:10px">Cole um código de proposta, aprovação ou rejeição.</p>
+      <div style="display:flex;gap:8px;margin-bottom:14px">
+        <textarea id="responder-input" placeholder="Cole o código aqui..." style="flex:1;height:70px;background:rgba(255,255,255,.07);border:1.5px solid rgba(200,168,60,.35);border-radius:8px;color:#fff;padding:10px;font-size:.78rem;resize:none;font-family:monospace"></textarea>
+        <button onclick="parseResponderCode()" style="background:#c8a83c;border:none;border-radius:8px;padding:0 14px;color:#000;font-weight:800;font-size:.8rem;cursor:pointer;flex-shrink:0">Ver →</button>
+      </div>
+      <div id="responder-result"></div>
     </div>
   </div>
 </div>
@@ -1461,103 +1476,318 @@ function refreshCurrentPage() {
 function openInstructions() {
   document.getElementById('instructions-modal').style.display = 'flex';
 }
-/* ===== TRADE ===== */
+/* ===== TRADE v2 ===== */
+function tradeEncode(obj) { return btoa(unescape(encodeURIComponent(JSON.stringify(obj)))); }
+function tradeDecode(s)   { return JSON.parse(decodeURIComponent(escape(atob(s.trim())))); }
+
 function openTrade() {
   if (!currentUser) { showToast('Faça login primeiro!'); return; }
   document.getElementById('trade-modal').style.display = 'flex';
-  switchTradeTab('minhas');
+  switchTradeTab('perfil');
 }
 function closeTrade() {
   document.getElementById('trade-modal').style.display = 'none';
-  document.getElementById('trade-code-box').style.display = 'none';
-  document.getElementById('trade-input').value = '';
-  document.getElementById('trade-redeem-result').style.display = 'none';
+  document.getElementById('propor-input').value = '';
+  document.getElementById('responder-input').value = '';
+  document.getElementById('propor-result').innerHTML = '';
+  document.getElementById('responder-result').innerHTML = '';
+  document.getElementById('profile-code-box').style.display = 'none';
 }
 function switchTradeTab(tab) {
-  document.getElementById('trade-panel-minhas').style.display   = tab==='minhas'   ? '' : 'none';
-  document.getElementById('trade-panel-resgatar').style.display = tab==='resgatar' ? '' : 'none';
-  document.getElementById('tab-minhas').classList.toggle('active',   tab==='minhas');
-  document.getElementById('tab-resgatar').classList.toggle('active', tab==='resgatar');
-  if (tab==='minhas') renderDupesGrid();
+  ['perfil','propor','responder'].forEach(t => {
+    document.getElementById('trade-panel-'+t).style.display = t===tab ? '' : 'none';
+    document.getElementById('tab-'+t).classList.toggle('active', t===tab);
+  });
+  if (tab==='perfil') renderMyDupesGrid();
 }
-function renderDupesGrid() {
+
+/* ── MEU PERFIL ── */
+function renderMyDupesGrid() {
   const dupes = getDupes();
-  const grid = document.getElementById('trade-dupes-grid');
-  document.getElementById('trade-code-box').style.display = 'none';
+  const grid  = document.getElementById('my-dupes-grid');
   if (!dupes.length) {
-    grid.innerHTML = '<p style="color:rgba(255,255,255,.4);font-size:.82rem;grid-column:1/-1">Nenhuma figurinha repetida ainda. Abra mais pacotes! 📦</p>';
+    grid.innerHTML = '<p style="color:rgba(255,255,255,.4);font-size:.78rem;grid-column:1/-1">Nenhuma repetida ainda. Abra mais pacotes! 📦</p>';
     return;
   }
   const counts = {};
   dupes.forEach(id => counts[id] = (counts[id]||0)+1);
-  const unique = [...new Set(dupes)];
-  grid.innerHTML = unique.map(id => {
-    const p = getPlayer(id);
-    if (!p) return '';
+  grid.innerHTML = [...new Set(dupes)].map(id => {
+    const p = getPlayer(id); if (!p) return '';
     const sq = SQUADS[p.squad] || {color:'#555',emoji:'⚽'};
-    return `<div class="trade-dupe-card" onclick="selectDupeForTrade(${id})">
+    return `<div class="trade-dupe-card">
       <div class="tdc-strip" style="background:${sq.color}"></div>
-      <div class="tdc-avatar" style="background:${sq.color}22">${sq.emoji}</div>
+      <div class="tdc-avatar" style="background:${sq.color}22">${p.photo?`<img src="${p.photo}" style="width:100%;height:100%;border-radius:50%;object-fit:cover">`:sq.emoji}</div>
       <div class="tdc-name">${p.name}</div>
       <div class="tdc-badge">×${counts[id]}</div>
     </div>`;
   }).join('');
 }
-function selectDupeForTrade(id) {
+function genAndShowProfile() {
+  const dupes     = [...new Set(getDupes())];
+  const collected = getCollected();
+  const missing   = TEAM.filter(p => !collected.includes(p.id)).map(p => p.id);
+  const code = tradeEncode({v:2, type:'perfil', user: currentUser, dupes, missing});
+  document.getElementById('profile-code-text').textContent = code;
+  document.getElementById('profile-code-box').style.display = '';
+  renderMyDupesGrid();
+}
+function copyProfileCode() {
+  const code = document.getElementById('profile-code-text').textContent;
+  let p; try { p = tradeDecode(code); } catch(e) { return; }
+  const dupNames  = p.dupes.map(id => getPlayer(id)?.name).filter(Boolean).join(', ') || '—';
+  const msg = `🔄 *Trocas disponíveis — ${p.user}*\n📦 Tenho para trocar: ${dupNames}\nCola o código abaixo no álbum (aba "Propor Troca"):\n${code}`;
+  navigator.clipboard.writeText(msg).then(() => showToast('Perfil copiado! Cole no Slack 🎉')).catch(() => showToast('Copie o código acima'));
+}
+
+/* ── PROPOR TROCA ── */
+let _loadedProfile = null;
+let _propOffer = null, _propWant = null;
+
+function loadProfile() {
+  const raw = document.getElementById('propor-input').value.trim();
+  const res = document.getElementById('propor-result');
+  if (!raw) { res.innerHTML = tradeMsg('error','Cole um código de perfil primeiro.'); return; }
+  let payload;
+  try { payload = tradeDecode(raw); } catch(e) { res.innerHTML = tradeMsg('error','Código inválido.'); return; }
+  if (payload.type !== 'perfil') { res.innerHTML = tradeMsg('error','Esse não é um código de perfil. Use a aba "Responder" para propostas.'); return; }
+  if (payload.user === currentUser) { res.innerHTML = tradeMsg('error','Esse é o seu próprio perfil!'); return; }
+  _loadedProfile = payload;
+  _propOffer = null; _propWant = null;
+  renderProporUI(res);
+}
+
+function renderProporUI(res) {
+  const p    = _loadedProfile;
+  const myDupes    = getDupes();
+  const myCollected= getCollected();
+  // O que ELES têm pra oferecer que EU não tenho
+  const theyOffer  = p.dupes.filter(id => !myCollected.includes(id));
+  // O que EU tenho de repetida que ELES precisam
+  const iOffer     = [...new Set(myDupes)].filter(id => p.missing.includes(id));
+  const hasMatch   = theyOffer.length > 0 && iOffer.length > 0;
+
+  let html = `<div style="background:rgba(200,168,60,.08);border:1.5px solid rgba(200,168,60,.25);border-radius:10px;padding:14px;margin-bottom:12px">
+    <p style="color:#f0d060;font-weight:800;font-size:.85rem;margin-bottom:4px">Perfil de ${p.user}</p>
+    <p style="color:rgba(255,255,255,.5);font-size:.72rem">${p.dupes.length} repetida${p.dupes.length!==1?'s':''} disponíve${p.dupes.length!==1?'is':'l'} · faltam ${p.missing.length} figurinha${p.missing.length!==1?'s':''}</p>
+  </div>`;
+
+  if (!hasMatch) {
+    const why = theyOffer.length===0 ? 'Não há nada que eles tenham de repetida que você precise.'
+              : 'Você não tem repetidas que eles precisem.';
+    html += tradeMsg('warn', '😕 Sem match direto agora. ' + why);
+    res.innerHTML = html; return;
+  }
+
+  html += `<p style="color:rgba(255,255,255,.6);font-size:.75rem;margin-bottom:8px">✅ Há match! Selecione o que você quer receber e o que oferece em troca:</p>`;
+
+  html += `<p style="color:rgba(255,255,255,.45);font-size:.7rem;margin-bottom:6px">1️⃣ O que você quer receber (repetidas de ${p.user}):</p>
+  <div style="display:flex;flex-wrap:wrap;gap:6px;margin-bottom:14px">`;
+  theyOffer.forEach(id => {
+    const pl = getPlayer(id); if (!pl) return;
+    const sq = SQUADS[pl.squad]||{color:'#555'};
+    const sel = _propWant===id;
+    html += `<div onclick="selectPropWant(${id})" style="cursor:pointer;border-radius:8px;overflow:hidden;width:72px;border:2px solid ${sel?'#f0d060':'rgba(255,255,255,.15)'};background:${sel?'rgba(240,208,96,.12)':'rgba(255,255,255,.05)'};transition:.15s">
+      <div style="height:16px;background:${sq.color}"></div>
+      ${pl.photo?`<img src="${pl.photo}" style="width:100%;height:52px;object-fit:cover;object-position:center top">`:`<div style="height:52px;background:#0d1e0d;display:flex;align-items:center;justify-content:center;color:rgba(255,255,255,.3);font-size:.7rem;font-weight:700">${getInitials(pl.name)}</div>`}
+      <div style="padding:3px 3px 4px;text-align:center;font-size:.44rem;font-weight:700;color:#fff;line-height:1.2;overflow:hidden;white-space:nowrap;text-overflow:ellipsis">${pl.name}</div>
+    </div>`;
+  });
+  html += `</div>`;
+
+  html += `<p style="color:rgba(255,255,255,.45);font-size:.7rem;margin-bottom:6px">2️⃣ O que você oferece em troca (suas repetidas que ${p.user} precisa):</p>
+  <div style="display:flex;flex-wrap:wrap;gap:6px;margin-bottom:16px">`;
+  iOffer.forEach(id => {
+    const pl = getPlayer(id); if (!pl) return;
+    const sq = SQUADS[pl.squad]||{color:'#555'};
+    const sel = _propOffer===id;
+    html += `<div onclick="selectPropOffer(${id})" style="cursor:pointer;border-radius:8px;overflow:hidden;width:72px;border:2px solid ${sel?'#00b06f':'rgba(255,255,255,.15)'};background:${sel?'rgba(0,176,111,.1)':'rgba(255,255,255,.05)'};transition:.15s">
+      <div style="height:16px;background:${sq.color}"></div>
+      ${pl.photo?`<img src="${pl.photo}" style="width:100%;height:52px;object-fit:cover;object-position:center top">`:`<div style="height:52px;background:#0d1e0d;display:flex;align-items:center;justify-content:center;color:rgba(255,255,255,.3);font-size:.7rem;font-weight:700">${getInitials(pl.name)}</div>`}
+      <div style="padding:3px 3px 4px;text-align:center;font-size:.44rem;font-weight:700;color:#fff;line-height:1.2;overflow:hidden;white-space:nowrap;text-overflow:ellipsis">${pl.name}</div>
+    </div>`;
+  });
+  html += `</div>`;
+
+  if (_propOffer && _propWant) {
+    const pw = getPlayer(_propWant), po = getPlayer(_propOffer);
+    html += `<div style="background:rgba(0,176,111,.12);border:1.5px solid rgba(0,176,111,.4);border-radius:10px;padding:12px;margin-bottom:10px;text-align:center">
+      <p style="color:#fff;font-size:.78rem;font-weight:700">Você quer <span style="color:#f0d060">${pw?.name}</span> e oferece <span style="color:#6dffb0">${po?.name}</span> em troca</p>
+    </div>
+    <button onclick="gerarProposta()" style="width:100%;background:linear-gradient(135deg,#0d3d1c,#1a5c30);border:1.5px solid rgba(200,168,60,.5);color:#f0d060;font-weight:800;padding:11px;border-radius:8px;font-size:.88rem;cursor:pointer">🤝 Gerar proposta de troca</button>`;
+  }
+
+  html += `<div id="proposta-code-box" style="display:none;margin-top:12px;background:rgba(200,168,60,.08);border:1.5px solid rgba(200,168,60,.35);border-radius:10px;padding:12px">
+    <p style="color:#f0d060;font-size:.7rem;font-weight:700;margin-bottom:7px">PROPOSTA GERADA — envie para ${p.user}:</p>
+    <div style="display:flex;gap:8px;align-items:flex-start">
+      <code id="proposta-code-text" style="flex:1;background:rgba(0,0,0,.4);border-radius:6px;padding:8px;font-size:.68rem;color:#fff;word-break:break-all;font-family:monospace;max-height:70px;overflow-y:auto"></code>
+      <button onclick="copyPropostaCode()" style="background:#c8a83c;border:none;border-radius:6px;padding:8px 10px;color:#000;font-weight:800;font-size:.7rem;cursor:pointer;flex-shrink:0">📋</button>
+    </div>
+    <p style="color:rgba(255,255,255,.35);font-size:.65rem;margin-top:7px">Sua repetida foi reservada. Se rejeitada, volta ao seu estoque.</p>
+  </div>`;
+
+  res.innerHTML = html;
+  // re-attach after innerHTML
+}
+
+function selectPropWant(id)  { _propWant  = _propWant===id  ? null : id; renderProporUI(document.getElementById('propor-result')); }
+function selectPropOffer(id) { _propOffer = _propOffer===id ? null : id; renderProporUI(document.getElementById('propor-result')); }
+
+function gerarProposta() {
+  if (!_propOffer || !_propWant || !_loadedProfile) return;
+  // Reserve offer from my dupes
   const dupes = getDupes();
-  const idx = dupes.indexOf(id);
-  if (idx === -1) { showToast('Figurinha não encontrada no estoque.'); renderDupesGrid(); return; }
+  const idx = dupes.indexOf(_propOffer);
+  if (idx === -1) { showToast('Essa repetida não está mais no seu estoque!'); return; }
   dupes.splice(idx, 1);
   saveDupes(dupes);
-  const p = getPlayer(id);
-  const payload = { v:1, id, from: currentUser, name: p ? p.name : '?' };
-  const code = btoa(unescape(encodeURIComponent(JSON.stringify(payload))));
-  document.getElementById('trade-code-text').textContent = code;
-  document.getElementById('trade-code-box').style.display = '';
-  renderDupesGrid();
+
+  const code = tradeEncode({v:2, type:'proposta', from: currentUser, to: _loadedProfile.user, offer: _propOffer, want: _propWant});
+  document.getElementById('proposta-code-text').textContent = code;
+  document.getElementById('proposta-code-box').style.display = '';
+  _propOffer = null; _propWant = null;
+  renderMyDupesGrid();
 }
-let _lastTradeCode = '';
-function copyTradeCode() {
-  const code = document.getElementById('trade-code-text').textContent;
-  const p = JSON.parse(decodeURIComponent(escape(atob(code))));
-  const msg = `🔄 Troca de figurinha — ${p.name}\nCódigo: ${code}`;
-  navigator.clipboard.writeText(msg).then(() => showToast('Código copiado! Cole no Slack 🎉')).catch(() => showToast('Copie o código acima'));
+function copyPropostaCode() {
+  const code = document.getElementById('proposta-code-text').textContent;
+  let p; try { p = tradeDecode(code); } catch(e) { return; }
+  const offerName = getPlayer(p.offer)?.name || '#'+p.offer;
+  const wantName  = getPlayer(p.want)?.name  || '#'+p.want;
+  const msg = `🤝 *Proposta de troca — ${p.from}*\nOferece: ${offerName} · Quer: ${wantName}\nCola no álbum (aba "Responder"):\n${code}`;
+  navigator.clipboard.writeText(msg).then(() => showToast('Proposta copiada! Envie para ' + p.to + ' 🎉')).catch(() => showToast('Copie o código acima'));
 }
-function redeemTradeCode() {
-  const raw = document.getElementById('trade-input').value.trim();
-  const res = document.getElementById('trade-redeem-result');
-  if (!raw) { showToast('Cole um código primeiro!'); return; }
+
+/* ── RESPONDER ── */
+function parseResponderCode() {
+  const raw = document.getElementById('responder-input').value.trim();
+  const res = document.getElementById('responder-result');
+  if (!raw) { res.innerHTML = tradeMsg('error','Cole um código primeiro.'); return; }
   let payload;
-  try { payload = JSON.parse(decodeURIComponent(escape(atob(raw)))); } catch(e) { showResult(res,'error','Código inválido. Verifique se copiou corretamente.'); return; }
-  if (!payload.v || !payload.id || !payload.from) { showResult(res,'error','Código corrompido.'); return; }
-  if (payload.from === currentUser) { showResult(res,'error','Esse código é seu! Compartilhe com outra pessoa.'); return; }
-  const p = getPlayer(payload.id);
-  if (!p) { showResult(res,'error','Figurinha não reconhecida.'); return; }
-  const collected = getCollected();
-  const dupes = getDupes();
-  if (collected.includes(payload.id)) {
-    dupes.push(payload.id);
-    saveDupes(dupes);
-    showResult(res,'warn',`Você já tem ${p.name}! A figurinha foi para seu estoque de repetidas.`);
-  } else {
-    collected.push(payload.id);
-    saveCollected(collected);
-    refreshCurrentPage();
-    showResult(res,'ok',`✅ ${p.name} adicionado à sua coleção! Enviado por ${payload.from} 🎉`);
+  try { payload = tradeDecode(raw); } catch(e) { res.innerHTML = tradeMsg('error','Código inválido.'); return; }
+
+  if (payload.type === 'proposta')     return renderPropostaUI(res, payload, raw);
+  if (payload.type === 'confirmacao')  return applyConfirmacao(res, payload);
+  if (payload.type === 'rejeicao')     return applyRejeicao(res, payload);
+  res.innerHTML = tradeMsg('error','Tipo de código não reconhecido. Verifique a aba correta.');
+}
+
+function renderPropostaUI(res, p, rawCode) {
+  if (p.to !== currentUser) {
+    res.innerHTML = tradeMsg('warn', `Essa proposta é para ${p.to}, não para você (${currentUser}).`);
+    return;
   }
-  document.getElementById('trade-input').value = '';
+  const offerPlayer = getPlayer(p.offer);
+  const wantPlayer  = getPlayer(p.want);
+  const myDupes     = getDupes();
+  const myCollected = getCollected();
+  const hasWant     = myDupes.includes(p.want);
+  const sq1 = SQUADS[offerPlayer?.squad]||{color:'#555'};
+  const sq2 = SQUADS[wantPlayer?.squad]||{color:'#555'};
+
+  const cardHtml = (pl, sq, label, color) => `<div style="text-align:center">
+    <p style="color:${color};font-size:.65rem;font-weight:700;margin-bottom:6px">${label}</p>
+    <div style="width:88px;border-radius:8px;overflow:hidden;border:1.5px solid ${color};margin:0 auto">
+      <div style="height:20px;background:${sq.color}"></div>
+      ${pl?.photo?`<img src="${pl.photo}" style="width:100%;height:60px;object-fit:cover;object-position:center top">`:`<div style="height:60px;background:#0d1e0d;display:flex;align-items:center;justify-content:center;color:rgba(255,255,255,.3);font-size:.8rem;font-weight:700">${getInitials(pl?.name||'?')}</div>`}
+      <div style="padding:4px;background:#0a1a0a;text-align:center;font-size:.5rem;font-weight:700;color:#fff">${pl?.name||'?'}</div>
+    </div>
+  </div>`;
+
+  let html = `<div style="background:rgba(200,168,60,.08);border:1.5px solid rgba(200,168,60,.3);border-radius:10px;padding:16px;margin-bottom:12px">
+    <p style="color:#f0d060;font-weight:800;font-size:.88rem;margin-bottom:14px;text-align:center">Proposta de ${p.from}</p>
+    <div style="display:flex;align-items:center;justify-content:center;gap:16px;margin-bottom:14px">
+      ${cardHtml(offerPlayer, sq1, p.from+' oferece', '#6dffb0')}
+      <span style="color:rgba(255,255,255,.4);font-size:1.2rem">⇄</span>
+      ${cardHtml(wantPlayer, sq2, p.from+' quer sua', '#f0d060')}
+    </div>`;
+
+  if (!hasWant) {
+    html += `<p style="color:rgba(220,80,80,.9);font-size:.75rem;text-align:center;margin-bottom:10px">⚠️ Você não tem ${wantPlayer?.name||'essa figurinha'} como repetida.</p>
+    <button onclick="rejeitarProposta('${rawCode}')" style="width:100%;background:rgba(220,50,50,.2);border:1.5px solid rgba(220,50,50,.5);color:#ff8080;font-weight:800;padding:10px;border-radius:8px;font-size:.85rem;cursor:pointer">✕ Rejeitar proposta</button>`;
+  } else {
+    html += `<div style="display:flex;gap:8px">
+      <button onclick="aprovarProposta('${rawCode}')" style="flex:1;background:linear-gradient(135deg,#0d3d1c,#1a5c30);border:1.5px solid rgba(0,200,100,.5);color:#6dffb0;font-weight:800;padding:10px;border-radius:8px;font-size:.85rem;cursor:pointer">✓ Aprovar</button>
+      <button onclick="rejeitarProposta('${rawCode}')" style="flex:1;background:rgba(220,50,50,.15);border:1.5px solid rgba(220,50,50,.4);color:#ff8080;font-weight:800;padding:10px;border-radius:8px;font-size:.85rem;cursor:pointer">✕ Rejeitar</button>
+    </div>`;
+  }
+  html += `</div><div id="resposta-code-box" style="display:none;margin-top:12px;background:rgba(200,168,60,.08);border:1.5px solid rgba(200,168,60,.35);border-radius:10px;padding:12px">
+    <p id="resposta-code-label" style="color:#f0d060;font-size:.7rem;font-weight:700;margin-bottom:7px"></p>
+    <div style="display:flex;gap:8px;align-items:flex-start">
+      <code id="resposta-code-text" style="flex:1;background:rgba(0,0,0,.4);border-radius:6px;padding:8px;font-size:.68rem;color:#fff;word-break:break-all;font-family:monospace;max-height:70px;overflow-y:auto"></code>
+      <button onclick="copyRespostaCode()" style="background:#c8a83c;border:none;border-radius:6px;padding:8px 10px;color:#000;font-weight:800;font-size:.7rem;cursor:pointer;flex-shrink:0">📋</button>
+    </div>
+  </div>`;
+  res.innerHTML = html;
 }
-function showResult(el, type, msg) {
-  const colors = { ok:'rgba(0,160,80,.2)', warn:'rgba(200,168,60,.2)', error:'rgba(220,50,50,.2)' };
-  const borders = { ok:'rgba(0,160,80,.5)', warn:'rgba(200,168,60,.5)', error:'rgba(220,50,50,.5)' };
-  el.style.display = '';
-  el.style.background = colors[type];
-  el.style.border = '1.5px solid ' + borders[type];
-  el.style.color = '#fff';
-  el.style.fontSize = '.82rem';
-  el.textContent = msg;
+
+function aprovarProposta(rawCode) {
+  let p; try { p = tradeDecode(rawCode); } catch(e) { return; }
+  const dupes = getDupes();
+  const idx = dupes.indexOf(p.want);
+  if (idx === -1) { showToast('Repetida não encontrada no estoque!'); return; }
+  dupes.splice(idx, 1);
+  // Receive the offered sticker
+  const collected = getCollected();
+  if (!collected.includes(p.offer)) { collected.push(p.offer); saveCollected(collected); }
+  else { dupes.push(p.offer); }
+  saveDupes(dupes);
+  refreshCurrentPage();
+
+  const code = tradeEncode({v:2, type:'confirmacao', from: currentUser, to: p.from, give: p.want, receive: p.offer});
+  document.getElementById('resposta-code-text').textContent = code;
+  document.getElementById('resposta-code-label').textContent = `APROVADO ✓ — envie para ${p.from}:`;
+  document.getElementById('resposta-code-box').style.display = '';
+  const offerName = getPlayer(p.offer)?.name || '#'+p.offer;
+  showToast(`Troca aprovada! ${offerName} adicionada à sua coleção ✨`);
 }
-/* ===== END TRADE ===== */
+
+function rejeitarProposta(rawCode) {
+  let p; try { p = tradeDecode(rawCode); } catch(e) { return; }
+  const code = tradeEncode({v:2, type:'rejeicao', from: currentUser, to: p.from, offer: p.offer, want: p.want});
+  document.getElementById('resposta-code-text').textContent = code;
+  document.getElementById('resposta-code-label').textContent = `REJEITADO — envie para ${p.from} para devolver a figurinha:`;
+  document.getElementById('resposta-code-box').style.display = '';
+  showToast('Proposta rejeitada.');
+}
+
+function copyRespostaCode() {
+  const code = document.getElementById('resposta-code-text').textContent;
+  let p; try { p = tradeDecode(code); } catch(e) { return; }
+  const emoji = p.type==='confirmacao' ? '✅' : '❌';
+  const msg = `${emoji} *Resposta de troca — ${p.from}*\nCola no álbum (aba "Responder"):\n${code}`;
+  navigator.clipboard.writeText(msg).then(() => showToast('Código copiado! Envie para ' + p.to + ' 🎉')).catch(() => showToast('Copie o código acima'));
+}
+
+function applyConfirmacao(res, p) {
+  if (p.to !== currentUser) { res.innerHTML = tradeMsg('warn',`Essa confirmação é para ${p.to}, não para você.`); return; }
+  const givePlayer    = getPlayer(p.give);
+  const receivePlayer = getPlayer(p.receive);
+  const collected     = getCollected();
+  const dupes         = getDupes();
+  if (!collected.includes(p.give)) { collected.push(p.give); saveCollected(collected); }
+  else { dupes.push(p.give); saveDupes(dupes); }
+  refreshCurrentPage();
+  res.innerHTML = tradeMsg('ok', `✅ ${p.from} aprovou! ${givePlayer?.name||'Figurinha'} adicionada à sua coleção! 🎉`);
+  showToast((givePlayer?.name||'Figurinha') + ' recebida! 🎉');
+}
+
+function applyRejeicao(res, p) {
+  if (p.to !== currentUser) { res.innerHTML = tradeMsg('warn',`Essa rejeição é para ${p.to}, não para você.`); return; }
+  // Return the reserved sticker to dupes
+  const dupes = getDupes();
+  dupes.push(p.offer);
+  saveDupes(dupes);
+  renderMyDupesGrid();
+  const offerName = getPlayer(p.offer)?.name || '#'+p.offer;
+  res.innerHTML = tradeMsg('warn', `❌ ${p.from} rejeitou a proposta. ${offerName} voltou para o seu estoque de repetidas.`);
+}
+
+function tradeMsg(type, msg) {
+  const bg  = {ok:'rgba(0,160,80,.18)',  warn:'rgba(200,168,60,.18)', error:'rgba(220,50,50,.18)'};
+  const brd = {ok:'rgba(0,160,80,.45)',  warn:'rgba(200,168,60,.45)', error:'rgba(220,50,50,.45)'};
+  return `<div style="background:${bg[type]};border:1.5px solid ${brd[type]};border-radius:8px;padding:12px;color:#fff;font-size:.8rem;line-height:1.5">${msg}</div>`;
+}
+function showResult(el,type,msg){el.innerHTML=tradeMsg(type,msg);}
+/* ===== END TRADE v2 ===== */
 
 function updateFAB() {
   const used = getPacksToday();
