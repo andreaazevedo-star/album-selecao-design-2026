@@ -1200,7 +1200,7 @@ function goForward() {
 function goBackward() {
   if (isFlipping) return;
   if (isMobile) { goMobileBackward(); return; }
-  if (currentSpread <= 0) return;
+  if (currentSpread === 0) { showCover(); return; }
 
   isFlipping = true;
   const prevSpread = currentSpread - 1;
@@ -1418,6 +1418,15 @@ function setNavVisible(visible) {
   document.getElementById('dots').style.display    = visible ? 'flex' : 'none';
 }
 
+function showCover() {
+  document.getElementById('book-scene').style.display = 'none';
+  const cs = document.getElementById('cover-screen');
+  cs.style.opacity = '0';
+  cs.style.display = 'flex';
+  requestAnimationFrame(() => { cs.style.opacity = '1'; });
+  setNavVisible(false);
+}
+
 function openAlbum() {
   const cs = document.getElementById('cover-screen');
   cs.style.opacity = '0';
@@ -1425,8 +1434,8 @@ function openAlbum() {
     cs.style.display = 'none';
     document.getElementById('book-scene').style.display = 'flex';
     currentSpread = 0;
-    document.getElementById('p-left').innerHTML  = renderPageHTML(SPREADS[1].left);
-    document.getElementById('p-right').innerHTML = renderPageHTML(SPREADS[1].right);
+    document.getElementById('p-left').innerHTML  = renderPageHTML(SPREADS[0].left);
+    document.getElementById('p-right').innerHTML = renderPageHTML(SPREADS[0].right);
     setNavVisible(true);
     updateDots();
   }, 400);
