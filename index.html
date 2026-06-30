@@ -671,7 +671,7 @@ function drawCards(n) {
 function renderCardHTML(player, opts) {
   const { large=false, dark=false, inPack=false, noGray=false } = opts || {};
   const collected = getCollected();
-  const isCollected = collected.includes(player.id) || inPack || noGray;
+  const isCollected = collected.includes(player.id) || inPack || noGray || !!player.photo;
   const sq = player.squad && SQUADS[player.squad] ? SQUADS[player.squad] : null;
   const color = sq ? sq.color : '#065f46';
   const squadName = sq ? sq.name : (player.squad === 0 ? 'Diretoria' : '');
