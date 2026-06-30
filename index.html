@@ -212,17 +212,12 @@ body{background:#0f2d1a}
 .share-btn:hover{background:#00c97e}
 
 /* ===== FAB ===== */
-#fab{position:fixed;bottom:24px;right:24px;z-index:50;
-  background:linear-gradient(135deg,#0d3d1c 0%,#1a5c30 100%);
-  color:#fff;border:2px solid rgba(200,168,60,0.55);border-radius:50px;padding:11px 20px;
-  display:flex;align-items:center;gap:10px;font-size:.95rem;font-weight:700;cursor:pointer;
-  box-shadow:0 4px 20px rgba(0,0,0,0.5),0 0 0 1px rgba(200,168,60,0.15);transition:.2s}
-#fab:hover{transform:translateY(-2px);border-color:rgba(200,168,60,0.85);box-shadow:0 6px 28px rgba(0,0,0,0.6)}
-#fab:disabled{background:#374151;border-color:rgba(255,255,255,0.1);box-shadow:none;cursor:default;transform:none;opacity:0.5}
-.fab-icon{font-size:1.2rem}
-.fab-label{line-height:1.2}
-.fab-title{font-size:.85rem;font-weight:800;letter-spacing:.03em}
-.fab-counter{font-size:.7rem;color:rgba(200,168,60,0.9);font-weight:700}
+#fab{position:fixed;top:76px;right:24px;z-index:50;
+  background:none;border:none;padding:0;cursor:pointer;transition:.15s;display:none;flex-direction:column;align-items:center;gap:4px}
+#fab:hover{transform:scale(1.05)}
+#fab:disabled{opacity:0.4;cursor:default;transform:none}
+#fab img{width:90px;height:auto;display:block;filter:drop-shadow(0 4px 12px rgba(0,0,0,0.5))}
+.fab-counter{font-size:.68rem;font-weight:800;color:#f0d060;letter-spacing:.05em;text-shadow:0 1px 3px rgba(0,0,0,0.8)}
 
 /* ===== SUA SELEÇÃO PAGE ===== */
 .ss-page{width:100%;height:100%;background:linear-gradient(160deg,#071f0f 0%,#0a2e16 100%);display:flex;flex-direction:column;overflow:hidden}
@@ -397,10 +392,8 @@ body{background:#0f2d1a}
 
 <!-- FAB -->
 <button id="fab" style="display:none" onclick="openPack()">
-  <span class="fab-icon">🃏</span>
-  <div class="fab-label">
-    <div class="fab-title">Abrir Pacote</div>
-    <div class="fab-counter" id="fab-counter">0/7</div>
+  <img src="pacote.png" alt="Abrir Pacote">
+  <div class="fab-counter" id="fab-counter">0/7</div>
   </div>
 </button>
 
