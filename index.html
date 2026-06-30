@@ -804,118 +804,137 @@ function renderOverlayPage(bgImg, bgSide, slots) {
 
 // Slot positions (% of displayed page): { id, l=left, t=top, w=width, h=height }
 // Figma frame: 1632×1088px, left page = left 816px
+// Coords calculados do FigJam (node 46-28). Fórmula:
+// l=(slot_x - page_x_start)/page_w*100, t=(slot_y - frame_y)/page_h*100
+// Frames 1536×1024 → left page w=768, right page x_start = frame_x+768
+
+// Gen AI (gd-left) — frame 136:1238, x=5024, y=2632
 const SLOTS_GEN_AI = [
-  { id:6,  l:52.3, t:13.9, w:18.8, h:20.5 }, // Paula – técnica
-  { id:18, l:28.9, t:48.1, w:18.8, h:14.9 }, // Gabi Martins
-  { id:19, l:49.2, t:48.1, w:18.8, h:14.9 }, // Fê Souza
-  { id:16, l:69.5, t:48.1, w:18.8, h:14.9 }, // Lillian Koyama
-  { id:17, l:28.9, t:72.6, w:18.8, h:14.9 }, // Jana Vallim
-  { id:24, l:49.2, t:72.6, w:18.8, h:14.9 }, // Felipe Sampaio
-  { id:25, l:69.5, t:72.6, w:18.8, h:14.9 }, // Marco Carolino
+  { id:6,  l:54.0, t:26.3, w:15.6, h:16.6 }, // Paula Pinto – técnica
+  { id:18, l:35.3, t:45.2, w:15.6, h:17.6 }, // Gabi Martins
+  { id:19, l:54.0, t:45.2, w:15.6, h:17.6 }, // Fê Souza
+  { id:16, l:72.8, t:45.2, w:15.6, h:17.6 }, // Lillian Koyama
+  { id:17, l:35.3, t:64.2, w:15.6, h:17.6 }, // Jana Vallim
+  { id:24, l:54.0, t:64.2, w:15.6, h:17.6 }, // Felipe Sampaio
+  { id:25, l:72.8, t:63.7, w:15.6, h:17.6 }, // Marco Carolino
 ];
 
-// Distribution – Aquisição Digital (gd-right)
+// Distribution – Aquisição Digital (gd-right) — frame 136:1238 right half, x_start=5792
 const SLOTS_DISTRIBUTION = [
-  { id:7,  l:30.0, t:22.0, w:19.5, h:26.0 }, // Juliana do Vale – técnica
-  { id:12, l:51.0, t:22.0, w:19.5, h:26.0 }, // Jorge Lira – sub técnica
-  { id:26, l:30.0, t:51.5, w:17.5, h:16.5 }, // Nagella dos Santos
-  { id:27, l:49.0, t:51.5, w:17.5, h:16.5 }, // Alexandre Caetano
-  { id:28, l:68.0, t:51.5, w:17.5, h:16.5 }, // Vinicius Thomé
-  { id:20, l:22.5, t:71.0, w:15.5, h:15.0 }, // Erika Neves
-  { id:30, l:39.5, t:71.0, w:15.5, h:15.0 }, // Nanda Dias
-  { id:32, l:56.5, t:71.0, w:15.5, h:15.0 }, // Nayara Braga
-  { id:35, l:73.5, t:71.0, w:15.5, h:15.0 }, // Marina Vaccari
+  { id:7,  l:44.1, t:26.2, w:15.6, h:16.7 }, // Juliana do Vale – técnica
+  { id:12, l:63.0, t:26.3, w:15.6, h:16.8 }, // Jorge Lira – sub técnica
+  { id:26, l:33.7, t:44.5, w:15.6, h:17.6 }, // Nagella dos Santos
+  { id:27, l:52.1, t:43.9, w:16.1, h:18.2 }, // Alexandre Caetano
+  { id:28, l:71.2, t:44.5, w:15.6, h:17.6 }, // Vinicius Thomé
+  { id:20, l:27.5, t:64.2, w:15.6, h:17.6 }, // Erika Neves
+  { id:30, l:45.2, t:64.2, w:15.6, h:17.6 }, // Nanda Dias
+  { id:32, l:62.9, t:64.2, w:15.6, h:17.6 }, // Nayara Braga
+  { id:35, l:80.6, t:64.2, w:15.6, h:17.6 }, // Marina Vaccari
 ];
 
-// Distribution – Atendimento (dc-left)
+// Distribution – Atendimento (dc-left) — frame 136:1171, x=5024, y=3764
 const SLOTS_DIST_ATEND = [
-  { id:7,  l:27.5, t:27.0, w:20.5, h:25.0 }, // Juliana do Vale – técnica
-  { id:15, l:50.0, t:27.0, w:20.5, h:25.0 }, // Rodrigo Silva – sub técnica
-  { id:37, l:21.0, t:55.0, w:16.5, h:16.0 }, // Flavio Benassi
-  { id:38, l:38.5, t:55.0, w:16.5, h:16.0 }, // Karen Monteiro
-  { id:39, l:56.0, t:55.0, w:16.5, h:16.0 }, // Rebeca Coutinho
-  { id:40, l:73.5, t:55.0, w:16.5, h:16.0 }, // Marco Ribeiro
+  { id:7,  l:42.7, t:27.6, w:15.6, h:16.6 }, // Juliana do Vale – técnica
+  { id:15, l:61.5, t:27.6, w:15.6, h:16.6 }, // Rodrigo Silva – sub técnica
+  { id:37, l:26.0, t:46.6, w:15.6, h:16.6 }, // Flavio Benassi
+  { id:38, l:43.8, t:46.6, w:15.6, h:16.6 }, // Karen Monteiro
+  { id:39, l:61.5, t:46.6, w:15.6, h:16.6 }, // Rebeca Coutinho
+  { id:40, l:79.2, t:46.6, w:15.6, h:16.6 }, // Marco Ribeiro
 ];
 
-// Distribution – Cross (dc-right)
+// Distribution – Cross (dc-right) — frame 136:1171 right half, x_start=5792
 const SLOTS_DIST_CROSS = [
-  { id:7,  l:43.0, t:18.0, w:20.5, h:25.0 }, // Juliana do Vale – técnica
-  { id:47, l:27.0, t:47.5, w:17.5, h:16.0 }, // Pietra Brito
-  { id:48, l:46.0, t:47.5, w:17.5, h:16.0 }, // Michel Percegarolli
-  { id:49, l:66.0, t:47.5, w:17.5, h:16.0 }, // Suzi Sarmento
-  { id:50, l:33.5, t:67.5, w:17.5, h:15.5 }, // Alexandre Quattrucci
-  { id:31, l:53.5, t:67.5, w:17.5, h:15.5 }, // Samara Oliveira
+  { id:7,  l:52.5, t:27.6, w:15.6, h:16.6 }, // Juliana do Vale – técnica
+  { id:47, l:33.7, t:46.6, w:15.6, h:16.6 }, // Pietra Brito
+  { id:48, l:52.5, t:46.6, w:15.6, h:16.6 }, // Michel Percegarolli
+  { id:49, l:71.2, t:46.6, w:15.6, h:16.6 }, // Suzi Sarmento
+  { id:50, l:45.2, t:65.5, w:15.6, h:16.6 }, // Alexandre Quattrucci
+  { id:31, l:62.9, t:65.5, w:15.6, h:16.6 }, // Samara Oliveira
 ];
 
-// Cross Journeys (cc2-left)
+// Cross Journeys (cc2-left) — frame 136:1212, x=5025, y=4844
 const SLOTS_CROSS_JOURNEYS = [
-  { id:9,  l:27.5, t:24.0, w:20.5, h:25.0 }, // Tatiana Yamada – técnica
-  { id:14, l:49.5, t:24.0, w:20.5, h:25.0 }, // Kiko Herrschaft – sub técnico
-  { id:36, l:27.0, t:52.5, w:17.5, h:16.0 }, // Juliene Alves
-  { id:33, l:46.0, t:52.5, w:17.5, h:16.0 }, // Andre Rodrigues
-  { id:34, l:65.5, t:52.5, w:17.5, h:16.0 }, // André Rolla
+  { id:9,  l:44.8, t:27.8, w:15.6, h:16.6 }, // Tatiana Yamada – técnica
+  { id:14, l:63.5, t:27.8, w:15.6, h:16.6 }, // Kiko Herrschaft – sub técnico
+  { id:36, l:36.5, t:46.0, w:15.6, h:16.6 }, // Juliene Alves
+  { id:33, l:54.2, t:46.0, w:15.6, h:16.6 }, // Andre Rodrigues
+  { id:34, l:71.9, t:46.0, w:15.6, h:16.6 }, // André Rolla
 ];
 
-// Commerce (cc2-right)
+// Commerce (cc2-right) — frame 136:1212 right half, x_start=5793
 const SLOTS_COMMERCE = [
-  { id:10, l:28.0, t:22.0, w:20.5, h:26.0 }, // Fausto Junior – técnico
-  { id:29, l:50.5, t:22.0, w:20.5, h:26.0 }, // Rafaela Lopes
+  { id:10, l:41.3, t:27.8, w:15.6, h:16.6 }, // Fausto Junior – técnico
+  { id:29, l:60.0, t:27.8, w:15.6, h:16.6 }, // Rafaela Lopes
 ];
 
-// Payments (pb-left)
+// Payments (pb-left) — frame 136:1045, x=5025, y=5928
 const SLOTS_PAYMENTS = [
-  { id:8,  l:27.5, t:22.0, w:20.5, h:24.0 }, // Daniel Ito – técnico
-  { id:13, l:49.5, t:22.0, w:20.5, h:24.0 }, // Julia Garcia – técnica
-  { id:41, l:21.0, t:49.0, w:15.5, h:16.0 }, // Celso Junior
-  { id:42, l:37.5, t:49.0, w:15.5, h:16.0 }, // Juliana Ribeiro
-  { id:46, l:55.5, t:49.0, w:15.5, h:16.0 }, // Redlhey Maciel
-  { id:43, l:73.0, t:49.0, w:15.5, h:16.0 }, // Caroline Ribeiro
-  { id:44, l:33.5, t:68.0, w:17.5, h:15.5 }, // Vinicius Alcantara
-  { id:45, l:53.5, t:68.0, w:17.5, h:15.5 }, // Victor Carvalho
+  { id:8,  l:44.0, t:22.9, w:15.6, h:16.6 }, // Daniel Ito – técnico
+  { id:13, l:62.8, t:22.9, w:15.6, h:16.6 }, // Julia Garcia – técnica
+  { id:41, l:25.3, t:41.8, w:15.6, h:16.6 }, // Celso Junior (Junas)
+  { id:42, l:44.0, t:41.8, w:15.6, h:16.6 }, // Juliana Ribeiro
+  { id:46, l:62.8, t:41.8, w:15.6, h:16.6 }, // Redlhey Maciel
+  { id:43, l:81.5, t:41.8, w:15.6, h:16.6 }, // Caroline Ribeiro
+  { id:44, l:44.0, t:60.7, w:15.6, h:16.6 }, // Vinicius Alcantara (Vinizeira)
+  { id:45, l:62.8, t:60.7, w:15.6, h:16.6 }, // Victor Carvalho
 ];
 
-// Banking (pb-right)
+// Banking (pb-right) — frame 136:1045 right half, x_start=5793
 const SLOTS_BANKING = [
-  { id:2,  l:27.5, t:19.5, w:20.5, h:24.0 }, // André Albuquerque – técnico
-  { id:11, l:49.5, t:19.5, w:20.5, h:24.0 }, // Deia Duarte – sub técnica
-  { id:51, l:21.0, t:46.0, w:15.5, h:16.0 }, // Carla Medeiros
-  { id:52, l:37.5, t:46.0, w:15.5, h:16.0 }, // Caroline Pintos
-  { id:53, l:55.0, t:46.0, w:15.5, h:16.0 }, // Juliana Pordeus
-  { id:54, l:73.0, t:46.0, w:15.5, h:16.0 }, // Isadora Carolina
-  { id:55, l:21.0, t:65.0, w:15.5, h:16.0 }, // Rafael Bressan
-  { id:56, l:37.5, t:65.0, w:15.5, h:16.0 }, // Adriano Ayres
-  { id:23, l:55.0, t:65.0, w:15.5, h:16.0 }, // Leonardo de Souza
-  { id:21, l:73.0, t:65.0, w:15.5, h:16.0 }, // Tamiz Freitas
+  { id:2,  l:43.2, t:24.0, w:15.6, h:16.6 }, // André Albuquerque – técnico
+  { id:11, l:62.0, t:24.0, w:15.6, h:16.6 }, // Deia Duarte – sub técnica
+  { id:51, l:24.5, t:43.0, w:15.6, h:16.6 }, // Carla Medeiros
+  { id:52, l:43.2, t:43.0, w:15.6, h:16.6 }, // Caroline Pintos
+  { id:53, l:62.0, t:43.0, w:15.6, h:16.6 }, // Juliana Pordeus
+  { id:54, l:80.7, t:43.0, w:15.6, h:16.6 }, // Isadora Carolina
+  { id:55, l:24.5, t:61.9, w:15.6, h:16.6 }, // Rafael Bressan
+  { id:56, l:43.2, t:61.9, w:15.6, h:16.6 }, // Adriano Ayres
+  { id:23, l:62.0, t:61.9, w:15.6, h:16.6 }, // Leonardo de Souza
+  { id:21, l:80.7, t:61.9, w:15.6, h:16.6 }, // Tamiz Freitas
 ];
 
-// Crédito (cred-left)
+// Crédito (cred-left) — frame 136:1019, x=5024, y=7012
 const SLOTS_CREDITO = [
-  { id:3,  l:42.5, t:17.0, w:20.5, h:26.0 }, // Junca – técnico
-  { id:59, l:27.0, t:47.0, w:17.5, h:16.0 }, // Lucas Veronese
-  { id:60, l:46.0, t:47.0, w:17.5, h:16.0 }, // Tharine
-  { id:61, l:65.5, t:47.0, w:17.5, h:16.0 }, // Brunão
+  { id:3,  l:51.7, t:24.4, w:15.6, h:16.6 }, // Junca – técnico
+  { id:59, l:33.0, t:43.4, w:15.6, h:16.6 }, // Lucas Veronese
+  { id:60, l:51.7, t:43.4, w:15.6, h:16.6 }, // Tharine
+  { id:61, l:70.4, t:43.4, w:15.6, h:16.6 }, // Brunão
 ];
 
-// Cartões (cred-right)
+// Cartões (cred-right) — frame 136:1019 right half, x_start=5792
 const SLOTS_CARTOES = [
-  { id:5,  l:42.5, t:17.0, w:20.5, h:26.0 }, // Josi Portela – técnica
-  { id:57, l:27.0, t:47.0, w:17.5, h:16.0 }, // Nepo
-  { id:58, l:46.0, t:47.0, w:17.5, h:16.0 }, // Thaminne
-  { id:22, l:65.5, t:47.0, w:17.5, h:16.0 }, // Tici
+  { id:5,  l:50.1, t:24.4, w:15.6, h:16.6 }, // Josi Portela – técnica
+  { id:57, l:31.4, t:43.4, w:15.6, h:16.6 }, // Nepo
+  { id:58, l:50.1, t:43.4, w:15.6, h:16.6 }, // Thaminne
+  { id:22, l:68.9, t:43.4, w:15.6, h:16.6 }, // Tici
 ];
 
-// Novos Negócios (nt-left) — calibrar após ver template
+// Novos Negócios (nt-left) — frame 136:1105, x=5025, y=8096
 const SLOTS_NOVOS_NEGOCIOS = [
-  { id:4,  l:42.5, t:17.0, w:20.5, h:26.0 }, // Melissa Costa – técnica
-  { id:62, l:27.0, t:47.0, w:17.5, h:16.0 }, // Flora Lins
-  { id:63, l:46.0, t:47.0, w:17.5, h:16.0 }, // Raffael Costa
-  { id:64, l:65.5, t:47.0, w:17.5, h:16.0 }, // Sérgio Fontes
-  { id:19, l:27.0, t:67.0, w:17.5, h:16.0 }, // Fê Souza (cross)
+  { id:4,  l:55.2, t:27.1, w:15.6, h:16.6 }, // Melissa Costa – técnica
+  { id:62, l:35.5, t:46.1, w:15.6, h:16.6 }, // Flora Lins
+  { id:63, l:54.3, t:46.1, w:15.6, h:16.6 }, // Raffael Costa
+  { id:64, l:73.1, t:46.1, w:15.6, h:16.6 }, // Sérgio Fontes
+  { id:19, l:54.3, t:65.0, w:15.6, h:16.6 }, // Fê Souza (cross)
 ];
 
-// Comissão Técnica (nt-right) — calibrar após ver template
+// Comissão Técnica (nt-right) — frame 136:1105 right half, x_start=5793
 const SLOTS_COMISSAO_TECNICA = [
-  { id:1,  l:42.5, t:17.0, w:20.5, h:26.0 }, // Thamya Moreira – diretora
+  { id:1,  l:81.3, t:4.8,  w:15.6, h:16.6 }, // Thamya Moreira – diretora
+  { id:2,  l:26.6, t:23.1, w:15.6, h:16.6 }, // André Albuquerque
+  { id:8,  l:44.8, t:23.1, w:15.6, h:16.6 }, // Daniel Ito
+  { id:11, l:63.0, t:23.1, w:15.6, h:16.6 }, // Deia Duarte
+  { id:10, l:81.3, t:23.1, w:15.6, h:16.6 }, // Fausto Junior
+  { id:13, l:26.6, t:41.7, w:15.6, h:16.6 }, // Julia Garcia
+  { id:3,  l:44.8, t:41.7, w:15.6, h:16.6 }, // Junca
+  { id:5,  l:63.0, t:41.7, w:15.6, h:16.6 }, // Josi Portela
+  { id:12, l:81.3, t:41.7, w:15.6, h:16.6 }, // Jorge Lira
+  { id:7,  l:34.4, t:60.3, w:15.6, h:16.6 }, // Juliana do Vale
+  { id:14, l:52.6, t:60.3, w:15.6, h:16.6 }, // Kiko Herrschaft
+  { id:4,  l:70.8, t:60.3, w:15.6, h:16.6 }, // Melissa Costa
+  { id:6,  l:34.4, t:78.8, w:15.6, h:16.6 }, // Paula Pinto
+  { id:15, l:52.6, t:78.8, w:15.6, h:16.6 }, // Rodrigo Silva
+  { id:9,  l:70.8, t:78.8, w:15.6, h:16.6 }, // Tatiana Yamada
 ];
 
 // ============================================================
