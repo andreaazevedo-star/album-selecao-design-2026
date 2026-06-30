@@ -216,7 +216,7 @@ body{background:#0f2d1a}
   background:none;border:none;padding:0;cursor:pointer;transition:.15s;display:none;flex-direction:column;align-items:center;gap:4px}
 #fab:hover{transform:scale(1.05)}
 #fab:disabled{opacity:0.4;cursor:default;transform:none}
-#fab img{width:90px;height:auto;display:block;filter:drop-shadow(0 4px 12px rgba(0,0,0,0.5))}
+#fab img{width:140px;height:auto;display:block;filter:drop-shadow(0 4px 12px rgba(0,0,0,0.5))}
 .fab-counter{font-size:.68rem;font-weight:800;color:#f0d060;letter-spacing:.05em;text-shadow:0 1px 3px rgba(0,0,0,0.8)}
 
 /* ===== SUA SELEÇÃO PAGE ===== */
@@ -393,7 +393,6 @@ body{background:#0f2d1a}
 <!-- FAB -->
 <button id="fab" style="display:none" onclick="openPack()">
   <img src="pacote.png" alt="Abrir Pacote">
-  <div class="fab-counter" id="fab-counter">0/7</div>
 </button>
 
 <!-- PACK OVERLAY -->
@@ -1367,7 +1366,6 @@ function showResult(el, type, msg) {
 
 function updateFAB() {
   const used = getPacksToday();
-  document.getElementById('fab-counter').textContent = used + '/' + TOTAL_PACKS;
   document.getElementById('fab').disabled = used >= TOTAL_PACKS;
 }
 
