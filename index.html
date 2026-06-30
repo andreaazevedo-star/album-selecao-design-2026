@@ -484,7 +484,7 @@ const TEAM = [
   { id:3,  name:'Junca',                role:'Designer Manager',      squad:7, squads:[7],   isTecnico:true,  isSpecial:false, isCross:false },
   { id:4,  name:'Melissa Costa',        role:'Designer Manager',      squad:9, squads:[9],   isTecnico:true,  isSpecial:false, isCross:false },
   { id:5,  name:'Josi Portela',         role:'Designer Manager',      squad:8, squads:[8],   isTecnico:true,  isSpecial:false, isCross:false },
-  { id:6,  name:'Paula Pintos',         role:'Designer Manager',      squad:1, squads:[1],   isTecnico:true,  isSpecial:false, isCross:false },
+  { id:6,  name:'Paula Pintos',         role:'Designer Manager',      squad:1, squads:[1],   isTecnico:true,  isSpecial:false, isCross:false, photo:'imgs/gen-ai/6.png' },
   { id:7,  name:'Juliana do Vale',      role:'Designer Manager',      squad:2, squads:[2],   isTecnico:true,  isSpecial:false, isCross:false },
   { id:8,  name:'Daniel Ito',           role:'Designer Manager',      squad:5, squads:[5],   isTecnico:true,  isSpecial:false, isCross:false },
   { id:9,  name:'Tatiana Yamada',       role:'Designer Manager',      squad:3, squads:[3],   isTecnico:true,  isSpecial:false, isCross:false },
@@ -494,15 +494,15 @@ const TEAM = [
   { id:13, name:'Julia Garcia',         role:'Design Manager',        squad:5, squads:[5],   isTecnico:true,  isSpecial:false, isCross:false },
   { id:14, name:'Kiko Herrschaft',      role:'Designer Manager',      squad:3, squads:[3],   isTecnico:true,  isSpecial:false, isCross:false },
   { id:15, name:'Rodrigo Silva',        role:'Designer Lead',         squad:2, squads:[2],   isTecnico:true,  isSpecial:false, isCross:false },
-  { id:18, name:'Gabi Martins',         role:'Service Designer',      squad:1, squads:[1,3], isTecnico:false, isSpecial:true,  isCross:true  },
-  { id:19, name:'Fê Souza',             role:'Service Designer',      squad:1, squads:[1,3,9],isTecnico:false,isSpecial:true,  isCross:true  },
+  { id:18, name:'Gabi Martins',         role:'Service Designer',      squad:1, squads:[1,3], isTecnico:false, isSpecial:true,  isCross:true,  photo:'imgs/gen-ai/18.png' },
+  { id:19, name:'Fê Souza',             role:'Service Designer',      squad:1, squads:[1,3,9],isTecnico:false,isSpecial:true,  isCross:true,  photo:'imgs/gen-ai/19.png' },
   { id:20, name:'Erika Neves',          role:'Content Designer',      squad:2, squads:[2],   isTecnico:false, isSpecial:true,  isCross:false },
   { id:21, name:'Tamiz Freitas',        role:'Content Designer',      squad:6, squads:[6],   isTecnico:false, isSpecial:true,  isCross:false },
   { id:22, name:'Tici',                 role:'Content Designer',      squad:7, squads:[7,8], isTecnico:false, isSpecial:true,  isCross:true  },
-  { id:16, name:'Lillian Koyama',       role:'Designer Conversation', squad:1, squads:[1],   isTecnico:false, isSpecial:false, isCross:false },
-  { id:17, name:'Jana Vallim',          role:'Designer Conversation', squad:1, squads:[1],   isTecnico:false, isSpecial:false, isCross:false },
-  { id:24, name:'Felipe Sampaio',       role:'Product Designer',      squad:1, squads:[1],   isTecnico:false, isSpecial:false, isCross:false },
-  { id:25, name:'Marco Carolino',       role:'Product Designer',      squad:1, squads:[1],   isTecnico:false, isSpecial:false, isCross:false },
+  { id:16, name:'Lillian Koyama',       role:'Designer Conversation', squad:1, squads:[1],   isTecnico:false, isSpecial:false, isCross:false, photo:'imgs/gen-ai/16.png' },
+  { id:17, name:'Jana Vallim',          role:'Designer Conversation', squad:1, squads:[1],   isTecnico:false, isSpecial:false, isCross:false, photo:'imgs/gen-ai/17.png' },
+  { id:24, name:'Felipe Sampaio',       role:'Product Designer',      squad:1, squads:[1],   isTecnico:false, isSpecial:false, isCross:false, photo:'imgs/gen-ai/24.png' },
+  { id:25, name:'Marco Carolino',       role:'Product Designer',      squad:1, squads:[1],   isTecnico:false, isSpecial:false, isCross:false, photo:'imgs/gen-ai/25.png' },
   { id:26, name:'Nagella dos Santos',   role:'Product Designer',      squad:2, squads:[2],   isTecnico:false, isSpecial:false, isCross:false },
   { id:37, name:'Flavio Benassi',       role:'Product Designer',      squad:2, squads:[2],   isTecnico:false, isSpecial:false, isCross:false },
   { id:27, name:'Alexandre Caetano',    role:'Product Designer',      squad:2, squads:[2],   isTecnico:false, isSpecial:false, isCross:false },
@@ -691,7 +691,10 @@ function renderCardHTML(player, opts) {
     <div class="card-strip" style="background:${dark?'#b45309':color}">
       <span class="card-num">#${player.id}</span>
     </div>
-    <div class="card-avatar" style="background:${dark?'#b45309':color}">${getInitials(player.name)}</div>
+    ${player.photo
+      ? `<div class="card-avatar" style="background:${dark?'#b45309':color};padding:0;overflow:hidden"><img src="${player.photo}" alt="${player.name}" style="width:100%;height:100%;object-fit:cover;object-position:top;display:block;border-radius:50%"></div>`
+      : `<div class="card-avatar" style="background:${dark?'#b45309':color}">${getInitials(player.name)}</div>`
+    }
     <div class="card-info">
       <div class="card-name">${player.name}</div>
       <div class="card-role">${player.role}</div>
