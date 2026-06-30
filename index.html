@@ -1208,9 +1208,15 @@ function goBackward() {
   flipper.className = 'flip-backward';
   flipper.style.cssText = 'display:block;left:0;right:auto;transform-origin:right center;transform:rotateY(0deg);';
 
+  // Front = current left page (will flip to the right)
   flipper.querySelector('.front').innerHTML = document.getElementById('p-left').innerHTML;
+  // Back = prev spread's right page (revealed on right side after flip)
   flipper.querySelector('.back').innerHTML  = renderPageHTML(SPREADS[prevSpread].right);
-  document.getElementById('p-left').style.visibility = 'hidden';
+
+  // Pre-update p-left so it shows prevSpread.left as the flipper rotates away
+  document.getElementById('p-left').innerHTML = renderPageHTML(SPREADS[prevSpread].left);
+  // Hide p-right so the flipper's back face is visible when it lands on the right
+  document.getElementById('p-right').style.visibility = 'hidden';
 
   requestAnimationFrame(() => requestAnimationFrame(() => {
     flipper.style.transform = 'rotateY(180deg)';
@@ -1219,9 +1225,8 @@ function goBackward() {
   flipper.addEventListener('transitionend', function handler() {
     flipper.removeEventListener('transitionend', handler);
     currentSpread = prevSpread;
-    document.getElementById('p-left').innerHTML  = renderPageHTML(SPREADS[currentSpread].left);
     document.getElementById('p-right').innerHTML = renderPageHTML(SPREADS[currentSpread].right);
-    document.getElementById('p-left').style.visibility = '';
+    document.getElementById('p-right').style.visibility = '';
     flipper.style.display = 'none';
     flipper.style.transform = '';
     updateDots();
