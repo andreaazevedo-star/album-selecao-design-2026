@@ -1139,7 +1139,7 @@ function updateDots() {
     d.onclick = () => jumpToSpread(i);
     dots.appendChild(d);
   });
-  document.getElementById('nav-prev').disabled = (isMobile ? mobilePageIndex === 0 : false);
+  document.getElementById('nav-prev').disabled = false;
   document.getElementById('nav-next').disabled = (isMobile ? mobilePageIndex === MOBILE_PAGES.length - 1 : currentSpread === SPREADS.length - 1);
   updateBookClosed();
 }
@@ -1245,7 +1245,7 @@ function goMobileForward() {
 }
 
 function goMobileBackward() {
-  if (mobilePageIndex <= 0) return;
+  if (mobilePageIndex <= 0) { showCover(); return; }
   mobilePageIndex--;
   currentSpread = Math.floor(mobilePageIndex / 2);
   renderMobilePage();
