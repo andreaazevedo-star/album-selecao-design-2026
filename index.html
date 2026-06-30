@@ -186,6 +186,41 @@ body{background:#0f2d1a}
 .card-dark .card-squad-tag{color:#fbbf24!important}
 .card-dark .card-avatar{background:#b45309!important}
 
+/* ===== SQUAD PAGE V2 (sticker layout) ===== */
+.stkv2{width:100%;height:100%;position:relative;overflow:hidden;background:#061008;font-family:system-ui,sans-serif}
+.stkv2-bg{position:absolute;inset:0;background:radial-gradient(ellipse at 50% 100%,rgba(0,90,20,.55) 0%,transparent 60%),linear-gradient(180deg,#0a1a0c 0%,#040c06 100%)}
+.stkv2-bg::after{content:'';position:absolute;inset:0;background:radial-gradient(ellipse at 50% 110%,rgba(80,200,50,.07) 0%,transparent 50%)}
+.stkv2-side{position:absolute;left:0;top:0;bottom:0;width:27%;background:rgba(0,0,0,.45);border-right:1px solid rgba(200,168,60,.2);display:flex;flex-direction:column;padding:10px 8px 8px;gap:5px;z-index:2;overflow:hidden}
+.stkv2-squad-icon{text-align:center;font-size:1.5rem;line-height:1;margin-bottom:2px}
+.stkv2-sitem{padding:3px 0;border-bottom:1px solid rgba(200,168,60,.1)}
+.stkv2-slabel{font-size:.37rem;color:rgba(200,168,60,.7);font-weight:700;text-transform:uppercase;letter-spacing:.06em}
+.stkv2-sval{font-size:.46rem;color:rgba(255,255,255,.88);font-weight:600;line-height:1.3;margin-top:1px}
+.stkv2-pagenum{margin-top:auto;font-size:.85rem;font-weight:900;color:rgba(200,168,60,.4);line-height:1}
+.stkv2-pagenum span{font-size:.38rem;font-weight:400;display:block;color:rgba(200,168,60,.3);letter-spacing:.08em;text-transform:uppercase}
+.stkv2-main{position:absolute;left:27%;right:0;top:0;bottom:0;display:flex;flex-direction:column;align-items:center;padding:7px 7px 5px;z-index:2;gap:3px}
+.stkv2-hdr{text-align:center;flex-shrink:0}
+.stkv2-stars{font-size:.52rem;color:#f0d060;letter-spacing:5px}
+.stkv2-title{font-size:1.45rem;font-weight:900;color:#7fff50;font-style:italic;text-transform:uppercase;line-height:1;text-shadow:0 0 18px rgba(100,255,50,.4),0 2px 4px rgba(0,0,0,.5);margin:1px 0}
+.stkv2-sub{font-size:.33rem;color:rgba(255,255,255,.6);text-transform:uppercase;letter-spacing:.04em;line-height:1.5}
+.stkv2-badge{font-size:.4rem;color:#f0d060;font-weight:700;text-transform:uppercase;letter-spacing:.1em;flex-shrink:0}
+.stkv2-tecrow{flex:1.6;display:flex;justify-content:center;align-items:stretch;width:100%}
+.stkv2-regrow{flex:1;display:flex;justify-content:center;align-items:stretch;width:100%;gap:4px}
+/* Sticker card */
+.stk{display:flex;flex-direction:column;border-radius:5px;overflow:hidden;border:1.5px solid rgba(200,168,60,.65);background:#060e06;box-shadow:0 2px 8px rgba(0,0,0,.6),inset 0 0 0 1px rgba(200,168,60,.12)}
+.stk.stk-lg{width:42%}
+.stk.stk-sm{flex:1}
+.stk-hd{background:linear-gradient(135deg,#0d3d1c,#1a5c30);padding:2px 4px;display:flex;align-items:center;justify-content:space-between;border-bottom:1px solid rgba(200,168,60,.3);flex-shrink:0}
+.stk-hd-txt{font-size:.28rem;color:rgba(200,168,60,.85);font-weight:700;letter-spacing:.04em}
+.stk-hd-star{font-size:.36rem;color:#f0d060}
+.stk-img{flex:1;overflow:hidden}
+.stk-img img{width:100%;height:100%;object-fit:cover;object-position:center top;display:block}
+.stk-img-ph{width:100%;height:100%;background:#0d1e0d;display:flex;align-items:center;justify-content:center;color:rgba(255,255,255,.12);font-size:1rem;font-weight:700}
+.stk-ft{background:linear-gradient(135deg,#0d3d1c,#1a5c30);padding:3px 4px;border-top:1px solid rgba(200,168,60,.3);flex-shrink:0}
+.stk-nm{color:#f0d060;font-size:.38rem;font-weight:900;text-transform:uppercase;letter-spacing:.02em;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;line-height:1.2}
+.stk-rl{color:rgba(255,255,255,.5);font-size:.28rem;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.stk.not-collected{filter:grayscale(1);opacity:.3}
+.stk.is-special{border-color:rgba(250,220,0,.85);box-shadow:0 0 8px rgba(250,180,0,.25),0 2px 8px rgba(0,0,0,.6)}
+
 /* ===== DECORATIVE PAGE ===== */
 .deco-page{width:100%;height:100%;background:#0a2218;display:flex;align-items:center;justify-content:center;background-image:repeating-linear-gradient(45deg,transparent,transparent 20px,rgba(255,255,255,.03) 20px,rgba(255,255,255,.03) 21px)}
 .deco-ds{font-size:8rem;font-weight:900;color:rgba(255,255,255,.15);user-select:none}
@@ -547,7 +582,7 @@ const TEAM = [
 
 const SPREADS = [
   { left: 'cc-left',    right: 'cc-right'       },  // contra capa + sumário
-  { left: 'gd-left',    right: 'gd-right'       },  // Gen AI + Distribution
+  { left: 'genai',      right: 'gd-right'       },  // Gen AI + Distribution
   { left: 'dc-left',    right: 'dc-right'       },  // Dist. Atendimento + Dist. Cross
   { left: 'cc2-left',    right: 'cc2-right'      },  // Cross + Commerce
   { left: 'pb-left',     right: 'pb-right'       },  // Payments + Banking
@@ -704,6 +739,62 @@ function renderCardHTML(player, opts) {
 }
 
 // ============================================================
+// STICKER CARD V2
+// ============================================================
+function mkStk(player, isLg) {
+  const collected = getCollected();
+  const isCollected = collected.includes(player.id) || !!player.photo;
+  let cls = 'stk' + (isLg ? ' stk-lg' : ' stk-sm');
+  if (!isCollected) cls += ' not-collected';
+  if (player.isSpecial) cls += ' is-special';
+  const inner = player.photo
+    ? `<img src="${player.photo}" alt="${player.name}">`
+    : `<div class="stk-img-ph">${getInitials(player.name)}</div>`;
+  return `<div class="${cls}">
+    <div class="stk-hd"><span class="stk-hd-txt">SELEÇÃO DE DESIGN · 2026</span><span class="stk-hd-star">★</span></div>
+    <div class="stk-img">${inner}</div>
+    <div class="stk-ft"><div class="stk-nm">${player.name}</div><div class="stk-rl">${player.role}</div></div>
+  </div>`;
+}
+
+function renderSquadPageV2(squadId, pageNum, title, subtitle, specialty, style) {
+  const sq = SQUADS[squadId];
+  const players = TEAM.filter(p => p.squads.includes(squadId));
+  const tecnico = players.find(p => p.isTecnico);
+  const others = players.filter(p => !p.isTecnico);
+  const row1 = others.slice(0, 3);
+  const row2 = others.slice(3, 6);
+  const row3 = others.slice(6, 9);
+  const s = style || {};
+  const bgColor = s.bg || '#061008';
+  const accentColor = s.accent || '#7fff50';
+  return `<div class="stkv2" style="background:${bgColor}">
+    <div class="stkv2-bg" style="${s.bgStyle||''}"></div>
+    <div class="stkv2-side">
+      <div class="stkv2-squad-icon">${sq.emoji}</div>
+      ${tecnico?`<div class="stkv2-sitem"><div class="stkv2-slabel">🧑‍💼 Técnica</div><div class="stkv2-sval">${tecnico.name}</div></div>`:''}
+      <div class="stkv2-sitem"><div class="stkv2-slabel">🎯 Estilo de jogo</div><div class="stkv2-sval">${subtitle}</div></div>
+      <div class="stkv2-sitem"><div class="stkv2-slabel">⚽ Formação</div><div class="stkv2-sval">3–3</div></div>
+      <div class="stkv2-sitem"><div class="stkv2-slabel">👥 Jogadores</div><div class="stkv2-sval">${players.length}</div></div>
+      <div class="stkv2-sitem"><div class="stkv2-slabel">📅 Fundação</div><div class="stkv2-sval">2026</div></div>
+      <div class="stkv2-sitem"><div class="stkv2-slabel">⭐ Especialidade</div><div class="stkv2-sval">${specialty}</div></div>
+      <div class="stkv2-pagenum">${String(pageNum).padStart(2,'0')}<span>Página</span></div>
+    </div>
+    <div class="stkv2-main">
+      <div class="stkv2-hdr">
+        <div class="stkv2-stars">★ SELEÇÃO ★</div>
+        <div class="stkv2-title" style="color:${accentColor}">${title}</div>
+        <div class="stkv2-sub">${subtitle.toUpperCase()}</div>
+      </div>
+      ${tecnico?`<div class="stkv2-badge">Técnica</div><div class="stkv2-tecrow">${mkStk(tecnico,true)}</div>`:''}
+      ${row1.length?`<div class="stkv2-regrow">${row1.map(p=>mkStk(p,false)).join('')}</div>`:''}
+      ${row2.length?`<div class="stkv2-regrow">${row2.map(p=>mkStk(p,false)).join('')}</div>`:''}
+      ${row3.length?`<div class="stkv2-regrow">${row3.map(p=>mkStk(p,false)).join('')}</div>`:''}
+    </div>
+  </div>`;
+}
+
+// ============================================================
 // PAGE RENDERERS
 // ============================================================
 function renderPageHTML(page) {
@@ -711,6 +802,7 @@ function renderPageHTML(page) {
   if (page === 'cover')   return renderCoverPage();
   if (page === 'cc-left') return `<div style="width:100%;height:100%;background-image:url('contra-capa.png');background-size:200% 100%;background-position:left center;background-repeat:no-repeat"></div>`;
   if (page === 'cc-right')return `<div style="width:100%;height:100%;background-image:url('contra-capa.png');background-size:200% 100%;background-position:right center;background-repeat:no-repeat"></div>`;
+  if (page === 'genai') return renderSquadPageV2(1, 1, 'GEN AI', 'Criatividade impulsionada por IA', 'Automação, IA e soluções inovadoras');
   if (page === 'gd-left') return `<div style="width:100%;height:100%;background-image:url('gen-dist.png');background-size:200% 100%;background-position:left center;background-repeat:no-repeat"></div>`;
   if (page === 'gd-right')return `<div style="width:100%;height:100%;background-image:url('gen-dist.png');background-size:200% 100%;background-position:right center;background-repeat:no-repeat"></div>`;
   if (page === 'dc-left') return `<div style="width:100%;height:100%;background-image:url('dist-cross.png');background-size:200% 100%;background-position:left center;background-repeat:no-repeat"></div>`;
