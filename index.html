@@ -18,6 +18,8 @@ body{background:#0f2d1a}
 #login-header-btns{display:flex;gap:10px}
 .lh-btn{padding:7px 14px;border-radius:20px;font-size:0.72rem;font-weight:700;letter-spacing:0.06em;cursor:pointer;border:none;
   text-transform:uppercase;transition:all 0.2s}
+.lh-btn-ghost{background:transparent;border:1.5px solid rgba(255,255,255,0.2);color:rgba(255,255,255,0.7)}
+.lh-btn-ghost:hover{background:rgba(255,255,255,0.08);color:#fff}
 .lh-btn-outline{background:transparent;border:1.5px solid rgba(200,168,60,0.6);color:#f0d060}
 .lh-btn-outline:hover{background:rgba(200,168,60,0.12)}
 .lh-btn-solid{background:linear-gradient(135deg,#0d3d1c,#1a5c30);border:1.5px solid rgba(200,168,60,0.5);color:#f0d060}
@@ -95,7 +97,7 @@ body{background:#0f2d1a}
 #switch-user-btn:hover{background:rgba(0,0,0,0.5)}
 
 /* ===== BOOK SCENE ===== */
-#book-scene{width:100vw;height:calc(100vh - 52px);margin-top:52px;background:#0f2d1a;background-image:repeating-linear-gradient(45deg,transparent,transparent 40px,rgba(255,255,255,0.03) 40px,rgba(255,255,255,0.03) 41px);display:flex;align-items:center;justify-content:center;perspective:3000px;position:relative}
+#book-scene{width:100vw;height:calc(100vh - 52px);margin-top:52px;padding:16px 0;box-sizing:border-box;background:#0f2d1a;background-image:repeating-linear-gradient(45deg,transparent,transparent 40px,rgba(255,255,255,0.03) 40px,rgba(255,255,255,0.03) 41px);display:flex;align-items:center;justify-content:center;perspective:3000px;position:relative}
 
 #book{width:1100px;height:720px;position:relative;transform-style:preserve-3d;box-shadow:0 30px 80px rgba(0,0,0,0.5),0 0 0 1px rgba(0,0,0,0.1);border-radius:6px;transition:width 0.6s cubic-bezier(0.4,0,0.2,1)}
 #book.closed{width:550px;cursor:pointer}
@@ -301,6 +303,7 @@ body{background:#0f2d1a}
 <div id="login-header">
   <div id="login-header-title">🏆 Seleção de Design 2026 🏆</div>
   <div id="login-header-btns">
+    <button class="lh-btn lh-btn-ghost" onclick="openInstructions()">📖 Instruções</button>
     <button class="lh-btn lh-btn-outline" onclick="openTrade()">🔄 Troca de Figurinhas</button>
     <button class="lh-btn lh-btn-solid" onclick="jumpToSpread(7)">⭐ Minha Seleção</button>
   </div>
@@ -409,6 +412,21 @@ body{background:#0f2d1a}
   <h2>✨ Novas figurinhas!</h2>
   <div id="pack-cards-row"></div>
   <button id="pack-save-btn" onclick="savePack()">Guardar no álbum</button>
+</div>
+
+<!-- INSTRUCTIONS MODAL -->
+<div id="instructions-modal" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,.88);z-index:10000;align-items:center;justify-content:center;padding:20px">
+  <div style="width:100%;max-width:480px;background:#0a2218;border:1.5px solid rgba(200,168,60,.35);border-radius:14px;padding:24px;position:relative;max-height:80vh;overflow-y:auto">
+    <button onclick="document.getElementById('instructions-modal').style.display='none'" style="position:absolute;top:12px;right:14px;background:none;border:none;color:#fff;font-size:1.3rem;cursor:pointer;opacity:.6">✕</button>
+    <h2 style="color:#f0d060;font-size:1.1rem;font-weight:900;margin-bottom:16px">📖 Como jogar</h2>
+    <div style="display:flex;flex-direction:column;gap:14px;font-size:.85rem;color:rgba(255,255,255,.85);line-height:1.5">
+      <div><span style="color:#f0d060;font-weight:800">📦 Abrir pacotes</span><br>Clique em <strong>Abrir Pacote</strong> (canto inferior direito). Você recebe até <strong>7 pacotes por dia</strong> — o contador reseta à meia-noite.</div>
+      <div><span style="color:#f0d060;font-weight:800">📌 Colar figurinhas</span><br>Após abrir um pacote, clique em <strong>Guardar no álbum</strong>. As figurinhas novas entram na sua coleção automaticamente.</div>
+      <div><span style="color:#f0d060;font-weight:800">🔄 Trocar repetidas</span><br>Figurinhas duplicadas ficam no seu estoque. Em <strong>Troca de Figurinhas</strong> você gera um código e manda pelo Slack para um colega resgatar.</div>
+      <div><span style="color:#f0d060;font-weight:800">⭐ Minha Seleção</span><br>Monte seu time dos sonhos com os designers que você coletou. Escolha capitão, posições e compartilhe sua escalação.</div>
+      <div><span style="color:#f0d060;font-weight:800">📖 Navegar o álbum</span><br>Use as setas laterais ou clique nas páginas para virar. Os pontos na base indicam em qual spread você está.</div>
+    </div>
+  </div>
 </div>
 
 <!-- TRADE MODAL -->
@@ -1252,6 +1270,9 @@ function refreshCurrentPage() {
 // ============================================================
 // FAB
 // ============================================================
+function openInstructions() {
+  document.getElementById('instructions-modal').style.display = 'flex';
+}
 /* ===== TRADE ===== */
 function openTrade() {
   if (!currentUser) { showToast('Faça login primeiro!'); return; }
