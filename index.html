@@ -1420,11 +1420,11 @@ function setNavVisible(visible) {
 
 function showCover() {
   document.getElementById('book-scene').style.display = 'none';
+  setNavVisible(false);
   const cs = document.getElementById('cover-screen');
   cs.style.opacity = '0';
   cs.style.display = 'flex';
-  requestAnimationFrame(() => { cs.style.opacity = '1'; });
-  setNavVisible(false);
+  setTimeout(() => { cs.style.opacity = '1'; }, 10);
 }
 
 function openAlbum() {
