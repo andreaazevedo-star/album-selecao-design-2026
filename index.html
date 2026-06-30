@@ -115,7 +115,7 @@ body{background:#0f2d1a}
 /* Flip */
 #flipper{position:absolute;width:calc(50% - 4px);height:100%;transform-style:preserve-3d;transition:transform 0.75s cubic-bezier(0.4,0,0.2,1);z-index:20;pointer-events:none;display:none}
 #flipper.flip-forward{left:calc(50% + 4px);transform-origin:left center}
-#flipper.flip-backward{right:0;left:auto;transform-origin:right center}
+#flipper.flip-backward{left:0;right:auto;transform-origin:right center}
 .flip-face{position:absolute;width:100%;height:100%;backface-visibility:hidden;overflow:hidden;background:#fafaf8}
 .flip-face.back{transform:rotateY(180deg)}
 
@@ -1206,7 +1206,7 @@ function goBackward() {
   const prevSpread = currentSpread - 1;
   const flipper = document.getElementById('flipper');
   flipper.className = 'flip-backward';
-  flipper.style.cssText = 'display:block;right:0;left:auto;transform-origin:right center;transform:rotateY(0deg);';
+  flipper.style.cssText = 'display:block;left:0;right:auto;transform-origin:right center;transform:rotateY(0deg);';
 
   flipper.querySelector('.front').innerHTML = document.getElementById('p-left').innerHTML;
   flipper.querySelector('.back').innerHTML  = renderPageHTML(SPREADS[prevSpread].right);
