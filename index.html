@@ -1139,7 +1139,7 @@ function updateDots() {
     d.onclick = () => jumpToSpread(i);
     dots.appendChild(d);
   });
-  document.getElementById('nav-prev').disabled = (isMobile ? mobilePageIndex === 0 : currentSpread === 0);
+  document.getElementById('nav-prev').disabled = (isMobile ? mobilePageIndex === 0 : false);
   document.getElementById('nav-next').disabled = (isMobile ? mobilePageIndex === MOBILE_PAGES.length - 1 : currentSpread === SPREADS.length - 1);
   updateBookClosed();
 }
