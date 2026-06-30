@@ -271,18 +271,28 @@ body{background:#4a6b4a}
 .trade-offer-btn{margin-top:3px;width:100%;padding:3px;font-size:.52rem;font-weight:700;background:rgba(200,168,60,0.15);border:1px solid rgba(200,168,60,0.35);border-radius:4px;color:#c8a83c;cursor:pointer;transition:.15s}
 .trade-offer-btn:hover{background:rgba(200,168,60,0.28)}
 
-/* ===== PACK OVERLAY ===== */
-#pack-overlay{position:fixed;inset:0;background:rgba(0,0,0,.88);display:flex;flex-direction:column;align-items:center;justify-content:center;z-index:100}
-#pack-overlay h2{color:#fff;font-size:1.5rem;font-weight:800;margin-bottom:24px}
-#pack-cards-row{display:flex;gap:12px;flex-wrap:wrap;justify-content:center}
-.pack-card{width:100px;height:140px;border-radius:10px;overflow:hidden;position:relative;background:#fff;flex-shrink:0;box-shadow:0 4px 20px rgba(0,0,0,.3);animation:popIn .3s ease backwards}
+/* ===== PACK FLOAT (fan above FAB) ===== */
 @keyframes popIn{from{transform:scale(.5) translateY(20px);opacity:0}to{transform:scale(1);opacity:1}}
-.pack-card .card-strip{height:28px}
-.pack-card .card-avatar{width:58px;height:58px;font-size:1.1rem;margin:8px auto 4px}
 .badge-nova{position:absolute;top:4px;left:4px;background:#00b06f;color:#fff;font-size:.55rem;padding:2px 5px;border-radius:4px;font-weight:700;z-index:2}
 .badge-rep{position:absolute;top:4px;right:4px;background:rgba(0,0,0,.6);color:#fff;font-size:.6rem;padding:2px 5px;border-radius:4px;font-weight:700;z-index:2}
-#pack-save-btn{margin-top:32px;background:#00b06f;color:#fff;padding:14px 32px;border-radius:10px;font-size:1rem;font-weight:700;border:none;cursor:pointer;transition:.2s}
-#pack-save-btn:hover{background:#00c97e;transform:translateY(-1px)}
+#pack-float{position:fixed;top:290px;right:12px;z-index:200;display:none;flex-direction:column;align-items:flex-end;gap:8px;pointer-events:none}
+#pack-float-fan{position:relative;width:140px;height:200px;pointer-events:auto}
+.pf-card{position:absolute;bottom:0;left:50%;width:80px;height:115px;border-radius:8px;overflow:hidden;cursor:grab;box-shadow:0 4px 18px rgba(0,0,0,.7);background:#fff;transform-origin:bottom center;display:flex;flex-direction:column;user-select:none;transition:filter .15s}
+.pf-card:hover{filter:brightness(1.1)}
+.pf-card.dragging{opacity:.3;cursor:grabbing}
+#pack-float-hint{font-size:.62rem;color:rgba(255,255,255,.8);text-align:right;pointer-events:auto;text-shadow:0 1px 4px rgba(0,0,0,.9);background:rgba(0,0,0,.45);padding:4px 8px;border-radius:6px;max-width:160px}
+#pack-float-save{background:rgba(0,140,80,.92);backdrop-filter:blur(4px);color:#fff;border:1.5px solid rgba(0,200,100,.35);border-radius:8px;padding:8px 14px;font-size:.72rem;font-weight:700;cursor:pointer;pointer-events:auto;transition:.2s;white-space:nowrap}
+#pack-float-save:hover{background:rgba(0,176,100,.98)}
+/* drop zones */
+.stk{transition:outline .12s}
+.stk.drop-hover{outline:3px solid #f0d060!important;outline-offset:2px;background:rgba(240,208,96,.07)!important}
+.stk.drop-wrong{animation:shakeCard .35s ease}
+.overlay-slot{transition:outline .12s}
+.overlay-slot.drop-hover{outline:3px solid #f0d060;outline-offset:2px}
+.overlay-slot.drop-wrong{animation:shakeCard .35s ease}
+@keyframes shakeCard{0%,100%{transform:translateX(0)}20%{transform:translateX(-6px)}40%{transform:translateX(6px)}60%{transform:translateX(-4px)}80%{transform:translateX(4px)}}
+@media(max-width:1100px){#pack-float{top:270px;right:8px}#pack-float-fan{width:120px;height:180px}.pf-card{width:68px;height:97px}}
+@media(max-width:900px){#pack-float{top:auto;bottom:130px;right:8px}}
 
 /* ===== PLAYER PICKER ===== */
 #player-picker{position:fixed;inset:0;background:rgba(0,0,0,.8);display:flex;align-items:center;justify-content:center;z-index:60}
@@ -435,11 +445,11 @@ body{background:#4a6b4a}
   <img src="pacote.png" alt="Abrir Pacote">
 </button>
 
-<!-- PACK OVERLAY -->
-<div id="pack-overlay" style="display:none">
-  <h2>✨ Novas figurinhas!</h2>
-  <div id="pack-cards-row"></div>
-  <button id="pack-save-btn" onclick="savePack()">Guardar no álbum</button>
+<!-- PACK FLOAT -->
+<div id="pack-float" style="display:none">
+  <div id="pack-float-fan"></div>
+  <div id="pack-float-hint"></div>
+  <button id="pack-float-save" onclick="savePackFloat()">Guardar restantes ✓</button>
 </div>
 
 <!-- INSTRUCTIONS MODAL -->
@@ -610,6 +620,7 @@ let isMobile = false;
 let suaSelecaoTab = 'selecao';
 let mobilePageIndex = 0;
 let pendingPackCards = [];
+let packFloatCards = [];
 let pickerCallback = null;
 let pickerFilter = 'all';
 const TOTAL_PACKS = 7;
@@ -750,10 +761,14 @@ function renderOverlayPage(bgImg, bgSide, slots) {
   const collected = getCollected();
   const divs = slots.map(s => {
     const p = TEAM.find(t => t.id === s.id);
-    if (!p || !p.photo) return '';
+    if (!p) return '';
     const isCollected = collected.includes(p.id) || !!p.photo;
-    const style = `position:absolute;left:${s.l}%;top:${s.t}%;width:${s.w}%;height:${s.h}%;overflow:hidden;border-radius:3px;${!isCollected?'filter:grayscale(1);opacity:.3':''}`;
-    return `<div style="${style}"><img src="${p.photo}" style="width:100%;height:100%;object-fit:cover;object-position:center top;display:block"></div>`;
+    const style = `position:absolute;left:${s.l}%;top:${s.t}%;width:${s.w}%;height:${s.h}%;overflow:hidden;border-radius:3px;${!isCollected?'opacity:.15':''}`;
+    const imgHtml = p.photo ? `<img src="${p.photo}" style="width:100%;height:100%;object-fit:cover;object-position:center top;display:block">` : '';
+    return `<div class="overlay-slot" style="${style}" data-player-id="${p.id}"
+      ondragover="event.preventDefault();this.classList.add('drop-hover')"
+      ondragleave="this.classList.remove('drop-hover')"
+      ondrop="dropStickerOnAlbum(event,${p.id})">${imgHtml}</div>`;
   }).join('');
   return `<div style="position:relative;width:100%;height:100%;background-image:url('${bgImg}');background-size:200% 100%;background-position:${bgSide} center;background-repeat:no-repeat">${divs}</div>`;
 }
@@ -782,7 +797,10 @@ function mkStk(player, isLg) {
   const inner = player.photo
     ? `<img src="${player.photo}" alt="${player.name}">`
     : `<div class="stk-img-ph">${getInitials(player.name)}</div>`;
-  return `<div class="${cls}">
+  return `<div class="${cls}" data-player-id="${player.id}"
+    ondragover="event.preventDefault();this.classList.add('drop-hover')"
+    ondragleave="this.classList.remove('drop-hover')"
+    ondrop="dropStickerOnAlbum(event,${player.id})">
     <div class="stk-hd"><span class="stk-hd-txt">SELEÇÃO DE DESIGN · 2026</span><span class="stk-hd-star">★</span></div>
     <div class="stk-img">${inner}</div>
     <div class="stk-ft"><div class="stk-nm">${player.name}</div><div class="stk-rl">${player.role}</div></div>
@@ -1192,56 +1210,106 @@ function openPack() {
 }
 
 function showPackOverlay(cards) {
-  const collected = getCollected();
-  const row = document.getElementById('pack-cards-row');
-  row.innerHTML = '';
-
-  const idsBeforeThis = [];
-  cards.forEach((p, i) => {
-    const alreadyHad = collected.includes(p.id);
-    const dupInDraw = idsBeforeThis.includes(p.id);
-    idsBeforeThis.push(p.id);
-
-    const sq = p.squad && SQUADS[p.squad] ? SQUADS[p.squad] : null;
-    const color = sq ? sq.color : '#065f46';
-    const squadName = sq ? sq.name : (p.squad === 0 ? 'Diretoria' : '');
-
-    const div = document.createElement('div');
-    div.className = 'pack-card' + (p.isSpecial ? ' is-special' : '') + (p.isNew ? ' is-new' : '');
-    div.style.animationDelay = (i * 0.1) + 's';
-    div.innerHTML =
-      (!alreadyHad && !dupInDraw ? '<div class="badge-nova">NOVA</div>' : '') +
-      (alreadyHad ? '<div class="badge-rep">dup</div>' : '') +
-      `<div class="card-strip" style="background:${color}"><span class="card-num">#${p.id}</span></div>
-       <div class="card-avatar" style="background:${color};width:58px;height:58px;border-radius:50%;margin:8px auto 4px;display:flex;align-items:center;justify-content:center;color:#fff;font-size:1.1rem;font-weight:700">${getInitials(p.name)}</div>
-       <div class="card-info" style="text-align:center;padding:0 4px">
-         <div class="card-name" style="font-size:.6rem;font-weight:700;line-height:1.2;color:#1a1a1a">${p.name}</div>
-         <div class="card-role" style="font-size:.5rem;color:#6b7280;margin-top:1px">${p.role}</div>
-         ${squadName ? `<div style="font-size:.48rem;color:${color};font-weight:600;margin-top:2px">${squadName}</div>` : ''}
-       </div>`;
-    row.appendChild(div);
-  });
-
-  document.getElementById('pack-overlay').style.display = 'flex';
+  packFloatCards = [...cards];
+  renderPackFloat();
+  document.getElementById('pack-float').style.display = 'flex';
 }
 
-function savePack() {
+function renderPackFloat() {
+  const container = document.getElementById('pack-float-fan');
+  container.innerHTML = '';
+  const collected = getCollected();
+  const total = packFloatCards.length;
+  const fanAngles = [-16, -8, 0, 8, 16];
+  const fanX     = [-38, -19, 0, 19, 38];
+
+  packFloatCards.forEach((p, i) => {
+    const alreadyHad = collected.includes(p.id);
+    const sq = p.squad && SQUADS[p.squad] ? SQUADS[p.squad] : null;
+    const color = sq ? sq.color : '#065f46';
+    const angle = fanAngles[i] !== undefined ? fanAngles[i] : 0;
+    const xOff  = fanX[i]     !== undefined ? fanX[i]     : 0;
+    const inner = p.photo
+      ? `<img src="${p.photo}" style="width:100%;height:100%;object-fit:cover;object-position:center top;display:block">`
+      : `<div style="flex:1;background:#0d1e0d;display:flex;align-items:center;justify-content:center;color:rgba(255,255,255,.4);font-size:.85rem;font-weight:700">${getInitials(p.name)}</div>`;
+
+    const div = document.createElement('div');
+    div.className = 'pf-card';
+    div.style.cssText = `transform:translateX(calc(-50% + ${xOff}px)) rotate(${angle}deg);z-index:${i+1};animation:popIn ${0.18+i*0.07}s ease backwards`;
+    div.setAttribute('draggable', 'true');
+    div.setAttribute('data-player-id', p.id);
+    div.innerHTML = `
+      ${alreadyHad ? '<div class="badge-rep">dup</div>' : '<div class="badge-nova">NOVA</div>'}
+      <div style="height:20px;flex-shrink:0;background:${color};display:flex;align-items:center;justify-content:flex-end;padding:0 5px">
+        <span style="color:rgba(255,255,255,.8);font-size:.46rem;font-weight:700">#${p.id}</span>
+      </div>
+      ${inner}
+      <div style="flex-shrink:0;background:${color};padding:2px 4px;text-align:center">
+        <div style="font-size:.44rem;font-weight:700;color:#fff;line-height:1.2;overflow:hidden;white-space:nowrap;text-overflow:ellipsis">${p.name}</div>
+      </div>`;
+
+    div.addEventListener('dragstart', e => {
+      e.dataTransfer.setData('text/plain', String(p.id));
+      setTimeout(() => div.classList.add('dragging'), 0);
+    });
+    div.addEventListener('dragend', () => div.classList.remove('dragging'));
+    container.appendChild(div);
+  });
+
+  const hint = document.getElementById('pack-float-hint');
+  hint.textContent = total > 0
+    ? `${total} figurinha${total>1?'s':''} — arraste para o álbum`
+    : 'Todas colocadas! 🎉';
+}
+
+function dropStickerOnAlbum(event, targetPlayerId) {
+  event.preventDefault();
+  event.currentTarget.classList.remove('drop-hover');
+  if (!packFloatCards.length) return;
+  const droppedId = parseInt(event.dataTransfer.getData('text/plain'));
+  if (droppedId !== targetPlayerId) {
+    event.currentTarget.classList.add('drop-wrong');
+    setTimeout(() => event.currentTarget && event.currentTarget.classList.remove('drop-wrong'), 400);
+    const wrongPlayer = TEAM.find(p => p.id === droppedId);
+    showToast('Figurinha errada! Procure ' + (wrongPlayer ? wrongPlayer.name : '#'+droppedId) + ' no álbum 😅');
+    return;
+  }
+  const idx = packFloatCards.findIndex(p => p.id === droppedId);
+  if (idx === -1) return;
+  const p = packFloatCards.splice(idx, 1)[0];
+  const collected = getCollected();
+  const dupes = getDupes();
+  if (!collected.includes(p.id)) { collected.push(p.id); saveCollected(collected); showToast(p.name + ' colada! ✨'); }
+  else { dupes.push(p.id); saveDupes(dupes); showToast(p.name + ' já coletada — repetida 🔄'); }
+  renderPackFloat();
+  if (packFloatCards.length === 0) {
+    incPacksToday();
+    pendingPackCards = [];
+    document.getElementById('pack-float').style.display = 'none';
+    updateFAB();
+    showToast('Pacote completo! 🎉');
+  }
+  refreshCurrentPage();
+}
+
+function savePackFloat() {
   const collected = getCollected();
   const dupes = getDupes();
   let newCount = 0, dupeCount = 0;
-  pendingPackCards.forEach(p => {
+  packFloatCards.forEach(p => {
     if (!collected.includes(p.id)) { collected.push(p.id); newCount++; }
     else { dupes.push(p.id); dupeCount++; }
   });
   saveCollected(collected);
   saveDupes(dupes);
   incPacksToday();
+  packFloatCards = [];
   pendingPackCards = [];
-  document.getElementById('pack-overlay').style.display = 'none';
+  document.getElementById('pack-float').style.display = 'none';
   updateFAB();
   refreshCurrentPage();
-  let msg = newCount > 0 ? `+${newCount} figurinha${newCount>1?'s':''} nova${newCount>1?'s':''}! 🎉` : 'Nenhuma figurinha nova.';
-  if (dupeCount > 0) msg += ` +${dupeCount} repetida${dupeCount>1?'s':''} para trocar 🔄`;
+  let msg = newCount > 0 ? `+${newCount} nova${newCount>1?'s':''}! 🎉` : 'Todas repetidas.';
+  if (dupeCount > 0) msg += ` +${dupeCount} repetida${dupeCount>1?'s':''} 🔄`;
   showToast(msg);
 }
 
