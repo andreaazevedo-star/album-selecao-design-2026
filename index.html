@@ -34,59 +34,30 @@ body{background:#4a6b4a}
 .trade-dupe-card .tdc-badge{text-align:center;padding:3px 0 5px;font-size:.6rem;color:#c8a83c;font-weight:700}
 /* ===== LOGIN ===== */
 #login-screen{position:fixed;inset:0;display:flex;align-items:center;justify-content:center;z-index:999;overflow:hidden;
-  background:#020d06}
-#login-screen-bg{position:absolute;inset:0;background-image:url('login-bg.png');background-size:cover;background-position:center;opacity:0.85;pointer-events:none}
-#login-screen::after{content:'';position:absolute;inset:0;background:radial-gradient(ellipse 80% 80% at 50% 50%,transparent 30%,rgba(0,5,2,0.55) 100%);pointer-events:none}
+  background:url('login-bg.png') center/cover no-repeat}
+#login-screen-bg{display:none}
 .login-bokeh{display:none}
 
-.login-card{position:relative;z-index:2;text-align:center;width:380px;padding:0}
-.login-frame{
-  background:linear-gradient(160deg,rgba(8,35,18,0.97) 0%,rgba(4,18,10,0.99) 100%);
-  border:2px solid #c8a83c;
-  border-radius:4px;
-  padding:36px 32px 28px;
-  position:relative;
-  box-shadow:0 0 80px rgba(0,0,0,0.9),0 0 40px rgba(0,80,30,0.3),inset 0 0 0 4px rgba(200,168,60,0.12)}
-/* ornate corner pieces */
-.login-corner{position:absolute;width:32px;height:32px;pointer-events:none}
-.login-corner::before,.login-corner::after{content:'';position:absolute;background:#c8a83c}
-.login-corner::before{width:100%;height:2px;top:0;left:0}
-.login-corner::after{width:2px;height:100%;top:0;left:0}
-.login-corner.tl{top:-2px;left:-2px}
-.login-corner.tr{top:-2px;right:-2px;transform:scaleX(-1)}
-.login-corner.bl{bottom:-2px;left:-2px;transform:scaleY(-1)}
-.login-corner.br{bottom:-2px;right:-2px;transform:scale(-1)}
-/* inner corner dots */
-.login-frame::before{content:'★';position:absolute;bottom:-14px;left:50%;transform:translateX(-50%);color:#c8a83c;font-size:1rem;z-index:2}
+.login-card{position:absolute;z-index:2;top:55%;left:50%;transform:translate(-50%,-50%);width:340px;text-align:center}
+.login-frame{background:transparent;border:none;padding:0;box-shadow:none}
+.login-corner,.login-shield,.login-title,.login-sub,.login-divider,.login-star-bottom{display:none}
 
-.login-shield{width:110px;height:auto;margin:0 auto 14px;position:relative}
-.login-shield img{width:100%;height:auto;display:block;filter:drop-shadow(0 4px 16px rgba(0,0,0,0.6))}
-
-.login-title{font-size:1.75rem;font-weight:900;letter-spacing:0.06em;text-transform:uppercase;line-height:1.1;color:#fff;
-  text-shadow:0 2px 12px rgba(0,0,0,0.8);margin-bottom:6px}
-.login-sub{color:#4caf70;font-size:0.82rem;font-weight:700;letter-spacing:0.2em;text-transform:uppercase;margin-bottom:24px;display:flex;align-items:center;justify-content:center;gap:8px}
-.login-sub::before,.login-sub::after{content:'★';font-size:0.65rem;color:#4caf70}
-
-.login-divider{width:24px;height:2px;background:#c8a83c;margin:0 auto 20px;opacity:0.6}
-
-.login-field{position:relative;margin-bottom:12px}
-.login-field-icon{position:absolute;left:14px;top:50%;transform:translateY(-50%);color:rgba(255,255,255,0.4);font-size:0.9rem;pointer-events:none}
+.login-field{position:relative;margin-bottom:10px}
+.login-field-icon{position:absolute;left:14px;top:50%;transform:translateY(-50%);color:rgba(255,255,255,0.45);font-size:0.9rem;pointer-events:none}
 #login-select{width:100%;padding:12px 14px 12px 40px;border-radius:6px;
   border:1.5px solid rgba(200,168,60,0.3);
-  background:rgba(0,0,0,0.45);color:rgba(255,255,255,0.8);
+  background:rgba(0,0,0,0.55);color:rgba(255,255,255,0.85);
   font-size:0.9rem;outline:none;appearance:none;cursor:pointer;
-  transition:border-color .2s}
+  transition:border-color .2s;backdrop-filter:blur(4px)}
 #login-select:focus{border-color:rgba(200,168,60,0.65)}
 #login-select option{background:#061a0e;color:#fff}
 
 .login-btn{width:100%;padding:13px;
-  background:#1a7a40;
+  background:#1c8a45;
   color:#fff;border:none;border-radius:6px;font-size:1rem;font-weight:800;
   letter-spacing:0.1em;cursor:pointer;transition:.2s;
   box-shadow:0 2px 16px rgba(0,120,60,0.4)}
-.login-btn:hover{background:#1e9049;transform:translateY(-1px);box-shadow:0 4px 20px rgba(0,140,70,0.5)}
-
-.login-star-bottom{display:none}
+.login-btn:hover{background:#21a050;transform:translateY(-1px)}
 
 /* ===== SWITCH USER BTN ===== */
 #switch-user-btn{position:fixed;top:12px;right:16px;background:rgba(0,0,0,0.3);color:#fff;border:none;border-radius:6px;padding:6px 12px;cursor:pointer;font-size:0.85rem;z-index:40;display:none;transition:.2s}
@@ -356,19 +327,6 @@ body{background:#4a6b4a}
 
   <div class="login-card">
     <div class="login-frame">
-      <div class="login-corner tl"></div>
-      <div class="login-corner tr"></div>
-      <div class="login-corner bl"></div>
-      <div class="login-corner br"></div>
-
-      <div class="login-shield">
-        <img src="login-shield.png" alt="Seleção do Design">
-      </div>
-
-      <div class="login-title">Seleção do Design</div>
-      <div class="login-sub">Álbum 2026</div>
-      <div class="login-divider"></div>
-
       <div class="login-field">
         <span class="login-field-icon">👤</span>
         <select id="login-select">
