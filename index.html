@@ -12,21 +12,21 @@ body{background:#4a6b4a}
 /* ===== LOGIN ===== */
 /* ===== LOGIN HEADER ===== */
 #login-header{position:fixed;top:0;left:0;right:0;width:100%;box-sizing:border-box;z-index:9999;display:none;align-items:center;justify-content:space-between;
-  height:64px;padding:0 20px;background:rgba(5,22,12,0.92);backdrop-filter:blur(12px);
-  border-bottom:1px solid rgba(200,168,60,0.35)}
-#login-header-title{font-size:1.05rem;font-weight:700;color:rgba(235,188,0,0.98);letter-spacing:-0.02em}
-#login-header-btns{display:flex;align-items:center;gap:8px}
-.lh-btn{padding:8px 16px;border-radius:8px;font-size:0.85rem;font-weight:600;cursor:pointer;border:none;transition:all 0.2s}
-.lh-btn-ghost{background:transparent;border:none;color:rgba(255,255,255,0.75)}
+  height:64px;padding:0 16px 0 12px;background:rgba(10,14,10,0.96);backdrop-filter:blur(12px);
+  border-bottom:1px solid rgba(200,168,60,0.2)}
+#login-header-title{font-size:1.25rem;font-weight:600;color:rgba(235,188,0,0.98);letter-spacing:-0.017em;padding-left:8px}
+#login-header-btns{display:flex;align-items:center;gap:4px}
+.lh-btn{padding:10px 14px;border-radius:8px;font-size:0.875rem;font-weight:600;cursor:pointer;border:none;transition:all 0.2s;letter-spacing:-0.055em}
+.lh-btn-ghost{background:transparent;color:rgba(255,255,255,0.85)}
 .lh-btn-ghost:hover{background:rgba(255,255,255,0.08);color:#fff}
 .lh-btn-outline{background:transparent;border:1.5px solid rgba(200,168,60,0.6);color:#f0d060}
 .lh-btn-outline:hover{background:rgba(200,168,60,0.12)}
 .lh-btn-solid{background:linear-gradient(135deg,#0d3d1c,#1a5c30);border:1.5px solid rgba(200,168,60,0.5);color:#f0d060}
 .lh-btn-solid:hover{background:linear-gradient(135deg,#1a5c30,#0d3d1c)}
 .lh-btn-icon{width:40px;height:40px;border-radius:8px;display:flex;align-items:center;justify-content:center;
-  background:transparent;border:none;color:rgba(255,255,255,0.7);font-size:1.1rem;cursor:pointer;transition:.2s}
+  background:transparent;border:none;color:rgba(255,255,255,0.7);cursor:pointer;transition:.2s}
 .lh-btn-icon:hover{background:rgba(255,255,255,0.08);color:#fff}
-.lh-divider{width:1px;height:32px;background:rgba(200,168,60,0.35);margin:0 4px}
+.lh-divider{width:1px;height:32px;background:rgba(255,255,255,0.15);margin:0 8px}
 .trade-tab{flex:1;padding:9px;border-radius:8px;font-size:.78rem;font-weight:700;cursor:pointer;border:1.5px solid rgba(200,168,60,.3);background:transparent;color:rgba(255,255,255,.5);transition:.2s}
 .trade-tab.active{background:rgba(200,168,60,.15);border-color:rgba(200,168,60,.7);color:#f0d060}
 .trade-dupe-card{border-radius:8px;overflow:hidden;cursor:pointer;border:2px solid transparent;transition:.2s;background:#0a2218}
@@ -357,10 +357,8 @@ body{background:#4a6b4a}
 
 <!-- COVER SCREEN -->
 <div id="cover-screen" style="display:none;position:fixed;inset:0;top:64px;background:#0a1a0f;align-items:center;justify-content:center;z-index:50;transition:opacity 0.4s">
-  <div style="position:relative;display:inline-block">
-    <img src="capa.png" style="max-height:calc(100vh - 64px - 48px);height:auto;width:auto;max-width:575px;border-radius:8px;box-shadow:0 40px 100px rgba(0,0,0,0.7);display:block;cursor:pointer" alt="Seleção do Design 2026" draggable="false" onclick="openAlbum()">
-    <button id="cover-next-btn" onclick="openAlbum()" style="position:absolute;bottom:24px;right:24px;width:52px;height:52px;border-radius:50%;background:#1c8a45;border:none;color:#fff;font-size:1.4rem;cursor:pointer;display:flex;align-items:center;justify-content:center;box-shadow:0 4px 20px rgba(0,120,60,0.5);transition:.2s" onmouseover="this.style.background='#21a050'" onmouseout="this.style.background='#1c8a45'">→</button>
-  </div>
+  <img src="capa.png" style="max-height:calc(100vh - 64px - 48px);height:auto;width:auto;max-width:575px;border-radius:8px;box-shadow:0 40px 100px rgba(0,0,0,0.7);display:block;cursor:pointer" alt="Seleção do Design 2026" draggable="false" onclick="openAlbum()">
+  <button id="cover-next-btn" onclick="openAlbum()" style="position:absolute;bottom:32px;right:32px;width:52px;height:52px;border-radius:50%;background:#1c8a45;border:none;color:#fff;font-size:1.5rem;cursor:pointer;display:flex;align-items:center;justify-content:center;box-shadow:0 4px 20px rgba(0,120,60,0.5);transition:.2s" onmouseover="this.style.background='#21a050'" onmouseout="this.style.background='#1c8a45'">→</button>
 </div>
 
 <!-- BOOK SCENE -->
@@ -1919,6 +1917,7 @@ function showCover() {
   document.getElementById('book-scene').style.display = 'none';
   setNavVisible(false);
   document.getElementById('pack-float').style.display = 'none';
+  document.getElementById('fab').style.display = 'none';
   const cs = document.getElementById('cover-screen');
   cs.style.display = 'flex';
   cs.style.opacity = '1';
@@ -1931,6 +1930,7 @@ function openAlbum() {
   setTimeout(() => {
     cs.style.display = 'none';
     document.getElementById('book-scene').style.display = 'flex';
+    document.getElementById('fab').style.display = 'flex';
     currentSpread = 0;
     document.getElementById('p-left').innerHTML  = renderPageHTML(SPREADS[0].left);
     document.getElementById('p-right').innerHTML = renderPageHTML(SPREADS[0].right);
