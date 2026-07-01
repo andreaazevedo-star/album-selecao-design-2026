@@ -7,7 +7,7 @@
 <style>
 *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
 html,body{height:100%;overflow:hidden;font-family:'Segoe UI',system-ui,sans-serif}
-body{background:#4a6b4a}
+body{background:#000509}
 
 /* ===== LOGIN ===== */
 /* ===== LOGIN HEADER ===== */
@@ -71,7 +71,7 @@ body{background:#4a6b4a}
 #switch-user-btn:hover{background:rgba(0,0,0,0.5)}
 
 /* ===== BOOK SCENE ===== */
-#book-scene{width:100vw;height:calc(100vh - 64px);margin-top:64px;background:linear-gradient(160deg,#6b8c6b 0%,#4a6b4a 100%);background-image:repeating-linear-gradient(45deg,transparent,transparent 40px,rgba(255,255,255,0.04) 40px,rgba(255,255,255,0.04) 41px);display:flex;align-items:center;justify-content:center;perspective:3000px;position:relative;padding-left:64px;padding-right:220px}
+#book-scene{width:100vw;height:calc(100vh - 64px);margin-top:64px;background:radial-gradient(ellipse at center, rgba(25,87,57,1) 0%, rgba(13,46,33,0.95) 50%, rgba(6,26,21,0.92) 75%, rgba(0,5,9,0.89) 100%);display:flex;align-items:center;justify-content:center;perspective:3000px;position:relative;padding-left:64px;padding-right:220px}
 
 #book{height:min(720px, calc(100vh - 92px));width:min(1100px, calc((100vh - 92px) * 1.528));position:relative;transform-style:preserve-3d;box-shadow:0 30px 80px rgba(0,0,0,0.5),0 0 0 1px rgba(0,0,0,0.1);border-radius:6px;transition:width 0.6s cubic-bezier(0.4,0,0.2,1)}
 #book.closed{width:min(550px, calc((100vh - 92px) * 0.764));cursor:pointer}
