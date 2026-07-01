@@ -276,8 +276,8 @@ body{background:#4a6b4a}
 .badge-nova{position:absolute;top:4px;left:4px;background:#00b06f;color:#fff;font-size:.55rem;padding:2px 5px;border-radius:4px;font-weight:700;z-index:2}
 .badge-rep{position:absolute;top:4px;right:4px;background:rgba(0,0,0,.6);color:#fff;font-size:.6rem;padding:2px 5px;border-radius:4px;font-weight:700;z-index:2}
 #pack-float{position:fixed;top:76px;right:24px;z-index:200;display:none;flex-direction:column;align-items:flex-end;gap:8px;pointer-events:none}
-#pack-float-fan{position:relative;width:140px;height:200px;pointer-events:auto}
-.pf-card{position:absolute;bottom:0;left:50%;width:80px;height:115px;border-radius:8px;overflow:hidden;cursor:grab;box-shadow:0 4px 18px rgba(0,0,0,.7);background:#fff;transform-origin:bottom center;display:flex;flex-direction:column;user-select:none;transition:filter .15s}
+#pack-float-fan{position:relative;width:240px;height:290px;pointer-events:auto}
+.pf-card{position:absolute;bottom:0;left:50%;width:120px;height:172px;border-radius:8px;overflow:hidden;cursor:grab;box-shadow:0 4px 18px rgba(0,0,0,.7);background:#fff;transform-origin:bottom center;display:flex;flex-direction:column;user-select:none;transition:filter .15s}
 .pf-card:hover{filter:brightness(1.1)}
 .pf-card.dragging{opacity:.3;cursor:grabbing}
 #pack-float-hint{font-size:.62rem;color:rgba(255,255,255,.8);text-align:right;pointer-events:auto;text-shadow:0 1px 4px rgba(0,0,0,.9);background:rgba(0,0,0,.45);padding:4px 8px;border-radius:6px;max-width:160px}
@@ -291,7 +291,7 @@ body{background:#4a6b4a}
 .overlay-slot.drop-hover{outline:3px solid #f0d060;outline-offset:2px}
 .overlay-slot.drop-wrong{animation:shakeCard .35s ease}
 @keyframes shakeCard{0%,100%{transform:translateX(0)}20%{transform:translateX(-6px)}40%{transform:translateX(6px)}60%{transform:translateX(-4px)}80%{transform:translateX(4px)}}
-@media(max-width:1100px){#pack-float{top:270px;right:8px}#pack-float-fan{width:120px;height:180px}.pf-card{width:68px;height:97px}}
+@media(max-width:1100px){#pack-float{top:270px;right:8px}#pack-float-fan{width:200px;height:240px}.pf-card{width:100px;height:144px}}
 @media(max-width:900px){#pack-float{top:auto;bottom:130px;right:8px}}
 
 /* ===== PLAYER PICKER ===== */
@@ -1375,7 +1375,7 @@ function renderPackFloat() {
   const collected = getCollected();
   const total = packFloatCards.length;
   const fanAngles = [-16, -8, 0, 8, 16];
-  const fanX     = [-38, -19, 0, 19, 38];
+  const fanX     = [-56, -28, 0, 28, 56];
 
   packFloatCards.forEach((p, i) => {
     const alreadyHad = collected.includes(p.id);
@@ -1395,11 +1395,11 @@ function renderPackFloat() {
     div.innerHTML = `
       ${alreadyHad ? '<div class="badge-rep">dup</div>' : '<div class="badge-nova">NOVA</div>'}
       <div style="height:20px;flex-shrink:0;background:${color};display:flex;align-items:center;justify-content:flex-end;padding:0 5px">
-        <span style="color:rgba(255,255,255,.8);font-size:.46rem;font-weight:700">#${p.id}</span>
+        <span style="color:rgba(255,255,255,.8);font-size:.6rem;font-weight:700">#${p.id}</span>
       </div>
       ${inner}
-      <div style="flex-shrink:0;background:${color};padding:2px 4px;text-align:center">
-        <div style="font-size:.44rem;font-weight:700;color:#fff;line-height:1.2;overflow:hidden;white-space:nowrap;text-overflow:ellipsis">${p.name}</div>
+      <div style="flex-shrink:0;background:${color};padding:4px 6px;text-align:center">
+        <div style="font-size:.62rem;font-weight:700;color:#fff;line-height:1.2;overflow:hidden;white-space:nowrap;text-overflow:ellipsis">${p.name}</div>
       </div>`;
 
     div.addEventListener('dragstart', e => {
