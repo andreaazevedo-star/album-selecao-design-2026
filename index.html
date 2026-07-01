@@ -12,18 +12,21 @@ body{background:#4a6b4a}
 /* ===== LOGIN ===== */
 /* ===== LOGIN HEADER ===== */
 #login-header{position:fixed;top:0;left:0;right:0;z-index:9999;display:none;align-items:center;justify-content:space-between;
-  padding:12px 20px;background:rgba(5,22,12,0.92);backdrop-filter:blur(12px);
+  height:64px;padding:0 20px;background:rgba(5,22,12,0.92);backdrop-filter:blur(12px);
   border-bottom:1px solid rgba(200,168,60,0.35)}
-#login-header-title{font-size:1rem;font-weight:900;color:#f0d060;letter-spacing:0.08em;text-transform:uppercase}
-#login-header-btns{display:flex;gap:10px}
-.lh-btn{padding:7px 14px;border-radius:20px;font-size:0.72rem;font-weight:700;letter-spacing:0.06em;cursor:pointer;border:none;
-  text-transform:uppercase;transition:all 0.2s}
-.lh-btn-ghost{background:transparent;border:1.5px solid rgba(255,255,255,0.2);color:rgba(255,255,255,0.7)}
+#login-header-title{font-size:1.05rem;font-weight:700;color:rgba(235,188,0,0.98);letter-spacing:-0.02em}
+#login-header-btns{display:flex;align-items:center;gap:8px}
+.lh-btn{padding:8px 16px;border-radius:8px;font-size:0.85rem;font-weight:600;cursor:pointer;border:none;transition:all 0.2s}
+.lh-btn-ghost{background:transparent;border:none;color:rgba(255,255,255,0.75)}
 .lh-btn-ghost:hover{background:rgba(255,255,255,0.08);color:#fff}
 .lh-btn-outline{background:transparent;border:1.5px solid rgba(200,168,60,0.6);color:#f0d060}
 .lh-btn-outline:hover{background:rgba(200,168,60,0.12)}
 .lh-btn-solid{background:linear-gradient(135deg,#0d3d1c,#1a5c30);border:1.5px solid rgba(200,168,60,0.5);color:#f0d060}
 .lh-btn-solid:hover{background:linear-gradient(135deg,#1a5c30,#0d3d1c)}
+.lh-btn-icon{width:40px;height:40px;border-radius:8px;display:flex;align-items:center;justify-content:center;
+  background:transparent;border:none;color:rgba(255,255,255,0.7);font-size:1.1rem;cursor:pointer;transition:.2s}
+.lh-btn-icon:hover{background:rgba(255,255,255,0.08);color:#fff}
+.lh-divider{width:1px;height:32px;background:rgba(200,168,60,0.35);margin:0 4px}
 .trade-tab{flex:1;padding:9px;border-radius:8px;font-size:.78rem;font-weight:700;cursor:pointer;border:1.5px solid rgba(200,168,60,.3);background:transparent;color:rgba(255,255,255,.5);transition:.2s}
 .trade-tab.active{background:rgba(200,168,60,.15);border-color:rgba(200,168,60,.7);color:#f0d060}
 .trade-dupe-card{border-radius:8px;overflow:hidden;cursor:pointer;border:2px solid transparent;transition:.2s;background:#0a2218}
@@ -68,7 +71,7 @@ body{background:#4a6b4a}
 #switch-user-btn:hover{background:rgba(0,0,0,0.5)}
 
 /* ===== BOOK SCENE ===== */
-#book-scene{width:100vw;height:calc(100vh - 52px);margin-top:52px;background:linear-gradient(160deg,#6b8c6b 0%,#4a6b4a 100%);background-image:repeating-linear-gradient(45deg,transparent,transparent 40px,rgba(255,255,255,0.04) 40px,rgba(255,255,255,0.04) 41px);display:flex;align-items:center;justify-content:center;perspective:3000px;position:relative}
+#book-scene{width:100vw;height:calc(100vh - 64px);margin-top:64px;background:linear-gradient(160deg,#6b8c6b 0%,#4a6b4a 100%);background-image:repeating-linear-gradient(45deg,transparent,transparent 40px,rgba(255,255,255,0.04) 40px,rgba(255,255,255,0.04) 41px);display:flex;align-items:center;justify-content:center;perspective:3000px;position:relative}
 
 #book{height:min(720px, calc(100vh - 92px));width:min(1100px, calc((100vh - 92px) * 1.528));position:relative;transform-style:preserve-3d;box-shadow:0 30px 80px rgba(0,0,0,0.5),0 0 0 1px rgba(0,0,0,0.1);border-radius:6px;transition:width 0.6s cubic-bezier(0.4,0,0.2,1)}
 #book.closed{width:min(550px, calc((100vh - 92px) * 0.764));cursor:pointer}
@@ -319,9 +322,16 @@ body{background:#4a6b4a}
 <div id="login-header">
   <div id="login-header-title">🏆 Seleção de Design 2026 🏆</div>
   <div id="login-header-btns">
-    <button class="lh-btn lh-btn-ghost" onclick="openInstructions()">📖 Instruções</button>
-    <button class="lh-btn lh-btn-outline" onclick="openTrade()">🔄 Troca de Figurinhas</button>
-    <button class="lh-btn lh-btn-solid" onclick="jumpToSpread(7)">⭐ Minha Seleção</button>
+    <button class="lh-btn lh-btn-ghost" onclick="openInstructions()">📖 Instruções de uso</button>
+    <button class="lh-btn lh-btn-ghost" onclick="openTrade()">🔄 Trocar figurinhas</button>
+    <div class="lh-divider"></div>
+    <button class="lh-btn-icon" onclick="logout()" title="Sair">
+      <svg width="20" height="20" viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <path d="M7.5 17.5H4.167A1.667 1.667 0 0 1 2.5 15.833V4.167A1.667 1.667 0 0 1 4.167 2.5H7.5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+        <path d="M13.333 14.167 17.5 10l-4.167-4.167" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+        <path d="M17.5 10H7.5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+      </svg>
+    </button>
   </div>
 </div>
 
@@ -346,8 +356,9 @@ body{background:#4a6b4a}
 <button id="switch-user-btn" onclick="logout()">↩ Trocar usuário</button>
 
 <!-- COVER SCREEN -->
-<div id="cover-screen" style="display:none;position:fixed;inset:0;top:52px;background:#0a1a0f;align-items:flex-start;justify-content:center;padding-top:40px;z-index:50;cursor:pointer;transition:opacity 0.4s" onclick="openAlbum()">
-  <img src="capa.png" style="height:calc(100vh - 52px - 40px - 16px);max-height:780px;width:auto;border-radius:8px;box-shadow:0 40px 100px rgba(0,0,0,0.7);display:block" alt="Seleção do Design 2026" draggable="false">
+<div id="cover-screen" style="display:none;position:fixed;inset:0;top:64px;background:#0a1a0f;align-items:center;justify-content:center;z-index:50;transition:opacity 0.4s">
+  <img src="capa.png" style="height:calc(100vh - 64px - 32px);max-height:766px;width:auto;max-width:575px;border-radius:8px;box-shadow:0 40px 100px rgba(0,0,0,0.7);display:block;cursor:pointer" alt="Seleção do Design 2026" draggable="false" onclick="openAlbum()">
+  <button id="cover-next-btn" onclick="openAlbum()" style="position:absolute;bottom:32px;right:32px;width:52px;height:52px;border-radius:50%;background:#1c8a45;border:none;color:#fff;font-size:1.4rem;cursor:pointer;display:flex;align-items:center;justify-content:center;box-shadow:0 4px 20px rgba(0,120,60,0.5);transition:.2s" onmouseover="this.style.background='#21a050'" onmouseout="this.style.background='#1c8a45'">→</button>
 </div>
 
 <!-- BOOK SCENE -->
