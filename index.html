@@ -793,11 +793,9 @@ function renderOverlayPage(bgImg, bgSide, slots) {
     const p = TEAM.find(t => t.id === s.id);
     if (!p) return '';
     const isCollected = collected.includes(p.id);
-    const emptyStyle = !isCollected ? 'background:rgba(0,0,0,.55);border:1.5px solid rgba(200,168,60,.35);box-sizing:border-box;' : '';
-    const style = `position:absolute;left:${s.l}%;top:${s.t}%;width:${s.w}%;height:${s.h}%;overflow:hidden;border-radius:3px;${emptyStyle}`;
+    const style = `position:absolute;left:${s.l}%;top:${s.t}%;width:${s.w}%;height:${s.h}%;overflow:hidden;border-radius:3px;`;
     const imgHtml = isCollected && p.photo
-      ? `<img src="${p.photo}" style="width:100%;height:100%;object-fit:cover;object-position:center top;display:block">`
-      : !isCollected ? `<div style="width:100%;height:100%;display:flex;align-items:center;justify-content:center;opacity:.4"><svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="rgba(200,168,60,.8)" stroke-width="1.5"><circle cx="12" cy="8" r="4"/><path d="M4 20c0-4 3.6-7 8-7s8 3 8 7"/></svg></div>` : '';
+      ? `<img src="${p.photo}" style="width:100%;height:100%;object-fit:cover;object-position:center top;display:block">` : '';
     return `<div class="overlay-slot" style="${style}" data-player-id="${p.id}"
       ondragover="event.preventDefault();this.classList.add('drop-hover')"
       ondragleave="this.classList.remove('drop-hover')"
