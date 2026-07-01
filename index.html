@@ -11,7 +11,7 @@ body{background:#4a6b4a}
 
 /* ===== LOGIN ===== */
 /* ===== LOGIN HEADER ===== */
-#login-header{position:fixed;top:0;left:0;right:0;z-index:9999;display:none;align-items:center;justify-content:space-between;
+#login-header{position:fixed;top:0;left:0;right:0;width:100%;box-sizing:border-box;z-index:9999;display:none;align-items:center;justify-content:space-between;
   height:64px;padding:0 20px;background:rgba(5,22,12,0.92);backdrop-filter:blur(12px);
   border-bottom:1px solid rgba(200,168,60,0.35)}
 #login-header-title{font-size:1.05rem;font-weight:700;color:rgba(235,188,0,0.98);letter-spacing:-0.02em}
@@ -357,8 +357,10 @@ body{background:#4a6b4a}
 
 <!-- COVER SCREEN -->
 <div id="cover-screen" style="display:none;position:fixed;inset:0;top:64px;background:#0a1a0f;align-items:center;justify-content:center;z-index:50;transition:opacity 0.4s">
-  <img src="capa.png" style="height:calc(100vh - 64px - 32px);max-height:766px;width:auto;max-width:575px;border-radius:8px;box-shadow:0 40px 100px rgba(0,0,0,0.7);display:block;cursor:pointer" alt="Seleção do Design 2026" draggable="false" onclick="openAlbum()">
-  <button id="cover-next-btn" onclick="openAlbum()" style="position:absolute;bottom:32px;right:32px;width:52px;height:52px;border-radius:50%;background:#1c8a45;border:none;color:#fff;font-size:1.4rem;cursor:pointer;display:flex;align-items:center;justify-content:center;box-shadow:0 4px 20px rgba(0,120,60,0.5);transition:.2s" onmouseover="this.style.background='#21a050'" onmouseout="this.style.background='#1c8a45'">→</button>
+  <div style="position:relative;display:inline-block">
+    <img src="capa.png" style="height:calc(100vh - 64px - 32px);max-height:766px;width:auto;max-width:575px;border-radius:8px;box-shadow:0 40px 100px rgba(0,0,0,0.7);display:block;cursor:pointer" alt="Seleção do Design 2026" draggable="false" onclick="openAlbum()">
+    <button id="cover-next-btn" onclick="openAlbum()" style="position:absolute;bottom:24px;right:24px;width:52px;height:52px;border-radius:50%;background:#1c8a45;border:none;color:#fff;font-size:1.4rem;cursor:pointer;display:flex;align-items:center;justify-content:center;box-shadow:0 4px 20px rgba(0,120,60,0.5);transition:.2s" onmouseover="this.style.background='#21a050'" onmouseout="this.style.background='#1c8a45'">→</button>
+  </div>
 </div>
 
 <!-- BOOK SCENE -->
@@ -1916,6 +1918,7 @@ function showCover() {
   isFlipping = false;
   document.getElementById('book-scene').style.display = 'none';
   setNavVisible(false);
+  document.getElementById('pack-float').style.display = 'none';
   const cs = document.getElementById('cover-screen');
   cs.style.display = 'flex';
   cs.style.opacity = '1';
