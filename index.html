@@ -394,21 +394,10 @@ body{background:#4a6b4a}
 </div>
 
 <!-- INSTRUCTIONS MODAL -->
-<div id="instructions-modal" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,.88);z-index:10000;align-items:flex-start;justify-content:center;padding:20px;overflow-y:auto">
-  <div style="width:100%;max-width:480px;background:#0a2218;border:1.5px solid rgba(200,168,60,.35);border-radius:14px;position:relative;margin:auto">
-    <div style="position:sticky;top:0;background:#0a2218;border-radius:14px 14px 0 0;padding:16px 24px 12px;display:flex;align-items:center;justify-content:space-between;border-bottom:1px solid rgba(200,168,60,.2);z-index:1">
-      <h2 style="color:#f0d060;font-size:1.1rem;font-weight:900">📖 Como jogar</h2>
-      <button onclick="document.getElementById('instructions-modal').style.display='none'" style="background:rgba(255,255,255,.1);border:1px solid rgba(255,255,255,.2);color:#fff;font-size:1rem;cursor:pointer;border-radius:8px;padding:6px 12px;font-weight:700">← Voltar ao álbum</button>
-    </div>
-    <div style="padding:20px 24px 24px">
-    <div style="display:flex;flex-direction:column;gap:14px;font-size:.85rem;color:rgba(255,255,255,.85);line-height:1.5">
-      <div><span style="color:#f0d060;font-weight:800">📦 Abrir pacotes</span><br>Clique em <strong>Abrir Pacote</strong> (canto inferior direito). Você recebe até <strong>7 pacotes por dia</strong> — o contador reseta à meia-noite.</div>
-      <div><span style="color:#f0d060;font-weight:800">📌 Colar figurinhas</span><br>Após abrir um pacote, clique em <strong>Guardar no álbum</strong>. As figurinhas novas entram na sua coleção automaticamente.</div>
-      <div><span style="color:#f0d060;font-weight:800">🔄 Trocar repetidas</span><br>Figurinhas duplicadas ficam no seu estoque. Em <strong>Troca de Figurinhas</strong> você gera um código e manda pelo Slack para um colega resgatar.</div>
-      <div><span style="color:#f0d060;font-weight:800">⭐ Minha Seleção</span><br>Monte seu time dos sonhos com os designers que você coletou. Escolha capitão, posições e compartilhe sua escalação.</div>
-      <div><span style="color:#f0d060;font-weight:800">📖 Navegar o álbum</span><br>Use as setas laterais ou clique nas páginas para virar. Os pontos na base indicam em qual spread você está.</div>
-    </div>
-    </div>
+<div id="instructions-modal" style="display:none;position:fixed;inset:0;top:64px;background:rgba(28,31,35,0.92);z-index:10000;align-items:center;justify-content:center;overflow-y:auto" onclick="if(event.target===this)closeInstructions()">
+  <div style="position:relative;display:inline-block;line-height:0;margin:24px auto">
+    <img src="instrucoes-de-uso.png" alt="Instruções de uso" style="max-width:min(1007px,calc(100vw - 48px));max-height:calc(100vh - 64px - 48px);width:auto;height:auto;border-radius:12px;display:block">
+    <button onclick="closeInstructions()" style="position:absolute;top:12px;right:12px;width:36px;height:36px;border-radius:8px;background:rgba(28,31,35,0.85);border:1.5px solid rgba(255,255,255,0.2);color:#fff;font-size:1.1rem;cursor:pointer;display:flex;align-items:center;justify-content:center;line-height:1;transition:.2s;z-index:1" onmouseover="this.style.background='rgba(60,60,60,0.95)'" onmouseout="this.style.background='rgba(28,31,35,0.85)'">✕</button>
   </div>
 </div>
 
@@ -1557,7 +1546,11 @@ function refreshCurrentPage() {
 // FAB
 // ============================================================
 function openInstructions() {
-  document.getElementById('instructions-modal').style.display = 'flex';
+  const m = document.getElementById('instructions-modal');
+  m.style.display = 'flex';
+}
+function closeInstructions() {
+  document.getElementById('instructions-modal').style.display = 'none';
 }
 /* ===== TRADE v3 ===== */
 function tradeEncode(obj) { return btoa(unescape(encodeURIComponent(JSON.stringify(obj)))); }
