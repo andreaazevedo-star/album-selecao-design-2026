@@ -1990,10 +1990,20 @@ async function loadTradeData() {
   renderRecommendations();
 }
 
+// resolve display name from a profile (handles legacy numeric-id profiles)
+function prettyProfileName(prof, fallbackId) {
+  const n = prof && prof.name;
+  if (n && !/^\d+$/.test(String(n).trim())) return n;          // real name
+  const num = Number((n != null ? n : (prof && prof.id != null ? prof.id : fallbackId)));
+  const pl = getPlayer(num);                                    // legacy numeric id → player name
+  if (pl) return pl.name;
+  const id = (prof && prof.id) || fallbackId || '';
+  return String(id).split('@')[0] || 'Colega';
+}
 // email (id) -> display name
 function nameOf(id) {
   const p = _allProfiles.find(x => x.id === id);
-  return (p && p.name) ? p.name : (id || '').split('@')[0];
+  return prettyProfileName(p, id);
 }
 
 function populatePersonSelect() {
@@ -2002,7 +2012,7 @@ function populatePersonSelect() {
   const others = _allProfiles.filter(p => p.id !== currentUser)
     .sort((a,b) => (a.name||'').localeCompare(b.name||'','pt-BR'));
   sel.innerHTML = '<option value="">Selecione uma pessoa</option>' +
-    others.map(p => `<option value="${p.id}">${p.name || p.id}</option>`).join('');
+    others.map(p => `<option value="${p.id}">${prettyProfileName(p)}</option>`).join('');
   if (others.some(p => p.id === cur)) sel.value = cur;
   sel.onchange = updatePropSendState;
 }
@@ -2019,7 +2029,7 @@ function computeRecommendations() {
     const theirMissing = TEAM.filter(p => !theirCollected.includes(p.id)).map(p => p.id);
     const iGive = myDupes.filter(id => theirMissing.includes(id));
     const iGet  = theirDupes.filter(id => myMissing.includes(id));
-    if (iGive.length && iGet.length) _recList.push({ personId: prof.id, personName: prof.name || prof.id, give: iGive[0], get: iGet[0] });
+    if (iGive.length && iGet.length) _recList.push({ personId: prof.id, personName: prettyProfileName(prof), give: iGive[0], get: iGet[0] });
   });
 }
 
