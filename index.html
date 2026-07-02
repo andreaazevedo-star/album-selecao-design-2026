@@ -430,6 +430,13 @@ body{background:#000509}
   <div id="dots"></div>
 </div>
 
+<!-- DEV panel (REMOVER antes de liberar pro time) -->
+<div id="dev-panel" style="display:none;position:fixed;left:12px;bottom:12px;z-index:9999;flex-direction:column;gap:6px;background:rgba(0,0,0,.55);border:1px solid rgba(255,255,255,.2);border-radius:10px;padding:8px">
+  <div style="font-size:.6rem;color:rgba(255,255,255,.5);font-weight:700;letter-spacing:.05em;text-align:center">DEV</div>
+  <button onclick="devComplete()" style="background:#0d3d1c;border:1px solid rgba(200,168,60,.5);color:#f0d060;border-radius:7px;padding:6px 10px;font-size:.7rem;font-weight:700;cursor:pointer">✅ Completar</button>
+  <button onclick="devReset()" style="background:rgba(120,20,20,.6);border:1px solid rgba(255,120,120,.4);color:#fca5a5;border-radius:7px;padding:6px 10px;font-size:.7rem;font-weight:700;cursor:pointer">🧹 Resetar</button>
+</div>
+
 <!-- FAB -->
 <button id="fab" style="display:none" onclick="openPack()">
   <img src="pacote.png" alt="Abrir Pacote">
@@ -2146,6 +2153,7 @@ function showApp() {
   document.getElementById('login-header').style.display = 'flex';
   document.getElementById('fab').style.display = 'flex';
   document.getElementById('switch-user-btn').style.display = 'block';
+  document.getElementById('dev-panel').style.display = 'flex';  // DEV (remover antes do release)
 
   isMobile = window.innerWidth < 900;
   currentSpread = 0;
@@ -2218,21 +2226,20 @@ document.getElementById('player-picker').addEventListener('click', function(e) {
 });
 
 // ============================================================
-// DEV-ONLY test shortcuts (REMOVER antes de liberar pro time)
-//   Shift+Alt+C = completar álbum  |  Shift+Alt+X = resetar
+// DEV-ONLY test helpers (REMOVER antes de liberar pro time)
 // ============================================================
-document.addEventListener('keydown', e => {
-  if (!currentUser || !e.shiftKey || !e.altKey) return;
-  if (e.code === 'KeyC') {
-    saveCollected(TEAM.map(p => p.id));
-    showToast('DEV: álbum completo ✅');
-    setTimeout(() => location.reload(), 500);
-  } else if (e.code === 'KeyX') {
-    saveCollected([]); saveDupes([]); clearPendingPack();
-    showToast('DEV: álbum resetado 🧹');
-    setTimeout(() => location.reload(), 500);
-  }
-});
+function devComplete() {
+  if (!currentUser) { showToast('Faça login primeiro!'); return; }
+  saveCollected(TEAM.map(p => p.id));
+  showToast('DEV: álbum completo ✅');
+  setTimeout(() => location.reload(), 500);
+}
+function devReset() {
+  if (!currentUser) { showToast('Faça login primeiro!'); return; }
+  saveCollected([]); saveDupes([]); clearPendingPack();
+  showToast('DEV: álbum resetado 🧹');
+  setTimeout(() => location.reload(), 500);
+}
 
 // ============================================================
 // INIT
