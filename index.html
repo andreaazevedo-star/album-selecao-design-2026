@@ -277,9 +277,11 @@ body{background:#000509}
 .stk-name{position:absolute;left:0;right:0;bottom:11px;text-align:center;z-index:3;padding:0 6px}
 .stk-name-txt{font-size:.74rem;font-weight:900;color:#fff;letter-spacing:.02em;text-shadow:0 2px 4px #000;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .stk-squad-pill{display:inline-block;margin-top:3px;font-size:.4rem;font-weight:800;color:#fff;background:var(--sq,#065f46);border-radius:20px;padding:2px 9px;letter-spacing:.06em;text-transform:uppercase;box-shadow:0 1px 3px rgba(0,0,0,.5)}
-#pack-float-status{pointer-events:auto;display:none;align-items:center;gap:6px;font-weight:800;border-radius:24px;padding:8px 18px;font-size:.8rem;letter-spacing:.02em;box-shadow:0 3px 12px rgba(0,0,0,.5)}
-#pack-float-status.pf-status-rep{background:#f5820a;color:#3d1f00}
-#pack-float-status.pf-status-new{background:rgba(0,0,0,.5);border:1px solid rgba(255,255,255,.25);color:rgba(255,255,255,.9);font-size:.68rem;font-weight:700}
+#pack-float-status{pointer-events:auto;display:none;flex-direction:column;align-items:center;gap:8px}
+.pf-status-rep{display:inline-flex;align-items:center;gap:6px;background:#f5820a;color:#3d1f00;font-weight:800;border-radius:24px;padding:8px 18px;font-size:.8rem;letter-spacing:.02em;box-shadow:0 3px 12px rgba(0,0,0,.5)}
+.pf-status-new{display:inline-flex;background:rgba(0,0,0,.5);border:1px solid rgba(255,255,255,.25);color:rgba(255,255,255,.9);font-size:.68rem;font-weight:700;border-radius:24px;padding:6px 14px;letter-spacing:.02em}
+.pf-status-trade{cursor:pointer;background:linear-gradient(135deg,#0d3d1c,#1a5c30);border:1.5px solid rgba(200,168,60,.55);color:#f0d060;font-weight:800;border-radius:24px;padding:8px 16px;font-size:.74rem;letter-spacing:.02em;transition:.15s;box-shadow:0 3px 12px rgba(0,0,0,.5)}
+.pf-status-trade:hover{background:linear-gradient(135deg,#12511f,#1f6e3a);transform:translateY(-1px)}
 #pack-float-hint{font-size:.62rem;color:rgba(255,255,255,.8);text-align:right;pointer-events:auto;text-shadow:0 1px 4px rgba(0,0,0,.9);background:rgba(0,0,0,.45);padding:4px 8px;border-radius:6px;max-width:160px}
 #pack-float-save{background:rgba(0,140,80,.92);backdrop-filter:blur(4px);color:#fff;border:1.5px solid rgba(0,200,100,.35);border-radius:8px;padding:8px 14px;font-size:.72rem;font-weight:700;cursor:pointer;pointer-events:auto;transition:.2s;white-space:nowrap}
 #pack-float-save:hover{background:rgba(0,176,100,.98)}
@@ -1394,20 +1396,41 @@ function renderPackFloat() {
     container.appendChild(div);
   });
 
-  // Status pill for the front (topmost) card
+  // Status for the front (topmost) card
   const statusEl = document.getElementById('pack-float-status');
   const front = packFloatCards[packFloatCards.length - 1];
   if (!front) {
     statusEl.style.display = 'none';
+    statusEl.innerHTML = '';
   } else if (collected.includes(front.id)) {
-    statusEl.className = 'pf-status-rep';
-    statusEl.innerHTML = '🚩 Repetida';
-    statusEl.style.display = 'inline-flex';
+    statusEl.style.display = 'flex';
+    statusEl.innerHTML = `
+      <span class="pf-status-rep">🚩 Repetida</span>
+      <button class="pf-status-trade" onclick="guardarRepetida(${front.id})">Guardar para trocar 🔄</button>`;
   } else {
-    statusEl.className = 'pf-status-new';
-    statusEl.textContent = 'Arraste para o álbum';
-    statusEl.style.display = 'inline-flex';
+    statusEl.style.display = 'flex';
+    statusEl.innerHTML = `<span class="pf-status-new">Arraste para o álbum</span>`;
   }
+}
+
+// Store the duplicate for trading and jump to the trade market
+function guardarRepetida(playerId) {
+  const idx = packFloatCards.findIndex(p => p.id === playerId);
+  if (idx === -1) return;
+  const p = packFloatCards.splice(idx, 1)[0];
+  const dupes = getDupes();
+  dupes.push(p.id);
+  saveDupes(dupes);
+  renderPackFloat();
+  if (packFloatCards.length === 0) {
+    incPacksToday();
+    pendingPackCards = [];
+    document.getElementById('pack-float').style.display = 'none';
+    updateFAB();
+  }
+  refreshCurrentPage();
+  showToast(p.name + ' guardada para troca 🔄');
+  openTrade();
 }
 
 // ---- Zoom overlay ----
