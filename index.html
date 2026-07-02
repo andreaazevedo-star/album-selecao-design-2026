@@ -2218,6 +2218,23 @@ document.getElementById('player-picker').addEventListener('click', function(e) {
 });
 
 // ============================================================
+// DEV-ONLY test shortcuts (REMOVER antes de liberar pro time)
+//   Shift+Alt+C = completar álbum  |  Shift+Alt+X = resetar
+// ============================================================
+document.addEventListener('keydown', e => {
+  if (!currentUser || !e.shiftKey || !e.altKey) return;
+  if (e.code === 'KeyC') {
+    saveCollected(TEAM.map(p => p.id));
+    showToast('DEV: álbum completo ✅');
+    setTimeout(() => location.reload(), 500);
+  } else if (e.code === 'KeyX') {
+    saveCollected([]); saveDupes([]); clearPendingPack();
+    showToast('DEV: álbum resetado 🧹');
+    setTimeout(() => location.reload(), 500);
+  }
+});
+
+// ============================================================
 // INIT
 // ============================================================
 populateLoginSelect();
