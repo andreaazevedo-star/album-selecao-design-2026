@@ -487,12 +487,6 @@ body{background:#000509}
   <div id="dots"></div>
 </div>
 
-<!-- DEV panel (REMOVER antes de liberar pro time) -->
-<div id="dev-panel" style="display:none;position:fixed;left:12px;bottom:12px;z-index:9999;flex-direction:column;gap:6px;background:rgba(0,0,0,.55);border:1px solid rgba(255,255,255,.2);border-radius:10px;padding:8px">
-  <div style="font-size:.6rem;color:rgba(255,255,255,.5);font-weight:700;letter-spacing:.05em;text-align:center">DEV</div>
-  <button onclick="devComplete()" style="background:#0d3d1c;border:1px solid rgba(200,168,60,.5);color:#f0d060;border-radius:7px;padding:6px 10px;font-size:.7rem;font-weight:700;cursor:pointer">✅ Completar</button>
-  <button onclick="devReset()" style="background:rgba(120,20,20,.6);border:1px solid rgba(255,120,120,.4);color:#fca5a5;border-radius:7px;padding:6px 10px;font-size:.7rem;font-weight:700;cursor:pointer">🧹 Resetar</button>
-</div>
 
 <!-- FAB -->
 <button id="fab" style="display:none" onclick="openPack()">
@@ -772,7 +766,13 @@ let pendingPackCards = [];
 let packFloatCards = [];
 let pickerCallback = null;
 let pickerFilter = 'all';
-const TOTAL_PACKS = 50; // TESTE — voltar pra regra de horário (2 às 08h/14h/17h) antes do release
+function getMaxPacks() {
+  const h = new Date().getHours();
+  if (h >= 17) return 9;      // 08h(3) + 13h(3) + 17h(3)
+  if (h >= 13) return 6;      // 08h(3) + 13h(3)
+  if (h >= 8)  return 3;      // 08h(3)
+  return 0;                   // antes das 08h
+}
 
 // ============================================================
 // HELPERS
@@ -1198,7 +1198,7 @@ function renderCoverPage() {
     <div class="cover-divider"></div>
     <div class="cover-progress-label">${cnt} / ${total} figurinhas coletadas (${pct}%)</div>
     <div class="cover-progress-bar"><div class="cover-progress-fill" style="width:${pct}%"></div></div>
-    <div class="cover-packs">Pacotes hoje: ${packs}/${TOTAL_PACKS}</div>
+    <div class="cover-packs">Pacotes hoje: ${packs}/${getMaxPacks()}</div>
   </div>`;
 }
 
@@ -1500,7 +1500,7 @@ function closePicker() {
 function openPack() {
   // If there's still an open pack pending, just re-show it instead of drawing a new one
   if (packFloatCards.length) { document.getElementById('pack-float').style.display = 'flex'; return; }
-  if (getPacksToday() >= TOTAL_PACKS) {
+  if (getPacksToday() >= getMaxPacks()) {
     showToast('Todos os pacotes de hoje abertos! Volte amanhã 🌅');
     return;
   }
@@ -2300,8 +2300,8 @@ function showResult(el,type,msg){el.innerHTML=tradeMsg(type,msg);}
 
 function updateFAB() {
   const used = getPacksToday();
-  const remaining = TOTAL_PACKS - used;
-  const exhausted = used >= TOTAL_PACKS;
+  const remaining = getMaxPacks() - used;
+  const exhausted = used >= getMaxPacks();
   const fab = document.getElementById('fab');
   const status = document.getElementById('fab-status');
   const img = fab.querySelector('img');
@@ -2313,7 +2313,7 @@ function updateFAB() {
   } else {
     img.classList.remove('exhausted');
     status.className = 'fab-tag';
-    const label = remaining === TOTAL_PACKS ? 'Figurinhas disponíveis' : `${remaining} pacote${remaining > 1 ? 's' : ''} restante${remaining > 1 ? 's' : ''}`;
+    const label = remaining === getMaxPacks() ? 'Figurinhas disponíveis' : `${remaining} pacote${remaining > 1 ? 's' : ''} restante${remaining > 1 ? 's' : ''}`;
     status.innerHTML = `<span class="fab-tag-dot"></span><span id="fab-status-text">${label}</span>`;
   }
 }
@@ -2351,7 +2351,6 @@ function logout() {
   document.getElementById('book-scene').style.display = 'none';
   document.getElementById('fab').style.display = 'none';
   document.getElementById('switch-user-btn').style.display = 'none';
-  document.getElementById('dev-panel').style.display = 'none';
   const tm = document.getElementById('trade-modal'); if (tm) tm.style.display = 'none';
 }
 
@@ -2395,7 +2394,6 @@ function showApp() {
   document.getElementById('login-header').style.display = 'flex';
   document.getElementById('fab').style.display = 'flex';
   document.getElementById('switch-user-btn').style.display = 'block';
-  document.getElementById('dev-panel').style.display = 'flex';  // DEV (remover antes do release)
 
   isMobile = window.innerWidth < 900;
   currentSpread = 0;
@@ -2477,21 +2475,6 @@ document.getElementById('player-picker').addEventListener('click', function(e) {
   if (e.target === this) closePicker();
 });
 
-// ============================================================
-// DEV-ONLY test helpers (REMOVER antes de liberar pro time)
-// ============================================================
-function devComplete() {
-  if (!currentUser) { showToast('Faça login primeiro!'); return; }
-  saveCollected(TEAM.map(p => p.id));
-  showToast('DEV: álbum completo ✅');
-  setTimeout(() => location.reload(), 500);
-}
-function devReset() {
-  if (!currentUser) { showToast('Faça login primeiro!'); return; }
-  saveCollected([]); saveDupes([]); clearPendingPack(); resetPacksToday();
-  showToast('DEV: álbum resetado 🧹');
-  setTimeout(() => location.reload(), 500);
-}
 
 // ============================================================
 // INIT
