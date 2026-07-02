@@ -665,6 +665,22 @@ function getCollectedKey() { return 'album_collected_' + currentUser; }
 function getDreamKey()     { return 'album_dream_'      + currentUser; }
 function getCaptainKey()   { return 'album_captain_'    + currentUser; }
 function getDupesKey()     { return 'album_dupes_'      + currentUser; }
+function getPendingKey()   { return 'album_pending_'    + currentUser; }
+
+// Persist the currently-open pack (cards drawn but not yet placed/kept), per user
+function savePendingPack() {
+  if (!currentUser) return;
+  localStorage.setItem(getPendingKey(), JSON.stringify(packFloatCards.map(p => p.id)));
+}
+function loadPendingPack() {
+  try {
+    const ids = JSON.parse(localStorage.getItem(getPendingKey()) || '[]');
+    return ids.map(id => TEAM.find(p => p.id === id)).filter(Boolean);
+  } catch(e) { return []; }
+}
+function clearPendingPack() {
+  if (currentUser) localStorage.removeItem(getPendingKey());
+}
 
 function getDupes() {
   try { return JSON.parse(localStorage.getItem(getDupesKey()) || '[]'); } catch(e) { return []; }
@@ -1348,19 +1364,35 @@ function closePicker() {
 // PACK OPENING
 // ============================================================
 function openPack() {
+  // If there's still an open pack pending, just re-show it instead of drawing a new one
+  if (packFloatCards.length) { document.getElementById('pack-float').style.display = 'flex'; return; }
   if (getPacksToday() >= TOTAL_PACKS) {
     showToast('Todos os pacotes de hoje abertos! Volte amanhã 🌅');
     return;
   }
   const drawn = drawCards(5);
+  incPacksToday();          // pack is consumed at open (persists even if browser closes)
   pendingPackCards = drawn;
   showPackOverlay(drawn);
+  updateFAB();
 }
 
 function showPackOverlay(cards) {
   packFloatCards = [...cards];
+  savePendingPack();
   renderPackFloat();
   document.getElementById('pack-float').style.display = 'flex';
+}
+
+// Restore an open pack after login / browser reopen
+function restorePendingPack() {
+  packFloatCards = loadPendingPack();
+  if (packFloatCards.length) {
+    renderPackFloat();
+    document.getElementById('pack-float').style.display = 'flex';
+  } else {
+    document.getElementById('pack-float').style.display = 'none';
+  }
 }
 
 function renderPackFloat() {
@@ -1430,8 +1462,9 @@ function guardarRepetida(playerId) {
   dupes.push(p.id);
   saveDupes(dupes);
   renderPackFloat();
+  savePendingPack();
   if (packFloatCards.length === 0) {
-    incPacksToday();
+    clearPendingPack();
     pendingPackCards = [];
     document.getElementById('pack-float').style.display = 'none';
     updateFAB();
@@ -1491,8 +1524,9 @@ function dropStickerOnAlbum(event, targetPlayerId) {
   if (!collected.includes(p.id)) { collected.push(p.id); saveCollected(collected); showToast(p.name + ' colada! ✨'); }
   else { dupes.push(p.id); saveDupes(dupes); showToast(p.name + ' já coletada — repetida 🔄'); }
   renderPackFloat();
+  savePendingPack();
   if (packFloatCards.length === 0) {
-    incPacksToday();
+    clearPendingPack();
     pendingPackCards = [];
     document.getElementById('pack-float').style.display = 'none';
     updateFAB();
@@ -1511,7 +1545,7 @@ function savePackFloat() {
   });
   saveCollected(collected);
   saveDupes(dupes);
-  incPacksToday();
+  clearPendingPack();
   packFloatCards = [];
   pendingPackCards = [];
   document.getElementById('pack-float').style.display = 'none';
@@ -2070,6 +2104,7 @@ function openAlbum() {
     document.getElementById('p-right').innerHTML = renderPageHTML(SPREADS[0].right);
     setNavVisible(true);
     updateDots();
+    restorePendingPack();
   }, 400);
 }
 
@@ -2088,6 +2123,7 @@ function showApp() {
     setNavVisible(true);
     renderMobilePage();
     updateDots();
+    restorePendingPack();
   } else {
     setNavVisible(false);
     document.getElementById('pack-float').style.display = 'none';
