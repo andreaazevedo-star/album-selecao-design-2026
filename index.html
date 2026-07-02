@@ -10,9 +10,6 @@
 <!-- ===================== FIREBASE (Mercado de Trocas) ===================== -->
 <script type="module">
   import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
-  import { initializeFirestore, doc, setDoc, getDoc, getDocs, collection, addDoc, updateDoc,
-           query, where, onSnapshot, serverTimestamp }
-    from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
   import { getAuth, GoogleAuthProvider, signInWithPopup, signOut, onAuthStateChanged, setPersistence, browserLocalPersistence }
     from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
 
@@ -25,20 +22,79 @@
     appId: "1:52540044722:web:19fe4b3e3fc09123e9e0ab"
   };
   const app = initializeApp(firebaseConfig);
-  // Force long-polling: the streaming WebChannel is blocked by corporate proxies (Stone) / incognito.
-  const db  = initializeFirestore(app, { experimentalForceLongPolling: true, useFetchStreams: false });
   const auth = getAuth(app);
   setPersistence(auth, browserLocalPersistence).catch(()=>{});
 
-  // helpers to mutate a {collected,dupes} profile
+  // ===== Firestore via REST (plain fetch) — evita o WebChannel bloqueado por extensão de CORS / proxy =====
+  const KEY = firebaseConfig.apiKey;
+  const FS  = `https://firestore.googleapis.com/v1/projects/${firebaseConfig.projectId}/databases/(default)/documents`;
+
+  function enc(v) {
+    if (typeof v === 'number') return Number.isInteger(v) ? { integerValue: String(v) } : { doubleValue: v };
+    if (typeof v === 'string') return { stringValue: v };
+    if (typeof v === 'boolean') return { booleanValue: v };
+    if (Array.isArray(v)) return { arrayValue: { values: v.map(enc) } };
+    if (v == null) return { nullValue: null };
+    return { stringValue: String(v) };
+  }
+  function dec(v) {
+    if (!v) return null;
+    if ('integerValue' in v) return parseInt(v.integerValue, 10);
+    if ('doubleValue' in v)  return v.doubleValue;
+    if ('stringValue' in v)  return v.stringValue;
+    if ('booleanValue' in v) return v.booleanValue;
+    if ('arrayValue' in v)   return (v.arrayValue.values || []).map(dec);
+    if ('timestampValue' in v) return v.timestampValue;
+    return null;
+  }
+  function encFields(obj) { const f = {}; for (const k in obj) f[k] = enc(obj[k]); return { fields: f }; }
+  function decDoc(d) { const o = { id: d.name.split('/').pop() }; const f = d.fields || {}; for (const k in f) o[k] = dec(f[k]); return o; }
+
+  async function fsGet(path) {
+    const r = await fetch(`${FS}/${path}?key=${KEY}`);
+    if (r.status === 404) return null;
+    if (!r.ok) throw new Error('GET ' + r.status);
+    return r.json();
+  }
+  async function fsList(coll) {
+    const r = await fetch(`${FS}/${coll}?key=${KEY}&pageSize=300`);
+    if (!r.ok) throw new Error('LIST ' + r.status);
+    const j = await r.json();
+    return (j.documents || []).map(decDoc);
+  }
+  function fsSet(coll, id, obj) {  // full-document upsert
+    return fetch(`${FS}/${coll}/${encodeURIComponent(id)}?key=${KEY}`, {
+      method: 'PATCH', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(encFields(obj))
+    }).then(r => { if (!r.ok) throw new Error('SET ' + r.status); return r.json(); });
+  }
+  function fsCreate(coll, obj) {   // auto-id
+    return fetch(`${FS}/${coll}?key=${KEY}`, {
+      method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(encFields(obj))
+    }).then(r => { if (!r.ok) throw new Error('CREATE ' + r.status); return r.json(); });
+  }
+  function fsPatchField(coll, id, field, value) {
+    return fetch(`${FS}/${coll}/${encodeURIComponent(id)}?key=${KEY}&updateMask.fieldPaths=${field}`, {
+      method: 'PATCH', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ fields: { [field]: enc(value) } })
+    }).then(r => { if (!r.ok) throw new Error('PATCH ' + r.status); return r.json(); });
+  }
+
   function giveCard(prof, id) {
     const di = prof.dupes.indexOf(id);
-    if (di !== -1) prof.dupes.splice(di, 1);           // give away a spare first
+    if (di !== -1) prof.dupes.splice(di, 1);
     else { const ci = prof.collected.indexOf(id); if (ci !== -1) prof.collected.splice(ci, 1); }
   }
   function receiveCard(prof, id) {
-    if (prof.collected.includes(id)) prof.dupes.push(id);  // already have → becomes spare
+    if (prof.collected.includes(id)) prof.dupes.push(id);
     else prof.collected.push(id);
+  }
+  function nowIso() { return new Date().toISOString(); }
+
+  // polling helper for "listeners"
+  function poll(fn, cb, ms) {
+    let stopped = false;
+    async function tick() { if (stopped) return; try { cb(await fn()); } catch(e) { console.warn('poll', e); } if (!stopped) setTimeout(tick, ms); }
+    tick();
+    return () => { stopped = true; };
   }
 
   window.fb = {
@@ -47,26 +103,24 @@
     signOutUser: () => signOut(auth),
     onAuth: (cb) => onAuthStateChanged(auth, cb),
     publishProfile: (id, collected, dupes, name) =>
-      setDoc(doc(db, 'players', id), { name: name || id, collected, dupes, updatedAt: serverTimestamp() }, { merge: true }),
-    getProfile: async (id) => { const s = await getDoc(doc(db, 'players', id)); return s.exists() ? s.data() : null; },
-    getAllProfiles: async () => (await getDocs(collection(db, 'players'))).docs.map(d => ({ id: d.id, ...d.data() })),
-    sendProposal: (p) => addDoc(collection(db, 'proposals'), { ...p, status: 'pending', createdAt: serverTimestamp() }),
-    listenInbox: (user, cb) => onSnapshot(
-      query(collection(db, 'proposals'), where('to', '==', user)),
-      snap => cb(snap.docs.map(d => ({ id: d.id, ...d.data() })))),
-    listenOutbox: (user, cb) => onSnapshot(
-      query(collection(db, 'proposals'), where('from', '==', user)),
-      snap => cb(snap.docs.map(d => ({ id: d.id, ...d.data() })))),
-    updateProposal: (id, status) => updateDoc(doc(db, 'proposals', id), { status }),
+      fsSet('players', id, { name: name || id, collected, dupes, updatedAt: nowIso() }),
+    getProfile: async (id) => { const d = await fsGet('players/' + encodeURIComponent(id)); return d ? decDoc(d) : null; },
+    getAllProfiles: () => fsList('players'),
+    sendProposal: (p) => fsCreate('proposals', { ...p, status: 'pending', createdAt: nowIso() }),
+    listenInbox: (user, cb) => poll(async () => (await fsList('proposals')).filter(p => p.to === user), cb, 5000),
+    listenOutbox: (user, cb) => poll(async () => (await fsList('proposals')).filter(p => p.from === user), cb, 5000),
+    updateProposal: (id, status) => fsPatchField('proposals', id, 'status', status),
     applyTrade: async (fromUser, toUser, offerId, wantId) => {
-      const fs = await getDoc(doc(db, 'players', fromUser));
-      const ts = await getDoc(doc(db, 'players', toUser));
-      const fp = fs.exists() ? { collected: fs.data().collected || [], dupes: fs.data().dupes || [] } : { collected: [], dupes: [] };
-      const tp = ts.exists() ? { collected: ts.data().collected || [], dupes: ts.data().dupes || [] } : { collected: [], dupes: [] };
-      giveCard(fp, offerId); receiveCard(fp, wantId);   // proposer gives offer, gets want
-      giveCard(tp, wantId);  receiveCard(tp, offerId);   // receiver gives want, gets offer
-      await setDoc(doc(db, 'players', fromUser), { ...fp, updatedAt: serverTimestamp() }, { merge: true });
-      await setDoc(doc(db, 'players', toUser),   { ...tp, updatedAt: serverTimestamp() }, { merge: true });
+      const fd = await fsGet('players/' + encodeURIComponent(fromUser));
+      const td = await fsGet('players/' + encodeURIComponent(toUser));
+      const fp = fd ? decDoc(fd) : { collected: [], dupes: [], name: fromUser };
+      const tp = td ? decDoc(td) : { collected: [], dupes: [], name: toUser };
+      fp.collected = fp.collected || []; fp.dupes = fp.dupes || [];
+      tp.collected = tp.collected || []; tp.dupes = tp.dupes || [];
+      giveCard(fp, offerId); receiveCard(fp, wantId);
+      giveCard(tp, wantId);  receiveCard(tp, offerId);
+      await fsSet('players', fromUser, { name: fp.name || fromUser, collected: fp.collected, dupes: fp.dupes, updatedAt: nowIso() });
+      await fsSet('players', toUser,   { name: tp.name || toUser,   collected: tp.collected, dupes: tp.dupes, updatedAt: nowIso() });
     }
   };
   if (window.__onFbReady) window.__onFbReady();
