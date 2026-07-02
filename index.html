@@ -943,14 +943,14 @@ function renderPageHTML(page) {
   if (page === 'cc-left') return `<div style="width:100%;height:100%;background-image:url('contra-capa.png');background-size:200% 100%;background-position:left center;background-repeat:no-repeat"></div>`;
   if (page === 'cc-right')return `<div style="width:100%;height:100%;background-image:url('contra-capa.png');background-size:200% 100%;background-position:right center;background-repeat:no-repeat"></div>`;
   if (page === 'genai') return renderSquadPageV2(1, 1, 'GEN AI', 'Criatividade impulsionada por IA', 'Automação, IA e soluções inovadoras');
-  if (page === 'gd-left')  return renderOverlayPage('gen-dist.png',         'left',  SLOTS_GEN_AI);
-  if (page === 'gd-right') return renderOverlayPage('gen-dist.png',         'right', SLOTS_DISTRIBUTION);
+  if (page === 'gd-left')  return renderOverlayPage('gen-dist.png?v=2',         'left',  SLOTS_GEN_AI);
+  if (page === 'gd-right') return renderOverlayPage('gen-dist.png?v=2',         'right', SLOTS_DISTRIBUTION);
   if (page === 'dc-left')  return renderOverlayPage('dist-cross.png',       'left',  SLOTS_DIST_ATEND);
   if (page === 'dc-right') return renderOverlayPage('dist-cross.png',       'right', SLOTS_DIST_CROSS);
   if (page === 'cc2-left') return renderOverlayPage('cross-commerce.png',   'left',  SLOTS_CROSS_JOURNEYS);
   if (page === 'cc2-right')return renderOverlayPage('cross-commerce.png',   'right', SLOTS_COMMERCE);
-  if (page === 'pb-left')  return renderOverlayPage('payments-banking.png', 'left',  SLOTS_PAYMENTS);
-  if (page === 'pb-right') return renderOverlayPage('payments-banking.png', 'right', SLOTS_BANKING);
+  if (page === 'pb-left')  return renderOverlayPage('payments-banking.png?v=2', 'left',  SLOTS_PAYMENTS);
+  if (page === 'pb-right') return renderOverlayPage('payments-banking.png?v=2', 'right', SLOTS_BANKING);
   if (page === 'cred-left')return renderOverlayPage('credito-cartoes.png',  'left',  SLOTS_CREDITO);
   if (page === 'cred-right')return renderOverlayPage('credito-cartoes.png', 'right', SLOTS_CARTOES);
   if (page === 'nt-left')  return renderOverlayPage('novo-tecnico.png',     'left',  SLOTS_NOVOS_NEGOCIOS);
