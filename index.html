@@ -768,10 +768,15 @@ let pickerCallback = null;
 let pickerFilter = 'all';
 function getMaxPacks() {
   const h = new Date().getHours();
-  if (h >= 17) return 9;      // 08h(3) + 13h(3) + 17h(3)
-  if (h >= 13) return 6;      // 08h(3) + 13h(3)
-  if (h >= 8)  return 3;      // 08h(3)
-  return 0;                   // antes das 08h
+  if (h >= 8) return 3;
+  return 0;
+}
+function getCurrentWindow() {
+  const h = new Date().getHours();
+  if (h >= 17) return 'w3';
+  if (h >= 13) return 'w2';
+  if (h >= 8)  return 'w1';
+  return 'w0';
 }
 
 // ============================================================
@@ -843,18 +848,18 @@ function saveCaptain(id) {
   else localStorage.setItem(getCaptainKey(), String(id));
 }
 
-function getPacksToday() {
+function packsKey() {
   const today = new Date().toISOString().split('T')[0];
-  return parseInt(localStorage.getItem('album_packs_' + currentUser + '_' + today) || '0');
+  return 'album_packs_' + currentUser + '_' + today + '_' + getCurrentWindow();
+}
+function getPacksToday() {
+  return parseInt(localStorage.getItem(packsKey()) || '0');
 }
 function incPacksToday() {
-  const today = new Date().toISOString().split('T')[0];
-  const key = 'album_packs_' + currentUser + '_' + today;
-  localStorage.setItem(key, String(getPacksToday() + 1));
+  localStorage.setItem(packsKey(), String(getPacksToday() + 1));
 }
 function resetPacksToday() {
-  const today = new Date().toISOString().split('T')[0];
-  localStorage.removeItem('album_packs_' + currentUser + '_' + today);
+  localStorage.removeItem(packsKey());
 }
 
 function showToast(msg) {
@@ -1501,7 +1506,12 @@ function openPack() {
   // If there's still an open pack pending, just re-show it instead of drawing a new one
   if (packFloatCards.length) { document.getElementById('pack-float').style.display = 'flex'; return; }
   if (getPacksToday() >= getMaxPacks()) {
-    showToast('Todos os pacotes de hoje abertos! Volte amanhã 🌅');
+    const w = getCurrentWindow();
+    const msg = w === 'w0' ? 'Pacotes abrem às 08h! ⏰'
+              : w === 'w1' ? 'Pacotes desta janela esgotados! Próximos às 13h ⏰'
+              : w === 'w2' ? 'Pacotes desta janela esgotados! Próximos às 17h ⏰'
+              : 'Pacotes de hoje esgotados! Volte amanhã 🌅';
+    showToast(msg);
     return;
   }
   const drawn = drawCards(5);
@@ -2309,7 +2319,12 @@ function updateFAB() {
   if (exhausted) {
     img.classList.add('exhausted');
     status.className = 'fab-msg';
-    status.innerHTML = '😱 Ops, você já abriu todos os seus pacotes.<br>Volte mais tarde!!';
+    const w = getCurrentWindow();
+    const nextMsg = w === 'w0' ? 'Pacotes abrem às 08h!'
+                  : w === 'w1' ? 'Próximos às 13h!'
+                  : w === 'w2' ? 'Próximos às 17h!'
+                  : 'Volte amanhã!';
+    status.innerHTML = '😱 Pacotes desta janela esgotados.<br>' + nextMsg;
   } else {
     img.classList.remove('exhausted');
     status.className = 'fab-tag';
