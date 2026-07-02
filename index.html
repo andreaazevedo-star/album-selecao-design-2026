@@ -800,7 +800,7 @@ let pendingPackCards = [];
 let packFloatCards = [];
 let pickerCallback = null;
 let pickerFilter = 'all';
-const TOTAL_PACKS = 7;
+const TOTAL_PACKS = 50; // TESTE — voltar pra regra de horário (2 às 08h/14h/17h) antes do release
 
 // ============================================================
 // HELPERS
@@ -923,6 +923,10 @@ function incPacksToday() {
   const today = new Date().toISOString().split('T')[0];
   const key = 'album_packs_' + currentUser + '_' + today;
   localStorage.setItem(key, String(getPacksToday() + 1));
+}
+function resetPacksToday() {
+  const today = new Date().toISOString().split('T')[0];
+  localStorage.removeItem('album_packs_' + currentUser + '_' + today);
 }
 
 function showToast(msg) {
@@ -2648,7 +2652,7 @@ function devComplete() {
 }
 function devReset() {
   if (!currentUser) { showToast('Faça login primeiro!'); return; }
-  saveCollected([]); saveDupes([]); clearPendingPack();
+  saveCollected([]); saveDupes([]); clearPendingPack(); resetPacksToday();
   showToast('DEV: álbum resetado 🧹');
   setTimeout(() => location.reload(), 500);
 }
