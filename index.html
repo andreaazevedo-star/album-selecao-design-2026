@@ -10,6 +10,8 @@
   import { getFirestore, doc, setDoc, getDoc, getDocs, collection, addDoc, updateDoc,
            query, where, onSnapshot, serverTimestamp }
     from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
+  import { getAuth, GoogleAuthProvider, signInWithPopup, signOut, onAuthStateChanged, setPersistence, browserLocalPersistence }
+    from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
 
   const firebaseConfig = {
     apiKey: "AIzaSyBdXH-fsof1iHykoGBw_JssxkklRwSoxlY",
@@ -21,6 +23,8 @@
   };
   const app = initializeApp(firebaseConfig);
   const db  = getFirestore(app);
+  const auth = getAuth(app);
+  setPersistence(auth, browserLocalPersistence).catch(()=>{});
 
   // helpers to mutate a {collected,dupes} profile
   function giveCard(prof, id) {
@@ -35,10 +39,13 @@
 
   window.fb = {
     ready: true,
-    publishProfile: (user, collected, dupes) =>
-      setDoc(doc(db, 'players', user), { name: user, collected, dupes, updatedAt: serverTimestamp() }, { merge: true }),
-    getProfile: async (user) => { const s = await getDoc(doc(db, 'players', user)); return s.exists() ? s.data() : null; },
-    getAllProfiles: async () => (await getDocs(collection(db, 'players'))).docs.map(d => d.data()),
+    signInGoogle: () => signInWithPopup(auth, new GoogleAuthProvider()),
+    signOutUser: () => signOut(auth),
+    onAuth: (cb) => onAuthStateChanged(auth, cb),
+    publishProfile: (id, collected, dupes, name) =>
+      setDoc(doc(db, 'players', id), { name: name || id, collected, dupes, updatedAt: serverTimestamp() }, { merge: true }),
+    getProfile: async (id) => { const s = await getDoc(doc(db, 'players', id)); return s.exists() ? s.data() : null; },
+    getAllProfiles: async () => (await getDocs(collection(db, 'players'))).docs.map(d => ({ id: d.id, ...d.data() })),
     sendProposal: (p) => addDoc(collection(db, 'proposals'), { ...p, status: 'pending', createdAt: serverTimestamp() }),
     listenInbox: (user, cb) => onSnapshot(
       query(collection(db, 'proposals'), where('to', '==', user), where('status', '==', 'pending')),
@@ -51,8 +58,8 @@
       const tp = ts.exists() ? { collected: ts.data().collected || [], dupes: ts.data().dupes || [] } : { collected: [], dupes: [] };
       giveCard(fp, offerId); receiveCard(fp, wantId);   // proposer gives offer, gets want
       giveCard(tp, wantId);  receiveCard(tp, offerId);   // receiver gives want, gets offer
-      await setDoc(doc(db, 'players', fromUser), { name: fromUser, ...fp, updatedAt: serverTimestamp() }, { merge: true });
-      await setDoc(doc(db, 'players', toUser),   { name: toUser,   ...tp, updatedAt: serverTimestamp() }, { merge: true });
+      await setDoc(doc(db, 'players', fromUser), { ...fp, updatedAt: serverTimestamp() }, { merge: true });
+      await setDoc(doc(db, 'players', toUser),   { ...tp, updatedAt: serverTimestamp() }, { merge: true });
     }
   };
   if (window.__onFbReady) window.__onFbReady();
@@ -481,13 +488,12 @@ body{background:#000509}
 
   <div class="login-card">
     <div class="login-frame">
-      <div class="login-field">
-        <span class="login-field-icon">👤</span>
-        <select id="login-select">
-          <option value="">Selecione seu nome...</option>
-        </select>
-      </div>
-      <button id="login-btn" class="login-btn" onclick="doLogin()">ENTRAR &nbsp;→</button>
+      <p style="color:rgba(255,255,255,.75);font-size:.9rem;text-align:center;margin-bottom:16px;line-height:1.5">Entre com seu e-mail Google para acessar seu álbum.</p>
+      <button id="login-btn" class="login-btn" onclick="doLoginGoogle()" style="display:flex;align-items:center;justify-content:center;gap:10px">
+        <svg width="20" height="20" viewBox="0 0 48 48"><path fill="#FFC107" d="M43.6 20.5H42V20H24v8h11.3C33.7 32.7 29.3 36 24 36c-6.6 0-12-5.4-12-12s5.4-12 12-12c3.1 0 5.9 1.2 8 3.1l5.7-5.7C34.5 6.1 29.5 4 24 4 12.9 4 4 12.9 4 24s8.9 20 20 20 20-8.9 20-20c0-1.3-.1-2.3-.4-3.5z"/><path fill="#FF3D00" d="M6.3 14.7l6.6 4.8C14.7 15.1 19 12 24 12c3.1 0 5.9 1.2 8 3.1l5.7-5.7C34.5 6.1 29.5 4 24 4 16.3 4 9.7 8.3 6.3 14.7z"/><path fill="#4CAF50" d="M24 44c5.2 0 10-2 13.6-5.2l-6.3-5.3C29.2 35 26.7 36 24 36c-5.3 0-9.7-3.3-11.3-8l-6.5 5C9.5 39.6 16.2 44 24 44z"/><path fill="#1976D2" d="M43.6 20.5H42V20H24v8h11.3c-.8 2.2-2.2 4.1-4 5.5l6.3 5.3C41.4 36.3 44 30.7 44 24c0-1.3-.1-2.3-.4-3.5z"/></svg>
+        Entrar com Google
+      </button>
+      <p style="color:rgba(255,255,255,.4);font-size:.7rem;text-align:center;margin-top:14px">Use sua conta @stone.com.br</p>
     </div>
   </div>
 </div>
@@ -780,7 +786,8 @@ const MOBILE_PAGES = SPREADS.flatMap(s => [s.left, s.right]);
 // ============================================================
 // STATE
 // ============================================================
-let currentUser = null;
+let currentUser = null;      // Google email (unique id)
+let currentUserName = null;  // Google display name (for UI)
 let currentSpread = 0;
 let isFlipping = false;
 let isMobile = false;
@@ -831,7 +838,7 @@ function syncProfileToCloud() {
   if (!currentUser || !window.fb) return;
   const collected = getCollected();
   const dupes = getDupes();
-  window.fb.publishProfile(currentUser, collected, dupes).catch(e => console.warn('publish', e));
+  window.fb.publishProfile(currentUser, collected, dupes, currentUserName).catch(e => console.warn('publish', e));
 }
 // Pull cloud collection (cloud wins — reflects trades accepted while offline).
 async function syncProfileFromCloud() {
@@ -850,9 +857,29 @@ async function syncProfileFromCloud() {
     }
   } catch(e) { console.warn('sync', e); }
 }
-// Called by the Firebase module once it finishes loading.
+// Called by the Firebase module once it finishes loading — wires Google auth.
 window.__onFbReady = function() {
-  if (currentUser) { syncProfileFromCloud(); startInboxListener(); }
+  window.fb.onAuth(user => {
+    if (user) {
+      currentUser = user.email;
+      currentUserName = user.displayName || user.email;
+      document.getElementById('login-screen').style.display = 'none';
+      showApp();
+      syncProfileFromCloud();
+      startInboxListener();
+    } else {
+      stopInboxListener();
+      currentUser = null; currentUserName = null;
+      // back to login
+      document.getElementById('login-screen').style.display = 'flex';
+      document.getElementById('login-header').style.display = 'none';
+      document.getElementById('book-scene').style.display = 'none';
+      document.getElementById('fab').style.display = 'none';
+      document.getElementById('switch-user-btn').style.display = 'none';
+      document.getElementById('dev-panel').style.display = 'none';
+      const tm = document.getElementById('trade-modal'); if (tm) tm.style.display = 'none';
+    }
+  });
 };
 
 function getDupes() {
@@ -1960,14 +1987,20 @@ async function loadTradeData() {
   renderRecommendations();
 }
 
+// email (id) -> display name
+function nameOf(id) {
+  const p = _allProfiles.find(x => x.id === id);
+  return (p && p.name) ? p.name : (id || '').split('@')[0];
+}
+
 function populatePersonSelect() {
   const sel = document.getElementById('prop-person');
   const cur = sel.value;
-  const others = _allProfiles.filter(p => p.name !== currentUser).map(p => p.name)
-    .sort((a,b) => a.localeCompare(b,'pt-BR'));
+  const others = _allProfiles.filter(p => p.id !== currentUser)
+    .sort((a,b) => (a.name||'').localeCompare(b.name||'','pt-BR'));
   sel.innerHTML = '<option value="">Selecione uma pessoa</option>' +
-    others.map(n => `<option value="${n}">${n}</option>`).join('');
-  if (others.includes(cur)) sel.value = cur;
+    others.map(p => `<option value="${p.id}">${p.name || p.id}</option>`).join('');
+  if (others.some(p => p.id === cur)) sel.value = cur;
   sel.onchange = updatePropSendState;
 }
 
@@ -1977,13 +2010,13 @@ function computeRecommendations() {
   const myCollected = getCollected();
   const myMissing = TEAM.filter(p => !myCollected.includes(p.id)).map(p => p.id);
   _allProfiles.forEach(prof => {
-    if (prof.name === currentUser) return;
+    if (prof.id === currentUser) return;
     const theirCollected = prof.collected || [];
     const theirDupes = [...new Set(prof.dupes || [])];
     const theirMissing = TEAM.filter(p => !theirCollected.includes(p.id)).map(p => p.id);
     const iGive = myDupes.filter(id => theirMissing.includes(id));
     const iGet  = theirDupes.filter(id => myMissing.includes(id));
-    if (iGive.length && iGet.length) _recList.push({ person: prof.name, give: iGive[0], get: iGet[0] });
+    if (iGive.length && iGet.length) _recList.push({ personId: prof.id, personName: prof.name || prof.id, give: iGive[0], get: iGet[0] });
   });
 }
 
@@ -2003,10 +2036,10 @@ function renderRecommendations() {
   const r = _recList[_recIdx];
   const giveP = getPlayer(r.give), getP = getPlayer(r.get);
   body.innerHTML = `
-    <p style="color:rgba(255,255,255,.85);font-size:.78rem;text-align:center;margin:8px 0"><b style="color:#4ade80">${r.person}</b> pode te ajudar</p>
+    <p style="color:rgba(255,255,255,.85);font-size:.78rem;text-align:center;margin:8px 0"><b style="color:#4ade80">${r.personName}</b> pode te ajudar</p>
     <div class="trade-rec-cards">${miniCardHTML(r.get)}<div style="color:#4ade80;font-size:1.2rem">⇄</div>${miniCardHTML(r.give)}</div>
     <p style="color:rgba(255,255,255,.55);font-size:.7rem;text-align:center">Você recebe <b style="color:#fff">${getP?getP.name:''}</b> e dá <b style="color:#fff">${giveP?giveP.name:''}</b></p>
-    <button onclick="prefillProposal('${r.person}',${r.give},${r.get})" class="trade-send" style="margin-top:10px">Propor esta troca</button>`;
+    <button onclick="prefillProposal('${r.personId}',${r.give},${r.get})" class="trade-send" style="margin-top:10px">Propor esta troca</button>`;
   document.getElementById('rec-count').textContent = `${_recIdx+1}/${_recList.length} recomendações`;
   nav.style.display = 'flex';
 }
@@ -2044,7 +2077,7 @@ function sendProposalNew() {
   const person = document.getElementById('prop-person').value;
   if (_propOffer == null || _propWant == null || !person || !window.fb) return;
   window.fb.sendProposal({ from: currentUser, to: person, offer: _propOffer, want: _propWant })
-    .then(() => { showToast('Proposta enviada para ' + person + ' ✈️'); _propOffer = null; _propWant = null;
+    .then(() => { showToast('Proposta enviada para ' + nameOf(person) + ' ✈️'); _propOffer = null; _propWant = null;
       document.getElementById('prop-person').value = ''; renderPropSlots(); })
     .catch(e => { showToast('Erro ao enviar proposta'); console.warn(e); });
 }
@@ -2081,7 +2114,7 @@ function renderInbox() {
   const p = _inbox[_inboxIdx];
   const offerP = getPlayer(p.offer), wantP = getPlayer(p.want);
   body.innerHTML = `
-    <p style="color:rgba(255,255,255,.85);font-size:.76rem;margin:6px 0"><b style="color:#4ade80">${p.from}</b> quer trocar <b>${offerP?offerP.name:''}</b> pela sua <b>${wantP?wantP.name:''}</b></p>
+    <p style="color:rgba(255,255,255,.85);font-size:.76rem;margin:6px 0"><b style="color:#4ade80">${nameOf(p.from)}</b> quer trocar <b>${offerP?offerP.name:''}</b> pela sua <b>${wantP?wantP.name:''}</b></p>
     <div class="trade-rec-cards">${miniCardHTML(p.offer)}<div style="color:#4ade80">⇄</div>${miniCardHTML(p.want)}</div>
     <div style="display:flex;gap:8px;margin-top:8px">
       <button onclick="acceptProposal('${p.id}')" class="trade-send" style="background:linear-gradient(135deg,#0d3d1c,#1a5c30);color:#4ade80">Aceitar</button>
@@ -2417,36 +2450,20 @@ function updateFAB() {
 // ============================================================
 // LOGIN / LOGOUT
 // ============================================================
-function populateLoginSelect() {
-  const sel = document.getElementById('login-select');
-  const sorted = [...TEAM].sort((a,b) => a.name.localeCompare(b.name, 'pt-BR'));
-  sorted.forEach(p => {
-    const opt = document.createElement('option');
-    opt.value = p.id;
-    opt.textContent = p.name;
-    sel.appendChild(opt);
+function populateLoginSelect() { /* substituído por login Google */ }
+
+function doLoginGoogle() {
+  if (!window.fb) { showToast('Carregando… tente de novo em 1s'); return; }
+  window.fb.signInGoogle().catch(err => {
+    console.warn('login', err);
+    if (err && err.code === 'auth/popup-blocked') showToast('Permita pop-ups para entrar com o Google');
+    else if (err && err.code !== 'auth/popup-closed-by-user' && err.code !== 'auth/cancelled-popup-request') showToast('Não foi possível entrar. Tente de novo.');
   });
 }
 
-function doLogin() {
-  const sel = document.getElementById('login-select');
-  if (!sel.value) { showToast('Selecione seu nome!'); return; }
-  currentUser = sel.value;
-  localStorage.setItem('album_current_user', currentUser);
-  showApp();
-  syncProfileFromCloud();
-  startInboxListener();
-}
-
+// A troca de usuário/logout real é via signOut; o onAuth listener cuida do resto.
 function logout() {
-  stopInboxListener();
-  currentUser = null;
-  localStorage.removeItem('album_current_user');
-  document.getElementById('login-screen').style.display = 'flex';
-  document.getElementById('login-header').style.display = 'none';
-  document.getElementById('book-scene').style.display = 'none';
-  document.getElementById('fab').style.display = 'none';
-  document.getElementById('switch-user-btn').style.display = 'none';
+  if (window.fb) window.fb.signOutUser().catch(e => console.warn(e));
 }
 
 function setNavVisible(visible) {
@@ -2580,15 +2597,8 @@ function devReset() {
 // ============================================================
 // INIT
 // ============================================================
-populateLoginSelect();
-
-const savedUser = localStorage.getItem('album_current_user');
-if (savedUser) {
-  currentUser = savedUser;
-  const sel = document.getElementById('login-select');
-  sel.value = savedUser;
-  showApp();
-}
+// Login e sessão são gerenciados pelo Firebase Auth (Google) via window.__onFbReady.
+// A tela de login já aparece por padrão; o onAuth listener mostra o app quando logado.
 </script>
 </body>
 </html>
