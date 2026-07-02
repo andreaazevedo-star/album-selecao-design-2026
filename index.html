@@ -562,20 +562,10 @@ body{background:#000509}
 <!-- TRADE MODAL -->
 <div id="trade-modal" style="display:none;position:fixed;left:0;right:0;top:64px;bottom:0;background:radial-gradient(ellipse at top,#0f3020,#081109 70%);z-index:300;flex-direction:column;overflow-y:auto;padding:20px 24px 48px">
   <div style="width:100%;max-width:1360px;margin:0 auto">
-    <!-- back button -->
-    <button onclick="closeTrade()" style="width:46px;height:44px;border-radius:10px;background:#0d5c2a;border:none;color:#fff;font-size:1.3rem;cursor:pointer;display:flex;align-items:center;justify-content:center;margin-bottom:16px;box-shadow:0 3px 10px rgba(0,0,0,.4)" title="Voltar ao álbum">←</button>
-    <!-- header -->
-    <div style="display:flex;align-items:flex-start;justify-content:space-between;gap:16px;margin-bottom:22px">
-      <div style="display:flex;align-items:center;gap:16px">
-        <svg width="52" height="52" viewBox="0 0 24 24" fill="none" style="flex-shrink:0"><path d="M20 11a8 8 0 0 0-14.9-3M4 5v4h4M4 13a8 8 0 0 0 14.9 3M20 19v-4h-4" stroke="#f0a020" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg>
-        <div>
-          <h2 style="font-size:2rem;font-weight:900;letter-spacing:.02em;color:#fff;line-height:1.05">MERCADO DE <span style="color:#f0a020">TROCAS</span></h2>
-          <p style="color:rgba(255,255,255,.6);font-size:.9rem;margin-top:6px">Aqui você acompanha o progresso do seu álbum e gerencia suas trocas.</p>
-        </div>
-      </div>
-      <div style="flex-shrink:0;display:flex;align-items:flex-end;gap:10px">
-        <img class="trade-hero-pack" src="pacote.png" alt="" style="height:120px;filter:drop-shadow(0 6px 16px rgba(0,0,0,.6))">
-      </div>
+    <!-- banner (imagem do Figma) + botão voltar sobreposto -->
+    <div style="position:relative;margin-bottom:22px">
+      <img src="mercado-banner.png?v=1" alt="Mercado de Trocas" style="width:100%;height:auto;display:block;border-radius:8px">
+      <button onclick="closeTrade()" title="Voltar ao álbum" style="position:absolute;left:0.85%;top:6%;width:4.6%;height:24%;background:#0d5c2a;border:none;border-radius:8px;color:#fff;font-size:1.1rem;cursor:pointer;display:flex;align-items:center;justify-content:center">←</button>
     </div>
 
     <!-- stats -->
