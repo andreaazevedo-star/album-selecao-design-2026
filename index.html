@@ -4,6 +4,60 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Seleção do Design 2026</title>
+<!-- ===================== FIREBASE (Mercado de Trocas) ===================== -->
+<script type="module">
+  import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
+  import { getFirestore, doc, setDoc, getDoc, getDocs, collection, addDoc, updateDoc,
+           query, where, onSnapshot, serverTimestamp }
+    from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
+
+  const firebaseConfig = {
+    apiKey: "AIzaSyBdXH-fsof1iHykoGBw_JssxkklRwSoxlY",
+    authDomain: "album-selecao-design.firebaseapp.com",
+    projectId: "album-selecao-design",
+    storageBucket: "album-selecao-design.firebasestorage.app",
+    messagingSenderId: "52540044722",
+    appId: "1:52540044722:web:19fe4b3e3fc09123e9e0ab"
+  };
+  const app = initializeApp(firebaseConfig);
+  const db  = getFirestore(app);
+
+  // helpers to mutate a {collected,dupes} profile
+  function giveCard(prof, id) {
+    const di = prof.dupes.indexOf(id);
+    if (di !== -1) prof.dupes.splice(di, 1);           // give away a spare first
+    else { const ci = prof.collected.indexOf(id); if (ci !== -1) prof.collected.splice(ci, 1); }
+  }
+  function receiveCard(prof, id) {
+    if (prof.collected.includes(id)) prof.dupes.push(id);  // already have → becomes spare
+    else prof.collected.push(id);
+  }
+
+  window.fb = {
+    ready: true,
+    publishProfile: (user, collected, dupes) =>
+      setDoc(doc(db, 'players', user), { name: user, collected, dupes, updatedAt: serverTimestamp() }, { merge: true }),
+    getProfile: async (user) => { const s = await getDoc(doc(db, 'players', user)); return s.exists() ? s.data() : null; },
+    getAllProfiles: async () => (await getDocs(collection(db, 'players'))).docs.map(d => d.data()),
+    sendProposal: (p) => addDoc(collection(db, 'proposals'), { ...p, status: 'pending', createdAt: serverTimestamp() }),
+    listenInbox: (user, cb) => onSnapshot(
+      query(collection(db, 'proposals'), where('to', '==', user), where('status', '==', 'pending')),
+      snap => cb(snap.docs.map(d => ({ id: d.id, ...d.data() })))),
+    updateProposal: (id, status) => updateDoc(doc(db, 'proposals', id), { status }),
+    applyTrade: async (fromUser, toUser, offerId, wantId) => {
+      const fs = await getDoc(doc(db, 'players', fromUser));
+      const ts = await getDoc(doc(db, 'players', toUser));
+      const fp = fs.exists() ? { collected: fs.data().collected || [], dupes: fs.data().dupes || [] } : { collected: [], dupes: [] };
+      const tp = ts.exists() ? { collected: ts.data().collected || [], dupes: ts.data().dupes || [] } : { collected: [], dupes: [] };
+      giveCard(fp, offerId); receiveCard(fp, wantId);   // proposer gives offer, gets want
+      giveCard(tp, wantId);  receiveCard(tp, offerId);   // receiver gives want, gets offer
+      await setDoc(doc(db, 'players', fromUser), { name: fromUser, ...fp, updatedAt: serverTimestamp() }, { merge: true });
+      await setDoc(doc(db, 'players', toUser),   { name: toUser,   ...tp, updatedAt: serverTimestamp() }, { merge: true });
+    }
+  };
+  if (window.__onFbReady) window.__onFbReady();
+</script>
+<!-- ======================================================================= -->
 <style>
 *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
 html,body{height:100%;overflow:hidden;font-family:'Segoe UI',system-ui,sans-serif}
@@ -27,6 +81,26 @@ body{background:#000509}
   background:transparent;border:none;color:rgba(255,255,255,0.7);cursor:pointer;transition:.2s}
 .lh-btn-icon:hover{background:rgba(255,255,255,0.08);color:#fff}
 .lh-divider{width:1px;height:32px;background:rgba(255,255,255,0.15);margin:0 8px}
+/* Mercado de trocas */
+.trade-cols{display:grid;grid-template-columns:repeat(4,1fr);gap:16px}
+.trade-col{background:rgba(0,0,0,.35);border:1.5px solid rgba(200,168,60,.35);border-radius:14px;padding:16px;display:flex;flex-direction:column;min-height:340px}
+.trade-col-title{color:#4ade80;font-size:.9rem;font-weight:800;letter-spacing:.03em;margin-bottom:8px}
+.trade-col-sub{color:rgba(255,255,255,.55);font-size:.74rem;line-height:1.45}
+.prop-slot{width:78px;height:110px;border:2px dashed;border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:1.6rem;color:rgba(255,255,255,.6);cursor:pointer;overflow:hidden;background:rgba(255,255,255,.03)}
+.prop-slot img{width:100%;height:100%;object-fit:contain}
+.trade-select{width:100%;background:rgba(0,0,0,.5);border:1.5px solid rgba(200,168,60,.35);color:#fff;border-radius:8px;padding:9px 10px;font-size:.8rem;margin-bottom:10px;cursor:pointer}
+.trade-select option{background:#0a1f14}
+.trade-send{width:100%;background:rgba(255,255,255,.08);border:1.5px solid rgba(200,168,60,.3);color:#fff;font-weight:800;padding:10px;border-radius:8px;font-size:.82rem;cursor:pointer;transition:.15s}
+.trade-send:not(:disabled):hover{background:linear-gradient(135deg,#0d3d1c,#1a5c30);color:#f0d060}
+.trade-send:disabled{opacity:.45;cursor:default}
+.trade-navbtn{background:transparent;border:none;color:rgba(255,255,255,.7);font-size:.72rem;font-weight:700;cursor:pointer;padding:4px 6px}
+.trade-navbtn:hover{color:#f0d060}
+.trade-rec-cards{display:flex;align-items:center;justify-content:center;gap:8px;margin:10px 0}
+.trade-mini-card{width:74px;height:104px;border-radius:8px;overflow:hidden;background:#0d1e0d;flex-shrink:0}
+.trade-mini-card img{width:100%;height:100%;object-fit:contain;display:block}
+.trade-empty{color:rgba(255,255,255,.4);font-size:.78rem;text-align:center;padding:24px 8px}
+@media(max-width:1000px){.trade-cols{grid-template-columns:repeat(2,1fr)}.trade-stats-grid{grid-template-columns:repeat(2,1fr)!important}}
+@media(max-width:600px){.trade-cols{grid-template-columns:1fr}.trade-stats-grid{grid-template-columns:1fr!important}}
 .trade-tab{flex:1;padding:9px;border-radius:8px;font-size:.78rem;font-weight:700;cursor:pointer;border:1.5px solid rgba(200,168,60,.3);background:transparent;color:rgba(255,255,255,.5);transition:.2s}
 .trade-tab.active{background:rgba(200,168,60,.15);border-color:rgba(200,168,60,.7);color:#f0d060}
 .trade-dupe-card{border-radius:8px;overflow:hidden;cursor:pointer;border:2px solid transparent;transition:.2s;background:#0a2218}
@@ -486,65 +560,88 @@ body{background:#000509}
 </div>
 
 <!-- TRADE MODAL -->
-<div id="trade-modal" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,.93);z-index:300;flex-direction:column;align-items:center;overflow-y:auto;padding:0 16px 40px">
-  <div style="width:100%;max-width:560px">
-    <div style="position:sticky;top:0;background:rgba(5,15,10,.97);backdrop-filter:blur(8px);padding:16px 0 12px;display:flex;align-items:center;justify-content:space-between;border-bottom:1px solid rgba(200,168,60,.2);z-index:1;margin-bottom:16px">
-      <h2 style="color:#f0d060;font-size:1.2rem;font-weight:900">🔄 Troca de Figurinhas</h2>
-      <button onclick="closeTrade()" style="background:rgba(255,255,255,.1);border:1px solid rgba(255,255,255,.2);color:#fff;font-size:.78rem;cursor:pointer;border-radius:8px;padding:6px 12px;font-weight:700">← Voltar ao álbum</button>
-    </div>
-    <div style="display:flex;gap:6px;margin-bottom:20px">
-      <button class="trade-tab active" id="tab-perfil"    onclick="switchTradeTab('perfil')">📦 Meu Perfil</button>
-      <button class="trade-tab"        id="tab-mural"     onclick="switchTradeTab('mural')">👀 Ver Mural</button>
-      <button class="trade-tab"        id="tab-responder" onclick="switchTradeTab('responder')">📬 Responder</button>
+<div id="trade-modal" style="display:none;position:fixed;inset:0;background:radial-gradient(ellipse at top,#0f3020,#081109 70%);z-index:300;flex-direction:column;overflow-y:auto;padding:20px 20px 48px">
+  <div style="width:100%;max-width:1360px;margin:0 auto">
+    <!-- header -->
+    <div style="display:flex;align-items:flex-start;gap:16px;margin-bottom:22px">
+      <button onclick="closeTrade()" style="flex-shrink:0;width:44px;height:44px;border-radius:10px;background:#0d3d1c;border:1.5px solid rgba(200,168,60,.4);color:#fff;font-size:1.2rem;cursor:pointer;display:flex;align-items:center;justify-content:center">←</button>
+      <div>
+        <h2 style="font-size:1.9rem;font-weight:900;letter-spacing:.02em;color:#fff;line-height:1.1">🔄 MERCADO DE <span style="color:#f0a020">TROCAS</span></h2>
+        <p style="color:rgba(255,255,255,.6);font-size:.9rem;margin-top:6px">Aqui você acompanha o progresso do seu álbum e gerencia suas trocas.</p>
+      </div>
     </div>
 
-    <!-- ── MEU PERFIL ── -->
-    <div id="trade-panel-perfil">
-      <p style="color:rgba(255,255,255,.5);font-size:.78rem;margin-bottom:12px">Compartilhe seu perfil no Slack para que outros vejam sua coleção e peçam trocas.</p>
-      <button onclick="genAndShowProfile()" style="width:100%;background:linear-gradient(135deg,#0d3d1c,#1a5c30);border:1.5px solid rgba(200,168,60,.5);color:#f0d060;font-weight:800;padding:11px;border-radius:8px;font-size:.88rem;cursor:pointer;margin-bottom:14px">📤 Gerar meu perfil</button>
-      <div id="profile-code-box" style="display:none;background:rgba(200,168,60,.08);border:1.5px solid rgba(200,168,60,.35);border-radius:10px;padding:14px;margin-bottom:16px">
-        <p style="color:#f0d060;font-size:.72rem;font-weight:700;margin-bottom:8px">PERFIL — compartilhe no Slack:</p>
-        <div style="display:flex;gap:8px;align-items:flex-start">
-          <code id="profile-code-text" style="flex:1;background:rgba(0,0,0,.4);border-radius:6px;padding:8px 10px;font-size:.68rem;color:#fff;word-break:break-all;font-family:monospace;max-height:72px;overflow-y:auto"></code>
-          <button onclick="copyProfileCode()" style="background:#c8a83c;border:none;border-radius:6px;padding:8px 10px;color:#000;font-weight:800;font-size:.72rem;cursor:pointer;white-space:nowrap;flex-shrink:0">📋 Copiar</button>
+    <!-- stats -->
+    <div style="border:1.5px solid rgba(200,168,60,.45);border-radius:14px;padding:18px 20px;margin-bottom:22px;display:grid;grid-template-columns:repeat(4,1fr);gap:20px" class="trade-stats-grid">
+      <div>
+        <div style="color:#f0a020;font-size:.8rem;font-weight:800;letter-spacing:.04em">ÁLBUM COMPLETO</div>
+        <div style="display:flex;align-items:center;gap:12px;margin-top:6px">
+          <div><div id="stat-pct" style="font-size:2.6rem;font-weight:900;color:#fff;line-height:1">0%</div></div>
+          <div style="font-size:2.2rem">🏆</div>
+        </div>
+        <div style="height:8px;background:rgba(255,255,255,.12);border-radius:6px;margin-top:8px;overflow:hidden"><div id="stat-bar" style="height:100%;width:0%;background:linear-gradient(90deg,#16a34a,#4ade80);border-radius:6px;transition:width .4s"></div></div>
+      </div>
+      <div style="border-left:1px solid rgba(255,255,255,.12);padding-left:20px;text-align:center">
+        <div style="font-size:1.5rem">📗</div>
+        <div style="color:rgba(255,255,255,.7);font-size:.75rem;font-weight:700;margin-top:2px">JÁ TENHO</div>
+        <div id="stat-have" style="font-size:1.6rem;font-weight:900;color:#4ade80">0</div>
+        <div style="color:rgba(255,255,255,.45);font-size:.62rem;margin-top:2px">Figurinhas Coletadas</div>
+      </div>
+      <div style="border-left:1px solid rgba(255,255,255,.12);padding-left:20px;text-align:center">
+        <div style="font-size:1.5rem">🔄</div>
+        <div style="color:rgba(255,255,255,.7);font-size:.75rem;font-weight:700;margin-top:2px">REPETIDAS</div>
+        <div id="stat-dupes" style="font-size:1.6rem;font-weight:900;color:#f0a020">0</div>
+        <div style="color:rgba(255,255,255,.45);font-size:.62rem;margin-top:2px">Figurinhas Repetidas</div>
+      </div>
+      <div style="border-left:1px solid rgba(255,255,255,.12);padding-left:20px;text-align:center">
+        <div style="font-size:1.5rem">🃏</div>
+        <div style="color:rgba(255,255,255,.7);font-size:.75rem;font-weight:700;margin-top:2px">AINDA NÃO TENHO</div>
+        <div id="stat-missing" style="font-size:1.6rem;font-weight:900;color:#fff">0</div>
+        <div style="color:rgba(255,255,255,.45);font-size:.62rem;margin-top:2px">Figurinhas que Faltam</div>
+      </div>
+    </div>
+
+    <!-- 4 columns -->
+    <div class="trade-cols">
+      <!-- 1. recomendadas -->
+      <div class="trade-col">
+        <div class="trade-col-title">🤝 TROCAS RECOMENDADAS</div>
+        <p class="trade-col-sub">O sistema cruza suas figurinhas com as que outras pessoas precisam, sugerindo trocas para você.</p>
+        <div id="rec-body" style="flex:1"></div>
+        <div id="rec-nav" style="display:none;align-items:center;justify-content:space-between;margin-top:10px">
+          <span id="rec-count" style="color:rgba(255,255,255,.5);font-size:.7rem"></span>
+          <span><button onclick="recNav(-1)" class="trade-navbtn">← Anterior</button><button onclick="recNav(1)" class="trade-navbtn">Próximo →</button></span>
         </div>
       </div>
-      <p style="color:rgba(255,255,255,.4);font-size:.72rem;margin-bottom:10px">Minhas repetidas:</p>
-      <div id="my-dupes-grid" style="display:grid;grid-template-columns:repeat(auto-fill,minmax(86px,1fr));gap:8px"></div>
-    </div>
-
-    <!-- ── VER MURAL ── -->
-    <div id="trade-panel-mural" style="display:none">
-      <p style="color:rgba(255,255,255,.5);font-size:.78rem;margin-bottom:10px">Cole o perfil de outro designer para ver a coleção dele e pedir uma troca.</p>
-      <div style="display:flex;gap:8px;margin-bottom:14px">
-        <textarea id="mural-input" placeholder="Cole o código de perfil aqui..." style="flex:1;height:68px;background:rgba(255,255,255,.07);border:1.5px solid rgba(200,168,60,.35);border-radius:8px;color:#fff;padding:10px;font-size:.78rem;resize:none;font-family:monospace"></textarea>
-        <button onclick="loadMural()" style="background:#c8a83c;border:none;border-radius:8px;padding:0 14px;color:#000;font-weight:800;font-size:.8rem;cursor:pointer;flex-shrink:0">Ver →</button>
-      </div>
-      <div id="mural-result"></div>
-      <!-- painel de pedido (aparece ao clicar numa figurinha) -->
-      <div id="pedido-panel" style="display:none;position:sticky;bottom:0;background:rgba(5,20,10,.97);border-top:1.5px solid rgba(200,168,60,.4);padding:14px;margin-top:16px;border-radius:10px 10px 0 0">
-        <p style="color:#f0d060;font-size:.8rem;font-weight:800;margin-bottom:4px">Pedir troca de <span id="pedido-want-name" style="color:#fff"></span></p>
-        <p style="color:rgba(255,255,255,.45);font-size:.7rem;margin-bottom:10px">Escolha o que você oferece em troca (suas repetidas):</p>
-        <div id="pedido-offer-grid" style="display:flex;flex-wrap:wrap;gap:6px;margin-bottom:12px"></div>
-        <div id="pedido-code-area" style="display:none;background:rgba(200,168,60,.08);border:1.5px solid rgba(200,168,60,.3);border-radius:8px;padding:10px;margin-bottom:10px">
-          <p style="color:#f0d060;font-size:.68rem;font-weight:700;margin-bottom:6px">PEDIDO GERADO — envie para <span id="pedido-to-name"></span>:</p>
-          <div style="display:flex;gap:8px;align-items:flex-start">
-            <code id="pedido-code-text" style="flex:1;background:rgba(0,0,0,.4);border-radius:6px;padding:7px;font-size:.66rem;color:#fff;word-break:break-all;font-family:monospace;max-height:64px;overflow-y:auto"></code>
-            <button onclick="copyPedidoCode()" style="background:#c8a83c;border:none;border-radius:6px;padding:8px 10px;color:#000;font-weight:800;font-size:.7rem;cursor:pointer;flex-shrink:0">📋</button>
-          </div>
+      <!-- 2. oferecer proposta -->
+      <div class="trade-col">
+        <div class="trade-col-title">✈️ OFERECER UMA PROPOSTA</div>
+        <p class="trade-col-sub">Escolha a figurinha que deseja oferecer e a que gostaria de receber. Depois escolha a pessoa e envie.</p>
+        <div style="display:flex;align-items:center;gap:8px;justify-content:center;margin:6px 0 12px">
+          <div style="text-align:center"><div style="color:#4ade80;font-size:.66rem;font-weight:800;margin-bottom:5px">EU OFEREÇO</div><div id="prop-offer" onclick="pickProposalOffer()" class="prop-slot" style="border-color:rgba(74,222,128,.6)">+</div></div>
+          <div style="color:rgba(255,255,255,.5);font-size:1.2rem">➡</div>
+          <div style="text-align:center"><div style="color:#c084fc;font-size:.66rem;font-weight:800;margin-bottom:5px">EU QUERO</div><div id="prop-want" onclick="pickProposalWant()" class="prop-slot" style="border-color:rgba(192,132,252,.6)">+</div></div>
         </div>
-        <button onclick="document.getElementById('pedido-panel').style.display='none'" style="width:100%;background:transparent;border:1px solid rgba(255,255,255,.15);color:rgba(255,255,255,.4);padding:7px;border-radius:6px;font-size:.72rem;cursor:pointer">Cancelar</button>
+        <select id="prop-person" class="trade-select"><option value="">Selecione uma pessoa</option></select>
+        <button id="prop-send" onclick="sendProposalNew()" class="trade-send" disabled>✈ Enviar Proposta</button>
       </div>
-    </div>
-
-    <!-- ── RESPONDER ── -->
-    <div id="trade-panel-responder" style="display:none">
-      <p style="color:rgba(255,255,255,.5);font-size:.78rem;margin-bottom:10px">Cole um código de pedido, aprovação ou rejeição.</p>
-      <div style="display:flex;gap:8px;margin-bottom:14px">
-        <textarea id="responder-input" placeholder="Cole o código aqui..." style="flex:1;height:68px;background:rgba(255,255,255,.07);border:1.5px solid rgba(200,168,60,.35);border-radius:8px;color:#fff;padding:10px;font-size:.78rem;resize:none;font-family:monospace"></textarea>
-        <button onclick="parseResponderCode()" style="background:#c8a83c;border:none;border-radius:8px;padding:0 14px;color:#000;font-weight:800;font-size:.8rem;cursor:pointer;flex-shrink:0">Ver →</button>
+      <!-- 3. caixa de entrada -->
+      <div class="trade-col">
+        <div class="trade-col-title">✉️ CAIXA DE ENTRADA</div>
+        <p class="trade-col-sub">Acompanhe as propostas recebidas e responda às solicitações de troca.</p>
+        <div id="inbox-body" style="flex:1"></div>
+        <div id="inbox-nav" style="display:none;align-items:center;justify-content:space-between;margin-top:10px">
+          <span id="inbox-count" style="color:rgba(255,255,255,.5);font-size:.7rem"></span>
+          <span><button onclick="inboxNav(-1)" class="trade-navbtn">← Anterior</button><button onclick="inboxNav(1)" class="trade-navbtn">Próximo →</button></span>
+        </div>
       </div>
-      <div id="responder-result"></div>
+      <!-- 4. não encontrou -->
+      <div class="trade-col">
+        <div class="trade-col-title" style="color:#f0a020">NÃO ENCONTROU A TROCA IDEAL?</div>
+        <p class="trade-col-sub" style="margin-top:14px">Que tal sair perguntando para a galera? Só ir na nossa thread do canal <b style="color:#fff">#stone-design</b> no Slack e comentar.</p>
+        <div style="font-size:2.4rem;text-align:center;margin:18px 0">💬</div>
+        <p class="trade-col-sub">Assim que responderem, é só fazer a oferta na proposta de trocas! 😉</p>
+      </div>
     </div>
   </div>
 </div>
@@ -709,15 +806,46 @@ function clearPendingPack() {
   if (currentUser) localStorage.removeItem(getPendingKey());
 }
 
+// ===== Firebase sync (Mercado de Trocas) =====
+// Push local collection to the cloud so others can match trades.
+function syncProfileToCloud() {
+  if (!currentUser || !window.fb) return;
+  const collected = getCollected();
+  const dupes = getDupes();
+  window.fb.publishProfile(currentUser, collected, dupes).catch(e => console.warn('publish', e));
+}
+// Pull cloud collection (cloud wins — reflects trades accepted while offline).
+async function syncProfileFromCloud() {
+  if (!currentUser || !window.fb) return;
+  try {
+    const prof = await window.fb.getProfile(currentUser);
+    if (prof) {
+      _suppressCloudSync = true;
+      saveCollected(prof.collected || []);
+      saveDupes(prof.dupes || []);
+      _suppressCloudSync = false;
+      refreshCurrentPage();
+      if (typeof updateFAB === 'function') updateFAB();
+    } else {
+      syncProfileToCloud(); // first time — publish current local state
+    }
+  } catch(e) { console.warn('sync', e); }
+}
+// Called by the Firebase module once it finishes loading.
+window.__onFbReady = function() {
+  if (currentUser) { syncProfileFromCloud(); startInboxListener(); }
+};
+
 function getDupes() {
   try { return JSON.parse(localStorage.getItem(getDupesKey()) || '[]'); } catch(e) { return []; }
 }
-function saveDupes(arr) { localStorage.setItem(getDupesKey(), JSON.stringify(arr)); }
+let _suppressCloudSync = false;
+function saveDupes(arr) { localStorage.setItem(getDupesKey(), JSON.stringify(arr)); if (!_suppressCloudSync && typeof syncProfileToCloud === 'function') syncProfileToCloud(); }
 
 function getCollected() {
   try { return JSON.parse(localStorage.getItem(getCollectedKey()) || '[]'); } catch(e) { return []; }
 }
-function saveCollected(arr) { localStorage.setItem(getCollectedKey(), JSON.stringify(arr)); }
+function saveCollected(arr) { localStorage.setItem(getCollectedKey(), JSON.stringify(arr)); if (!_suppressCloudSync && typeof syncProfileToCloud === 'function') syncProfileToCloud(); }
 
 function getDream() {
   try {
@@ -1752,26 +1880,189 @@ function closeInstructions() {
 function tradeEncode(obj) { return btoa(unescape(encodeURIComponent(JSON.stringify(obj)))); }
 function tradeDecode(s)   { return JSON.parse(decodeURIComponent(escape(atob(s.trim())))); }
 
+/* ===== MERCADO DE TROCAS (Firebase) ===== */
+let _allProfiles = [], _recList = [], _recIdx = 0;
+let _propOffer = null, _propWant = null;
+let _inbox = [], _inboxIdx = 0, _inboxUnsub = null;
+
 function openTrade() {
   if (!currentUser) { showToast('Faça login primeiro!'); return; }
   document.getElementById('trade-modal').style.display = 'flex';
-  switchTradeTab('perfil');
+  renderTradeStats();
+  _propOffer = null; _propWant = null;
+  renderPropSlots();
+  renderInbox();
+  if (!window.fb) { showToast('Conectando ao servidor de trocas…'); return; }
+  loadTradeData();
 }
 function closeTrade() {
   document.getElementById('trade-modal').style.display = 'none';
-  document.getElementById('mural-input').value = '';
-  document.getElementById('responder-input').value = '';
-  document.getElementById('mural-result').innerHTML = '';
-  document.getElementById('responder-result').innerHTML = '';
-  document.getElementById('profile-code-box').style.display = 'none';
-  document.getElementById('pedido-panel').style.display = 'none';
 }
-function switchTradeTab(tab) {
-  ['perfil','mural','responder'].forEach(t => {
-    document.getElementById('trade-panel-'+t).style.display = t===tab ? '' : 'none';
-    document.getElementById('tab-'+t).classList.toggle('active', t===tab);
+
+function renderTradeStats() {
+  const total = TEAM.length;
+  const have = getCollected().length;
+  const dupes = getDupes().length;
+  const pct = total ? Math.round(have / total * 100) : 0;
+  document.getElementById('stat-pct').textContent = pct + '%';
+  document.getElementById('stat-bar').style.width = pct + '%';
+  document.getElementById('stat-have').textContent = have;
+  document.getElementById('stat-dupes').textContent = dupes;
+  document.getElementById('stat-missing').textContent = total - have;
+}
+
+async function loadTradeData() {
+  try { _allProfiles = await window.fb.getAllProfiles(); } catch(e) { _allProfiles = []; }
+  populatePersonSelect();
+  computeRecommendations();
+  renderRecommendations();
+}
+
+function populatePersonSelect() {
+  const sel = document.getElementById('prop-person');
+  const cur = sel.value;
+  const others = _allProfiles.filter(p => p.name !== currentUser).map(p => p.name)
+    .sort((a,b) => a.localeCompare(b,'pt-BR'));
+  sel.innerHTML = '<option value="">Selecione uma pessoa</option>' +
+    others.map(n => `<option value="${n}">${n}</option>`).join('');
+  if (others.includes(cur)) sel.value = cur;
+  sel.onchange = updatePropSendState;
+}
+
+function computeRecommendations() {
+  _recList = []; _recIdx = 0;
+  const myDupes = [...new Set(getDupes())];
+  const myCollected = getCollected();
+  const myMissing = TEAM.filter(p => !myCollected.includes(p.id)).map(p => p.id);
+  _allProfiles.forEach(prof => {
+    if (prof.name === currentUser) return;
+    const theirCollected = prof.collected || [];
+    const theirDupes = [...new Set(prof.dupes || [])];
+    const theirMissing = TEAM.filter(p => !theirCollected.includes(p.id)).map(p => p.id);
+    const iGive = myDupes.filter(id => theirMissing.includes(id));
+    const iGet  = theirDupes.filter(id => myMissing.includes(id));
+    if (iGive.length && iGet.length) _recList.push({ person: prof.name, give: iGive[0], get: iGet[0] });
   });
-  if (tab==='perfil') renderMyDupesGrid();
+}
+
+function miniCardHTML(id) {
+  const p = getPlayer(id);
+  return `<div class="trade-mini-card">${p && p.photo ? `<img src="${p.photo}">` : ''}</div>`;
+}
+
+function renderRecommendations() {
+  const body = document.getElementById('rec-body');
+  const nav = document.getElementById('rec-nav');
+  if (!_recList.length) {
+    body.innerHTML = '<div class="trade-empty">Nenhuma troca recomendada por enquanto.<br>Abra mais pacotes ou volte depois. 🔄</div>';
+    nav.style.display = 'none'; return;
+  }
+  if (_recIdx >= _recList.length) _recIdx = 0;
+  const r = _recList[_recIdx];
+  const giveP = getPlayer(r.give), getP = getPlayer(r.get);
+  body.innerHTML = `
+    <p style="color:rgba(255,255,255,.85);font-size:.78rem;text-align:center;margin:8px 0"><b style="color:#4ade80">${r.person}</b> pode te ajudar</p>
+    <div class="trade-rec-cards">${miniCardHTML(r.get)}<div style="color:#4ade80;font-size:1.2rem">⇄</div>${miniCardHTML(r.give)}</div>
+    <p style="color:rgba(255,255,255,.55);font-size:.7rem;text-align:center">Você recebe <b style="color:#fff">${getP?getP.name:''}</b> e dá <b style="color:#fff">${giveP?giveP.name:''}</b></p>
+    <button onclick="prefillProposal('${r.person}',${r.give},${r.get})" class="trade-send" style="margin-top:10px">Propor esta troca</button>`;
+  document.getElementById('rec-count').textContent = `${_recIdx+1}/${_recList.length} recomendações`;
+  nav.style.display = 'flex';
+}
+function recNav(d) { if (!_recList.length) return; _recIdx = (_recIdx + d + _recList.length) % _recList.length; renderRecommendations(); }
+
+function prefillProposal(person, giveId, getId) {
+  _propOffer = giveId; _propWant = getId;
+  renderPropSlots();
+  const sel = document.getElementById('prop-person'); sel.value = person; updatePropSendState();
+  document.getElementById('prop-send').scrollIntoView({ behavior:'smooth', block:'center' });
+}
+
+function miniImg(id) { const p = getPlayer(id); return p && p.photo ? `<img src="${p.photo}">` : '?'; }
+function renderPropSlots() {
+  document.getElementById('prop-offer').innerHTML = _propOffer != null ? miniImg(_propOffer) : '+';
+  document.getElementById('prop-want').innerHTML  = _propWant  != null ? miniImg(_propWant)  : '+';
+  updatePropSendState();
+}
+function pickProposalOffer() {
+  const dupes = [...new Set(getDupes())];
+  if (!dupes.length) { showToast('Você não tem repetidas para oferecer'); return; }
+  openGenericPicker('O que você oferece (repetidas)', dupes, id => { _propOffer = id; renderPropSlots(); });
+}
+function pickProposalWant() {
+  const collected = getCollected();
+  const missing = TEAM.filter(p => !collected.includes(p.id)).map(p => p.id);
+  if (!missing.length) { showToast('Você já tem todas! 🎉'); return; }
+  openGenericPicker('O que você quer (faltantes)', missing, id => { _propWant = id; renderPropSlots(); });
+}
+function updatePropSendState() {
+  const person = document.getElementById('prop-person').value;
+  document.getElementById('prop-send').disabled = !(_propOffer != null && _propWant != null && person);
+}
+function sendProposalNew() {
+  const person = document.getElementById('prop-person').value;
+  if (_propOffer == null || _propWant == null || !person || !window.fb) return;
+  window.fb.sendProposal({ from: currentUser, to: person, offer: _propOffer, want: _propWant })
+    .then(() => { showToast('Proposta enviada para ' + person + ' ✈️'); _propOffer = null; _propWant = null;
+      document.getElementById('prop-person').value = ''; renderPropSlots(); })
+    .catch(e => { showToast('Erro ao enviar proposta'); console.warn(e); });
+}
+
+function openGenericPicker(title, ids, cb) {
+  document.getElementById('picker-title').textContent = title;
+  document.getElementById('picker-sub').textContent = [...new Set(ids)].length + ' carta(s)';
+  const grid = document.getElementById('picker-grid'); grid.innerHTML = '';
+  [...new Set(ids)].forEach(id => {
+    const p = getPlayer(id); if (!p) return;
+    const wrap = document.createElement('div'); wrap.innerHTML = renderCardHTML(p, { noGray:true });
+    const card = wrap.firstChild; card.classList.add('picker-card'); card.classList.remove('not-collected');
+    card.addEventListener('click', () => { cb(id); closePicker(); });
+    grid.appendChild(card);
+  });
+  document.getElementById('player-picker').style.display = 'flex';
+}
+
+/* ── Caixa de entrada (tempo real) ── */
+function startInboxListener() {
+  if (!window.fb || !currentUser) return;
+  stopInboxListener();
+  _inboxUnsub = window.fb.listenInbox(currentUser, list => {
+    _inbox = list; if (_inboxIdx >= _inbox.length) _inboxIdx = 0;
+    if (document.getElementById('trade-modal').style.display !== 'none') renderInbox();
+  });
+}
+function stopInboxListener() { if (_inboxUnsub) { _inboxUnsub(); _inboxUnsub = null; } _inbox = []; }
+
+function renderInbox() {
+  const body = document.getElementById('inbox-body'), nav = document.getElementById('inbox-nav');
+  if (!_inbox.length) { body.innerHTML = '<div class="trade-empty">Nenhuma proposta recebida ainda.</div>'; nav.style.display = 'none'; return; }
+  if (_inboxIdx >= _inbox.length) _inboxIdx = 0;
+  const p = _inbox[_inboxIdx];
+  const offerP = getPlayer(p.offer), wantP = getPlayer(p.want);
+  body.innerHTML = `
+    <p style="color:rgba(255,255,255,.85);font-size:.76rem;margin:6px 0"><b style="color:#4ade80">${p.from}</b> quer trocar <b>${offerP?offerP.name:''}</b> pela sua <b>${wantP?wantP.name:''}</b></p>
+    <div class="trade-rec-cards">${miniCardHTML(p.offer)}<div style="color:#4ade80">⇄</div>${miniCardHTML(p.want)}</div>
+    <div style="display:flex;gap:8px;margin-top:8px">
+      <button onclick="acceptProposal('${p.id}')" class="trade-send" style="background:linear-gradient(135deg,#0d3d1c,#1a5c30);color:#4ade80">Aceitar</button>
+      <button onclick="rejectProposal('${p.id}')" class="trade-send" style="background:rgba(120,20,20,.5);color:#fca5a5;border-color:rgba(255,120,120,.4)">Recusar</button>
+    </div>`;
+  document.getElementById('inbox-count').textContent = `${_inboxIdx+1}/${_inbox.length} propostas`;
+  nav.style.display = 'flex';
+}
+function inboxNav(d) { if (!_inbox.length) return; _inboxIdx = (_inboxIdx + d + _inbox.length) % _inbox.length; renderInbox(); }
+
+async function acceptProposal(id) {
+  const p = _inbox.find(x => x.id === id); if (!p || !window.fb) return;
+  try {
+    await window.fb.applyTrade(p.from, currentUser, p.offer, p.want);
+    await window.fb.updateProposal(id, 'accepted');
+    await syncProfileFromCloud();
+    renderTradeStats(); loadTradeData();
+    showToast('Troca aceita! ✨');
+  } catch(e) { showToast('Erro ao aceitar troca'); console.warn(e); }
+}
+function rejectProposal(id) {
+  if (!window.fb) return;
+  window.fb.updateProposal(id, 'rejected').then(() => showToast('Proposta recusada')).catch(e => console.warn(e));
 }
 
 /* ── MEU PERFIL ── */
@@ -2101,9 +2392,12 @@ function doLogin() {
   currentUser = sel.value;
   localStorage.setItem('album_current_user', currentUser);
   showApp();
+  syncProfileFromCloud();
+  startInboxListener();
 }
 
 function logout() {
+  stopInboxListener();
   currentUser = null;
   localStorage.removeItem('album_current_user');
   document.getElementById('login-screen').style.display = 'flex';
