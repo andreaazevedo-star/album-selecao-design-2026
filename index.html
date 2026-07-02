@@ -371,16 +371,18 @@ body{background:#000509}
 @media(max-width:900px){#pack-float{top:auto;bottom:130px;right:8px}}
 
 /* ===== PLAYER PICKER ===== */
-#player-picker{position:fixed;inset:0;background:rgba(0,0,0,.8);display:flex;align-items:center;justify-content:center;z-index:600}
-.picker-panel{background:#fff;border-radius:16px;padding:24px;max-width:640px;max-height:80vh;overflow-y:auto;position:relative;width:calc(100% - 32px)}
-.picker-panel h3{font-size:1.1rem;font-weight:800;margin-bottom:4px;color:#111}
-.picker-sub{font-size:.8rem;color:#6b7280;margin-bottom:16px}
-.picker-grid{display:flex;flex-wrap:wrap;gap:8px}
-.picker-close{position:absolute;top:12px;right:12px;background:none;border:none;font-size:1.4rem;cursor:pointer;color:#374151;width:32px;height:32px;display:flex;align-items:center;justify-content:center;border-radius:50%;transition:.2s}
-.picker-close:hover{background:#f3f4f6}
-.picker-card{cursor:pointer;transition:.2s}
-.picker-card:hover{transform:scale(1.07);box-shadow:0 8px 24px rgba(0,0,0,.25)!important}
-.picker-empty{color:#6b7280;font-size:.9rem;line-height:1.6}
+#player-picker{position:fixed;inset:0;background:rgba(0,0,0,.85);backdrop-filter:blur(6px);display:flex;align-items:center;justify-content:center;z-index:600}
+.picker-panel{background:#0a1414;border:2px solid #e3a931;border-radius:20px;padding:28px 24px;max-width:720px;max-height:80vh;overflow-y:auto;position:relative;width:calc(100% - 32px)}
+.picker-panel h3{font-size:1.1rem;font-weight:800;margin-bottom:4px;color:#99c65c}
+.picker-sub{font-size:.8rem;color:rgba(253,253,249,.6);margin-bottom:16px}
+.picker-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(100px,1fr));gap:12px}
+.picker-close{position:absolute;top:12px;right:12px;background:rgba(255,255,255,.08);border:1.5px solid rgba(255,255,255,.2);font-size:1.2rem;cursor:pointer;color:#fdfdf9;width:34px;height:34px;display:flex;align-items:center;justify-content:center;border-radius:50%;transition:.2s}
+.picker-close:hover{background:rgba(255,255,255,.18)}
+.picker-card{cursor:pointer;transition:.2s;border-radius:10px;overflow:hidden;border:2px solid transparent;background:#0d1e0d}
+.picker-card:hover{transform:scale(1.05);border-color:#e3a931;box-shadow:0 8px 24px rgba(227,169,49,.3)}
+.picker-card img{width:100%;display:block}
+.picker-card .picker-card-name{font-size:.65rem;font-weight:700;color:#fdfdf9;text-align:center;padding:4px 4px 6px;line-height:1.2;background:rgba(0,0,0,.4)}
+.picker-empty{color:rgba(253,253,249,.4);font-size:.9rem;line-height:1.6}
 
 /* ===== TOAST ===== */
 .toast{position:fixed;bottom:80px;left:50%;transform:translateX(-50%);background:rgba(0,0,0,.85);color:#fff;padding:12px 24px;border-radius:30px;font-size:.9rem;z-index:200;opacity:0;transition:opacity .3s;white-space:nowrap;pointer-events:none}
@@ -1471,11 +1473,9 @@ function openPicker(title) {
     grid.innerHTML = '<p class="picker-empty">Nenhuma carta disponível.<br>Abra mais pacotes!</p>';
   } else {
     players.forEach(p => {
-      const wrap = document.createElement('div');
-      wrap.innerHTML = renderCardHTML(p, {noGray:true});
-      const card = wrap.firstChild;
-      card.classList.add('picker-card');
-      card.classList.remove('not-collected');
+      const card = document.createElement('div');
+      card.className = 'picker-card';
+      card.innerHTML = (p.photo ? '<img src="'+p.photo+'" alt="'+p.name+'">' : '') + '<div class="picker-card-name">'+p.name+'</div>';
       card.addEventListener('click', () => {
         const ok = pickerCallback && pickerCallback(p);
         if (ok !== false) closePicker();
@@ -1995,8 +1995,9 @@ function openGenericPicker(title, ids, cb) {
   document.getElementById('picker-sub').textContent = [...new Set(ids)].length + ' carta(s)';
   const grid = document.getElementById('picker-grid'); grid.innerHTML = '';
   [...new Set(ids)].forEach(id => { const p = getPlayer(id); if (!p) return;
-    const wrap = document.createElement('div'); wrap.innerHTML = renderCardHTML(p, { noGray:true });
-    const card = wrap.firstChild; card.classList.add('picker-card'); card.classList.remove('not-collected');
+    const card = document.createElement('div');
+    card.className = 'picker-card';
+    card.innerHTML = (p.photo ? '<img src="'+p.photo+'" alt="'+p.name+'">' : '') + '<div class="picker-card-name">'+p.name+'</div>';
     card.addEventListener('click', () => { cb(id); closePicker(); });
     grid.appendChild(card);
   });
