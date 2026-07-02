@@ -1412,8 +1412,8 @@ function renderPackFloat() {
       <span class="pf-status-rep">🚩 Repetida</span>
       <button class="pf-status-trade" onclick="guardarRepetida(${front.id})">Guardar para trocar 🔄</button>`;
   } else {
-    statusEl.style.display = 'flex';
-    statusEl.innerHTML = `<span class="pf-status-new">Arraste para o álbum</span>`;
+    statusEl.style.display = 'none';
+    statusEl.innerHTML = '';
   }
 }
 
