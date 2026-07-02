@@ -48,7 +48,10 @@
     getAllProfiles: async () => (await getDocs(collection(db, 'players'))).docs.map(d => ({ id: d.id, ...d.data() })),
     sendProposal: (p) => addDoc(collection(db, 'proposals'), { ...p, status: 'pending', createdAt: serverTimestamp() }),
     listenInbox: (user, cb) => onSnapshot(
-      query(collection(db, 'proposals'), where('to', '==', user), where('status', '==', 'pending')),
+      query(collection(db, 'proposals'), where('to', '==', user)),
+      snap => cb(snap.docs.map(d => ({ id: d.id, ...d.data() })))),
+    listenOutbox: (user, cb) => onSnapshot(
+      query(collection(db, 'proposals'), where('from', '==', user)),
       snap => cb(snap.docs.map(d => ({ id: d.id, ...d.data() })))),
     updateProposal: (id, status) => updateDoc(doc(db, 'proposals', id), { status }),
     applyTrade: async (fromUser, toUser, offerId, wantId) => {
@@ -1929,7 +1932,8 @@ function tradeDecode(s)   { return JSON.parse(decodeURIComponent(escape(atob(s.t
 /* ===== MERCADO DE TROCAS (Firebase) ===== */
 let _allProfiles = [], _recList = [], _recIdx = 0;
 let _propOffer = null, _propWant = null;
-let _inbox = [], _inboxIdx = 0, _inboxUnsub = null;
+let _inbox = [], _inboxIdx = 0, _inboxUnsub = null, _outboxUnsub = null;
+let _inboxIn = [], _inboxOut = [];
 
 function openTrade() {
   if (!currentUser) { showToast('Faça login primeiro!'); return; }
@@ -2025,6 +2029,14 @@ function miniCardHTML(id) {
   return `<div class="trade-mini-card">${p && p.photo ? `<img src="${p.photo}">` : ''}</div>`;
 }
 
+// Envia a proposta recomendada direto (sem preencher formulário)
+function proposeRecommended(personId, giveId, wantId) {
+  if (!window.fb) return;
+  window.fb.sendProposal({ from: currentUser, to: personId, offer: giveId, want: wantId })
+    .then(() => showToast('Proposta enviada para ' + nameOf(personId) + ' ✈️ — veja na Caixa de Entrada'))
+    .catch(e => { showToast('Erro ao enviar proposta'); console.warn(e); });
+}
+
 function renderRecommendations() {
   const body = document.getElementById('rec-body');
   const nav = document.getElementById('rec-nav');
@@ -2039,7 +2051,7 @@ function renderRecommendations() {
     <p style="color:rgba(255,255,255,.85);font-size:.78rem;text-align:center;margin:8px 0"><b style="color:#4ade80">${r.personName}</b> pode te ajudar</p>
     <div class="trade-rec-cards">${miniCardHTML(r.get)}<div style="color:#4ade80;font-size:1.2rem">⇄</div>${miniCardHTML(r.give)}</div>
     <p style="color:rgba(255,255,255,.55);font-size:.7rem;text-align:center">Você recebe <b style="color:#fff">${getP?getP.name:''}</b> e dá <b style="color:#fff">${giveP?giveP.name:''}</b></p>
-    <button onclick="prefillProposal('${r.personId}',${r.give},${r.get})" class="trade-send" style="margin-top:10px">Propor esta troca</button>`;
+    <button onclick="proposeRecommended('${r.personId}',${r.give},${r.get})" class="trade-send" style="margin-top:10px">Propor esta troca</button>`;
   document.getElementById('rec-count').textContent = `${_recIdx+1}/${_recList.length} recomendações`;
   nav.style.display = 'flex';
 }
@@ -2096,37 +2108,75 @@ function openGenericPicker(title, ids, cb) {
   document.getElementById('player-picker').style.display = 'flex';
 }
 
-/* ── Caixa de entrada (tempo real) ── */
+/* ── Caixa de entrada (tempo real) — recebidas + enviadas ── */
+function getDismissedKey() { return 'album_seenprops_' + currentUser; }
+function getDismissed() { try { return JSON.parse(localStorage.getItem(getDismissedKey()) || '[]'); } catch(e) { return []; } }
+function dismissProposal(id) { const d = getDismissed(); if (!d.includes(id)) { d.push(id); localStorage.setItem(getDismissedKey(), JSON.stringify(d)); } rebuildInbox(); }
+
 function startInboxListener() {
   if (!window.fb || !currentUser) return;
   stopInboxListener();
-  _inboxUnsub = window.fb.listenInbox(currentUser, list => {
-    _inbox = list; if (_inboxIdx >= _inbox.length) _inboxIdx = 0;
-    if (document.getElementById('trade-modal').style.display !== 'none') renderInbox();
+  _inboxUnsub = window.fb.listenInbox(currentUser, list => { _inboxIn = list; rebuildInbox(); });
+  _outboxUnsub = window.fb.listenOutbox(currentUser, list => {
+    const hadResult = list.some(p => p.status === 'accepted' || p.status === 'rejected');
+    _inboxOut = list;
+    if (hadResult) syncProfileFromCloud();   // someone acted on my proposal → refresh my collection
+    rebuildInbox();
   });
 }
-function stopInboxListener() { if (_inboxUnsub) { _inboxUnsub(); _inboxUnsub = null; } _inbox = []; }
+function stopInboxListener() {
+  if (_inboxUnsub) { _inboxUnsub(); _inboxUnsub = null; }
+  if (_outboxUnsub) { _outboxUnsub(); _outboxUnsub = null; }
+  _inboxIn = []; _inboxOut = []; _inbox = [];
+}
+
+function rebuildInbox() {
+  const dismissed = getDismissed();
+  const received    = _inboxIn.filter(p => p.status === 'pending').map(p => ({ ...p, kind: 'received' }));
+  const sentResult  = _inboxOut.filter(p => (p.status === 'accepted' || p.status === 'rejected') && !dismissed.includes(p.id)).map(p => ({ ...p, kind: 'sent-result' }));
+  const sentPending = _inboxOut.filter(p => p.status === 'pending').map(p => ({ ...p, kind: 'sent-pending' }));
+  _inbox = [...received, ...sentResult, ...sentPending];
+  if (_inboxIdx >= _inbox.length) _inboxIdx = 0;
+  if (document.getElementById('trade-modal').style.display !== 'none') renderInbox();
+}
 
 function renderInbox() {
   const body = document.getElementById('inbox-body'), nav = document.getElementById('inbox-nav');
-  if (!_inbox.length) { body.innerHTML = '<div class="trade-empty">Nenhuma proposta recebida ainda.</div>'; nav.style.display = 'none'; return; }
+  if (!_inbox.length) { body.innerHTML = '<div class="trade-empty">Nenhuma proposta por aqui ainda.</div>'; nav.style.display = 'none'; return; }
   if (_inboxIdx >= _inbox.length) _inboxIdx = 0;
   const p = _inbox[_inboxIdx];
   const offerP = getPlayer(p.offer), wantP = getPlayer(p.want);
-  body.innerHTML = `
-    <p style="color:rgba(255,255,255,.85);font-size:.76rem;margin:6px 0"><b style="color:#4ade80">${nameOf(p.from)}</b> quer trocar <b>${offerP?offerP.name:''}</b> pela sua <b>${wantP?wantP.name:''}</b></p>
-    <div class="trade-rec-cards">${miniCardHTML(p.offer)}<div style="color:#4ade80">⇄</div>${miniCardHTML(p.want)}</div>
-    <div style="display:flex;gap:8px;margin-top:8px">
-      <button onclick="acceptProposal('${p.id}')" class="trade-send" style="background:linear-gradient(135deg,#0d3d1c,#1a5c30);color:#4ade80">Aceitar</button>
-      <button onclick="rejectProposal('${p.id}')" class="trade-send" style="background:rgba(120,20,20,.5);color:#fca5a5;border-color:rgba(255,120,120,.4)">Recusar</button>
-    </div>`;
-  document.getElementById('inbox-count').textContent = `${_inboxIdx+1}/${_inbox.length} propostas`;
-  nav.style.display = 'flex';
+  const cards = `<div class="trade-rec-cards">${miniCardHTML(p.offer)}<div style="color:#4ade80">⇄</div>${miniCardHTML(p.want)}</div>`;
+  let html = '';
+  if (p.kind === 'received') {
+    html = `
+      <p style="color:rgba(255,255,255,.85);font-size:.76rem;margin:6px 0"><b style="color:#4ade80">${nameOf(p.from)}</b> quer trocar <b>${offerP?offerP.name:''}</b> pela sua <b>${wantP?wantP.name:''}</b></p>
+      ${cards}
+      <div style="display:flex;gap:8px;margin-top:8px">
+        <button onclick="acceptProposal('${p.id}')" class="trade-send" style="background:linear-gradient(135deg,#0d3d1c,#1a5c30);color:#4ade80">Aceitar</button>
+        <button onclick="rejectProposal('${p.id}')" class="trade-send" style="background:rgba(120,20,20,.5);color:#fca5a5;border-color:rgba(255,120,120,.4)">Recusar</button>
+      </div>`;
+  } else if (p.kind === 'sent-pending') {
+    html = `
+      <p style="color:rgba(255,255,255,.85);font-size:.76rem;margin:6px 0">Você propôs a <b style="color:#f0a020">${nameOf(p.to)}</b>: oferece <b>${offerP?offerP.name:''}</b> e recebe <b>${wantP?wantP.name:''}</b></p>
+      ${cards}
+      <p style="color:rgba(255,255,255,.5);font-size:.72rem;text-align:center;margin-top:8px">⏳ Aguardando resposta…</p>`;
+  } else { // sent-result
+    const ok = p.status === 'accepted';
+    html = `
+      <p style="color:rgba(255,255,255,.9);font-size:.78rem;margin:6px 0;font-weight:700">${ok ? '✅' : '❌'} <b style="color:${ok?'#4ade80':'#fca5a5'}">${nameOf(p.to)}</b> ${ok ? 'aceitou' : 'recusou'} sua proposta</p>
+      <p style="color:rgba(255,255,255,.7);font-size:.72rem;margin-bottom:6px">${ok ? `Você deu <b>${offerP?offerP.name:''}</b> e recebeu <b>${wantP?wantP.name:''}</b>` : `Você oferecia <b>${offerP?offerP.name:''}</b> por <b>${wantP?wantP.name:''}</b>`}</p>
+      ${cards}
+      <button onclick="dismissProposal('${p.id}')" class="trade-send" style="margin-top:8px">OK</button>`;
+  }
+  body.innerHTML = html;
+  document.getElementById('inbox-count').textContent = `${_inboxIdx+1}/${_inbox.length}`;
+  nav.style.display = _inbox.length > 1 ? 'flex' : 'none';
 }
 function inboxNav(d) { if (!_inbox.length) return; _inboxIdx = (_inboxIdx + d + _inbox.length) % _inbox.length; renderInbox(); }
 
 async function acceptProposal(id) {
-  const p = _inbox.find(x => x.id === id); if (!p || !window.fb) return;
+  const p = _inboxIn.find(x => x.id === id); if (!p || !window.fb) return;
   try {
     await window.fb.applyTrade(p.from, currentUser, p.offer, p.want);
     await window.fb.updateProposal(id, 'accepted');
