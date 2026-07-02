@@ -249,13 +249,35 @@ body{background:#000509}
 
 /* ===== PACK FLOAT (fan above FAB) ===== */
 @keyframes popIn{from{transform:scale(.5) translateY(20px);opacity:0}to{transform:scale(1);opacity:1}}
-.badge-nova{position:absolute;top:4px;left:4px;background:#00b06f;color:#fff;font-size:.55rem;padding:2px 5px;border-radius:4px;font-weight:700;z-index:2}
-.badge-rep{position:absolute;top:4px;right:4px;background:rgba(0,0,0,.6);color:#fff;font-size:.6rem;padding:2px 5px;border-radius:4px;font-weight:700;z-index:2}
+.badge-nova{position:absolute;top:50%;left:50%;transform:translate(-50%,-50%) rotate(-8deg);background:#00b06f;color:#fff;font-size:.62rem;padding:3px 10px;border-radius:5px;font-weight:800;letter-spacing:.06em;z-index:6;box-shadow:0 2px 8px rgba(0,0,0,.6);pointer-events:none}
+.badge-rep{position:absolute;top:50%;left:50%;transform:translate(-50%,-50%) rotate(-8deg);background:rgba(0,0,0,.75);border:1px solid rgba(255,255,255,.5);color:#fff;font-size:.62rem;padding:3px 10px;border-radius:5px;font-weight:800;letter-spacing:.06em;z-index:6;box-shadow:0 2px 8px rgba(0,0,0,.6);pointer-events:none}
 #pack-float{position:fixed;top:112px;right:24px;z-index:200;display:none;flex-direction:column;align-items:flex-end;gap:8px;pointer-events:none}
-#pack-float-fan{position:relative;width:240px;height:290px;pointer-events:auto}
-.pf-card{position:absolute;bottom:0;left:50%;width:120px;height:172px;border-radius:8px;overflow:hidden;cursor:grab;box-shadow:0 4px 18px rgba(0,0,0,.7);background:#fff;transform-origin:bottom center;display:flex;flex-direction:column;user-select:none;transition:filter .15s}
-.pf-card:hover{filter:brightness(1.1)}
+#pack-float-fan{position:relative;width:300px;height:330px;pointer-events:auto}
+.pf-card{position:absolute;bottom:0;left:50%;width:152px;height:218px;border-radius:10px;overflow:hidden;cursor:grab;box-shadow:0 6px 22px rgba(0,0,0,.75);background:linear-gradient(160deg,var(--sq,#065f46) -10%,#050a07 55%);transform-origin:bottom center;user-select:none;transition:filter .15s}
+.pf-card:hover{filter:brightness(1.12)}
 .pf-card.dragging{opacity:.3;cursor:grabbing}
+/* FIFA sticker card */
+.stk-photo{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;object-position:center top}
+.stk-initials{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;color:rgba(255,255,255,.35);font-size:2.4rem;font-weight:800}
+.stk-veil{position:absolute;inset:0;background:linear-gradient(180deg,rgba(5,10,7,.5) 0%,rgba(5,10,7,0) 26%,rgba(5,10,7,.1) 52%,rgba(5,10,7,.93) 100%)}
+.stk-border{position:absolute;inset:3px;border:1.5px solid var(--sq,#065f46);border-radius:7px;box-shadow:inset 0 0 14px rgba(0,0,0,.65);pointer-events:none;z-index:2}
+.stk-corner{position:absolute;width:13px;height:13px;border:2px solid #f0d060;z-index:4;pointer-events:none}
+.stk-corner.tl{top:5px;left:5px;border-right:0;border-bottom:0}
+.stk-corner.tr{top:5px;right:5px;border-left:0;border-bottom:0}
+.stk-corner.bl{bottom:5px;left:5px;border-right:0;border-top:0}
+.stk-corner.br{bottom:5px;right:5px;border-left:0;border-top:0}
+.stk-shield{position:absolute;top:9px;left:9px;width:36px;text-align:center;line-height:1.05;z-index:3;filter:drop-shadow(0 1px 2px rgba(0,0,0,.9))}
+.stk-shield-sel{font-size:.3rem;font-weight:700;color:#f0d060;letter-spacing:.02em}
+.stk-shield-yr{font-size:.46rem;font-weight:900;color:#f0d060;margin-top:1px}
+.stk-role{position:absolute;top:9px;right:9px;text-align:center;z-index:3}
+.stk-stars{font-size:.52rem;color:#f0d060;letter-spacing:1px;line-height:1;text-shadow:0 1px 2px #000}
+.stk-jog{font-size:.34rem;font-weight:800;color:#fff;background:rgba(0,0,0,.55);border:1px solid var(--sq,#065f46);border-radius:3px;padding:1px 4px;margin-top:2px;letter-spacing:.05em}
+.stk-stats{position:absolute;left:8px;top:56px;display:flex;flex-direction:column;gap:7px;z-index:3}
+.stk-stat{display:flex;align-items:center;gap:3px;font-size:.32rem;font-weight:700;color:rgba(255,255,255,.92);text-shadow:0 1px 2px #000;line-height:1;max-width:46px}
+.stk-stat .ic{font-size:.6rem;filter:drop-shadow(0 1px 1px #000)}
+.stk-name{position:absolute;left:0;right:0;bottom:11px;text-align:center;z-index:3;padding:0 6px}
+.stk-name-txt{font-size:.74rem;font-weight:900;color:#fff;letter-spacing:.02em;text-shadow:0 2px 4px #000;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.stk-squad-pill{display:inline-block;margin-top:3px;font-size:.4rem;font-weight:800;color:#fff;background:var(--sq,#065f46);border-radius:20px;padding:2px 9px;letter-spacing:.06em;text-transform:uppercase;box-shadow:0 1px 3px rgba(0,0,0,.5)}
 #pack-float-hint{font-size:.62rem;color:rgba(255,255,255,.8);text-align:right;pointer-events:auto;text-shadow:0 1px 4px rgba(0,0,0,.9);background:rgba(0,0,0,.45);padding:4px 8px;border-radius:6px;max-width:160px}
 #pack-float-save{background:rgba(0,140,80,.92);backdrop-filter:blur(4px);color:#fff;border:1.5px solid rgba(0,200,100,.35);border-radius:8px;padding:8px 14px;font-size:.72rem;font-weight:700;cursor:pointer;pointer-events:auto;transition:.2s;white-space:nowrap}
 #pack-float-save:hover{background:rgba(0,176,100,.98)}
@@ -267,7 +289,7 @@ body{background:#000509}
 .overlay-slot.drop-hover{outline:3px solid #f0d060;outline-offset:2px}
 .overlay-slot.drop-wrong{animation:shakeCard .35s ease}
 @keyframes shakeCard{0%,100%{transform:translateX(0)}20%{transform:translateX(-6px)}40%{transform:translateX(6px)}60%{transform:translateX(-4px)}80%{transform:translateX(4px)}}
-@media(max-width:1100px){#pack-float{top:270px;right:8px}#pack-float-fan{width:200px;height:240px}.pf-card{width:100px;height:144px}}
+@media(max-width:1100px){#pack-float{top:270px;right:8px}#pack-float-fan{width:250px;height:290px}.pf-card{width:128px;height:184px}}
 @media(max-width:900px){#pack-float{top:auto;bottom:130px;right:8px}}
 
 /* ===== PLAYER PICKER ===== */
@@ -1317,26 +1339,32 @@ function renderPackFloat() {
     const alreadyHad = collected.includes(p.id);
     const sq = p.squad && SQUADS[p.squad] ? SQUADS[p.squad] : null;
     const color = sq ? sq.color : '#065f46';
+    const sqName = sq ? sq.name : (p.isTecnico ? 'Comissão Técnica' : 'Seleção');
     const angle = fanAngles[i] !== undefined ? fanAngles[i] : 0;
     const xOff  = fanX[i]     !== undefined ? fanX[i]     : 0;
-    const inner = p.photo
-      ? `<img src="${p.photo}" style="width:100%;height:100%;object-fit:cover;object-position:center top;display:block">`
-      : `<div style="flex:1;background:#0d1e0d;display:flex;align-items:center;justify-content:center;color:rgba(255,255,255,.4);font-size:.85rem;font-weight:700">${getInitials(p.name)}</div>`;
+    const photoHtml = p.photo
+      ? `<img class="stk-photo" src="${p.photo}" alt="" onerror="this.style.display='none'">`
+      : `<div class="stk-initials">${getInitials(p.name)}</div>`;
 
     const div = document.createElement('div');
     div.className = 'pf-card';
-    div.style.cssText = `transform:translateX(calc(-50% + ${xOff}px)) rotate(${angle}deg);z-index:${i+1};animation:popIn ${0.18+i*0.07}s ease backwards`;
+    div.style.cssText = `--sq:${color};transform:translateX(calc(-50% + ${xOff}px)) rotate(${angle}deg);z-index:${i+1};animation:popIn ${0.18+i*0.07}s ease backwards`;
     div.setAttribute('draggable', 'true');
     div.setAttribute('data-player-id', p.id);
     div.innerHTML = `
-      ${alreadyHad ? '<div class="badge-rep">dup</div>' : '<div class="badge-nova">NOVA</div>'}
-      <div style="height:20px;flex-shrink:0;background:${color};display:flex;align-items:center;justify-content:flex-end;padding:0 5px">
-        <span style="color:rgba(255,255,255,.8);font-size:.6rem;font-weight:700">#${p.id}</span>
+      ${alreadyHad ? '<div class="badge-rep">REP</div>' : '<div class="badge-nova">NOVA</div>'}
+      ${photoHtml}
+      <div class="stk-veil"></div>
+      <div class="stk-border"></div>
+      <span class="stk-corner tl"></span><span class="stk-corner tr"></span><span class="stk-corner bl"></span><span class="stk-corner br"></span>
+      <div class="stk-shield"><div class="stk-shield-sel">SELEÇÃO DE</div><div class="stk-shield-yr">DESIGN 2026</div></div>
+      <div class="stk-role"><div class="stk-stars">★★</div><div class="stk-jog">JOGADOR</div></div>
+      <div class="stk-stats">
+        <div class="stk-stat"><span class="ic">👥</span>COLABORAÇÃO</div>
+        <div class="stk-stat"><span class="ic">📈</span>RESULTADOS</div>
+        <div class="stk-stat"><span class="ic">🛡️</span>CONFIANÇA</div>
       </div>
-      ${inner}
-      <div style="flex-shrink:0;background:${color};padding:4px 6px;text-align:center">
-        <div style="font-size:.62rem;font-weight:700;color:#fff;line-height:1.2;overflow:hidden;white-space:nowrap;text-overflow:ellipsis">${p.name}</div>
-      </div>`;
+      <div class="stk-name"><div class="stk-name-txt">${p.name}</div><div class="stk-squad-pill">${sqName}</div></div>`;
 
     div.addEventListener('dragstart', e => {
       e.dataTransfer.setData('text/plain', String(p.id));
