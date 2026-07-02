@@ -360,7 +360,7 @@ body{background:#000509}
 @media(max-width:900px){#pack-float{top:auto;bottom:130px;right:8px}}
 
 /* ===== PLAYER PICKER ===== */
-#player-picker{position:fixed;inset:0;background:rgba(0,0,0,.8);display:flex;align-items:center;justify-content:center;z-index:60}
+#player-picker{position:fixed;inset:0;background:rgba(0,0,0,.8);display:flex;align-items:center;justify-content:center;z-index:600}
 .picker-panel{background:#fff;border-radius:16px;padding:24px;max-width:640px;max-height:80vh;overflow-y:auto;position:relative;width:calc(100% - 32px)}
 .picker-panel h3{font-size:1.1rem;font-weight:800;margin-bottom:4px;color:#111}
 .picker-sub{font-size:.8rem;color:#6b7280;margin-bottom:16px}
@@ -588,8 +588,8 @@ body{background:#000509}
         <div id="gen-code-box" style="display:none;margin-top:12px;background:rgba(200,168,60,.08);border:1.5px solid rgba(200,168,60,.35);border-radius:8px;padding:10px">
           <p id="gen-code-desc" style="color:rgba(255,255,255,.8);font-size:.7rem;line-height:1.5;margin-bottom:8px"></p>
           <div style="display:flex;gap:6px;align-items:flex-start">
-            <code id="gen-code-text" style="flex:1;background:rgba(0,0,0,.5);border-radius:6px;padding:7px;font-size:.62rem;color:#fff;word-break:break-all;font-family:monospace;max-height:60px;overflow-y:auto"></code>
-            <button onclick="copyGenCode()" style="background:#c8a83c;border:none;border-radius:6px;padding:8px 10px;color:#000;font-weight:800;font-size:.7rem;cursor:pointer;flex-shrink:0">📋</button>
+            <code id="gen-code-text" style="flex:1;background:rgba(0,0,0,.5);border-radius:6px;padding:10px;font-size:1.4rem;font-weight:800;letter-spacing:.1em;color:#f0d060;text-align:center;font-family:monospace"></code>
+            <button onclick="copyGenCode()" title="Copiar código" style="background:#c8a83c;border:none;border-radius:6px;padding:0 14px;color:#000;font-weight:800;font-size:1.1rem;cursor:pointer;flex-shrink:0">⧉</button>
           </div>
         </div>
       </div>
@@ -1915,8 +1915,22 @@ function updateGenBtn() {
 }
 
 // ---- codigo de troca ----
-function mkTradeCode(o) { return 'TROCA-' + btoa(unescape(encodeURIComponent(JSON.stringify(o)))); }
-function readTradeCode(s) { s = s.trim(); if (s.indexOf('TROCA-') === 0) s = s.slice(6); return JSON.parse(decodeURIComponent(escape(atob(s)))); }
+// Código curto: base62 de (offer*128 + want) + 1 char aleatório (salt). ~4 caracteres.
+const A62 = '0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ';
+function b62enc(n) { let s = ''; do { s = A62[n % 62] + s; n = Math.floor(n / 62); } while (n > 0); return s; }
+function b62dec(s) { let n = 0; for (const c of s) { const i = A62.indexOf(c); if (i < 0) return NaN; n = n * 62 + i; } return n; }
+function mkTradeCode(offer, want) {
+  let core = b62enc(offer * 128 + want);
+  while (core.length < 3) core = '0' + core;
+  return core + A62[Math.floor(Math.random() * 62)];   // salt final (ignorado na leitura)
+}
+function readTradeCode(s) {
+  s = s.trim();
+  const core = s.slice(0, -1);              // remove o salt
+  const num = b62dec(core);
+  if (isNaN(num)) throw new Error('invalid');
+  return { o: Math.floor(num / 128), w: num % 128 };
+}
 function appliedKey() { return 'album_appliedcodes_' + currentUser; }
 function getApplied() { try { return JSON.parse(localStorage.getItem(appliedKey()) || '[]'); } catch(e) { return []; } }
 function markApplied(code) { const a = getApplied(); if (!a.includes(code)) { a.push(code); localStorage.setItem(appliedKey(), JSON.stringify(a)); } }
@@ -1926,7 +1940,7 @@ function receiveMyCard(id) { const p = getPlayer(id); if (!p) return; packFloatC
 function sendProposalNew() {
   const person = document.getElementById('prop-person').value;
   if (_propOffer == null || _propWant == null || !person) return;
-  const code = mkTradeCode({ f: currentUser, t: person, o: _propOffer, w: _propWant });
+  const code = mkTradeCode(_propOffer, _propWant);
   giveMyCard(_propOffer); receiveMyCard(_propWant);   // no meu lado: dou offer, recebo want
   markApplied(code);
   const offP = getPlayer(_propOffer), wP = getPlayer(_propWant);
@@ -1944,14 +1958,13 @@ function applyPastedCode() {
   const raw = document.getElementById('paste-code-input').value.trim();
   const res = document.getElementById('paste-code-result');
   if (!raw) return;
-  let p; try { p = readTradeCode(raw); } catch(e) { res.innerHTML = trMsg('error','Codigo invalido.'); return; }
-  if (getApplied().includes(raw)) { res.innerHTML = trMsg('warn','Voce ja aplicou esse codigo.'); return; }
-  if (p.f === currentUser) { res.innerHTML = trMsg('warn','Esse codigo e seu - ja foi aplicado quando voce gerou.'); return; }
-  if (p.t !== currentUser) { res.innerHTML = trMsg('warn','Esse codigo e pra ' + dispName(p.t) + ', nao pra voce.'); return; }
-  giveMyCard(p.w); receiveMyCard(p.o);   // sou destinatario: dou want, recebo offer
-  markApplied(raw);
+  let p; try { p = readTradeCode(raw); } catch(e) { res.innerHTML = trMsg('error','Código inválido.'); return; }
   const offP = getPlayer(p.o), wP = getPlayer(p.w);
-  res.innerHTML = trMsg('ok','Troca feita com <b>' + dispName(p.f) + '</b>! Voce deu <b>' + (wP?wP.name:'') + '</b> e recebeu <b>' + (offP?offP.name:'') + '</b> (foi pro seu pacote).');
+  if (!offP || !wP) { res.innerHTML = trMsg('error','Código inválido.'); return; }
+  if (getApplied().includes(raw)) { res.innerHTML = trMsg('warn','Você já aplicou esse código.'); return; }
+  giveMyCard(p.w); receiveMyCard(p.o);   // sou destinatário: dou want, recebo offer
+  markApplied(raw);
+  res.innerHTML = trMsg('ok','Troca feita! Você deu <b>' + wP.name + '</b> e recebeu <b>' + offP.name + '</b> (foi pro seu pacote).');
   document.getElementById('paste-code-input').value = '';
   renderTradeStats();
 }
