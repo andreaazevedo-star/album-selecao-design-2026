@@ -33,31 +33,42 @@ body{background:#000509}
   background:transparent;border:none;color:rgba(255,255,255,0.7);cursor:pointer;transition:.2s}
 .lh-btn-icon:hover{background:rgba(255,255,255,0.08);color:#fff}
 .lh-divider{width:1px;height:32px;background:rgba(255,255,255,0.15);margin:0 8px}
-/* Mercado de trocas */
-.trade-cols{display:grid;grid-template-columns:repeat(4,1fr);gap:16px}
-.trade-col{background:rgba(0,0,0,.35);border:1.5px solid rgba(200,168,60,.35);border-radius:14px;padding:16px;display:flex;flex-direction:column;min-height:340px}
-.trade-col-title{color:#eaf2ec;font-size:.9rem;font-weight:800;letter-spacing:.03em;margin-bottom:8px}
-.trade-col-sub{color:rgba(255,255,255,.55);font-size:.74rem;line-height:1.45}
+/* Mercado de trocas — cores/medidas extraídas do Figma (node 50:942) */
+.trade-cols{display:grid;grid-template-columns:24.3fr 42.6fr 28.5fr;gap:30px}
+.trade-col{background:#0a1414;border:2px solid #e3a931;border-radius:24px;padding:20px;display:flex;flex-direction:column;min-height:360px;position:relative;overflow:hidden}
+.trade-col-title{color:#99c65c;font-size:1rem;font-weight:600;letter-spacing:.02em;text-align:center;display:flex;align-items:center;justify-content:center;gap:6px}
+.trade-col-sub{color:#fdfdf9;font-size:.72rem;line-height:1.5;text-align:center}
+.trade-col-split{display:flex;flex:1;gap:0}
+.trade-col-split>div{flex:1;display:flex;flex-direction:column;padding:0 16px}
+.trade-col-split>div:first-child{padding-left:0}
+.trade-col-split>div:last-child{padding-right:0}
+.trade-col-divider{width:2px;background:linear-gradient(180deg,transparent,#e3a931 15%,#e3a931 85%,transparent);flex-shrink:0}
 .prop-slot{width:78px;height:110px;border:2px dashed;border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:1.6rem;color:rgba(255,255,255,.6);cursor:pointer;overflow:hidden;background:rgba(255,255,255,.03)}
 .prop-slot img{width:100%;height:100%;object-fit:contain}
-.trade-select{width:100%;background:rgba(0,0,0,.5);border:1.5px solid rgba(200,168,60,.35);color:#fff;border-radius:8px;padding:9px 10px;font-size:.8rem;margin-bottom:10px;cursor:pointer}
-.trade-select option{background:#0a1f14}
-.trade-send{width:100%;background:rgba(255,255,255,.08);border:1.5px solid rgba(200,168,60,.3);color:#fff;font-weight:800;padding:10px;border-radius:8px;font-size:.82rem;cursor:pointer;transition:.15s}
-.trade-send:not(:disabled):hover{background:linear-gradient(135deg,#0d3d1c,#1a5c30);color:#f0d060}
-.trade-send:disabled{opacity:.45;cursor:default}
+.trade-select{width:100%;background:#1c2024;border:1.5px solid #ebbc00;color:#fff;border-radius:8px;height:40px;padding:0 12px;font-size:.82rem;margin-bottom:10px;cursor:pointer}
+.trade-select option{background:#1c2024}
+.trade-code-field{width:100%;background:#1c2024;border:1.5px solid #ebbc00;color:#fff;border-radius:8px;height:40px;padding:0 12px;font-size:.85rem;font-weight:600;text-align:center;letter-spacing:.06em;font-family:'SF Mono',monospace;display:flex;align-items:center;gap:8px}
+.trade-code-field .tcf-ic{opacity:.75;font-size:.85rem;flex-shrink:0}
+.trade-code-field input{flex:1;background:transparent;border:none;color:#fff;text-align:center;font-size:.85rem;font-family:'SF Mono',monospace;letter-spacing:.06em;outline:none}
+.trade-copy-btn{width:40px;height:40px;flex-shrink:0;background:transparent;border:none;color:#ebbc00;cursor:pointer;font-size:1rem;border-radius:6px;transition:.15s}
+.trade-copy-btn:hover{background:rgba(235,188,0,.15)}
+.trade-send{width:100%;background:#1a7f37;border:none;color:#fff;font-weight:700;height:40px;border-radius:8px;font-size:.82rem;cursor:pointer;transition:.15s;display:flex;align-items:center;justify-content:center;gap:6px}
+.trade-send:not(:disabled):hover{background:#20993f}
+.trade-send:disabled{background:#2a3530;color:rgba(255,255,255,.35);cursor:default}
 .trade-navbtn{background:transparent;border:none;color:rgba(255,255,255,.7);font-size:.72rem;font-weight:700;cursor:pointer;padding:4px 6px}
 .trade-navbtn:hover{color:#f0d060}
 .trade-rec-cards{display:flex;align-items:center;justify-content:center;gap:8px;margin:10px 0}
 .trade-mini-card{width:74px;height:104px;border-radius:8px;overflow:hidden;background:#0d1e0d;flex-shrink:0}
 .trade-mini-card img{width:100%;height:100%;object-fit:contain;display:block}
 .trade-empty{color:rgba(255,255,255,.4);font-size:.78rem;text-align:center;padding:24px 8px}
+.trade-key-deco{position:absolute;right:-10px;top:50%;transform:translateY(-50%);width:110px;height:110px;opacity:.9;pointer-events:none}
 .stat-cell{border-left:1px solid rgba(255,255,255,.12);padding:0 20px;display:flex;flex-direction:column;align-items:center;justify-content:space-between;gap:12px}
 .stat-top{display:flex;align-items:center;gap:12px}
 .stat-ico{font-size:2.9rem;line-height:1}
-.stat-lbl{color:rgba(255,255,255,.75);font-size:.78rem;font-weight:800;letter-spacing:.03em}
-.stat-num{font-size:1.9rem;font-weight:900;line-height:1.05}
-.stat-pill{width:100%;background:rgba(0,0,0,.35);border:1.5px solid rgba(200,168,60,.3);color:rgba(255,255,255,.9);font-size:.74rem;font-weight:800;border-radius:8px;padding:9px 8px;cursor:pointer;transition:.15s}
-.stat-pill:hover{background:rgba(0,160,80,.22);border-color:rgba(0,200,100,.5);color:#4ade80}
+.stat-lbl{color:#fdfdf9;font-size:.78rem;font-weight:600;letter-spacing:.02em}
+.stat-num{font-size:1.9rem;font-weight:600;line-height:1.05}
+.stat-pill{width:100%;background:rgba(255,255,255,.08);border:none;color:#fdfdf9;font-size:.74rem;font-weight:600;border-radius:8px;padding:9px 8px;cursor:pointer;transition:.15s}
+.stat-pill:hover{background:rgba(255,255,255,.15)}
 /* card gallery overlay */
 #card-gallery{position:fixed;left:0;right:0;top:64px;bottom:0;z-index:400;background:rgba(6,20,14,.9);backdrop-filter:blur(3px);display:none;flex-direction:column;padding:24px}
 #card-gallery .cg-head{display:flex;align-items:center;justify-content:space-between;max-width:1360px;margin:0 auto 18px;width:100%}
@@ -67,7 +78,7 @@ body{background:#000509}
 #card-gallery .cg-card{border-radius:10px;overflow:hidden;box-shadow:0 6px 18px rgba(0,0,0,.6)}
 #card-gallery .cg-card img{width:100%;display:block}
 #card-gallery .cg-card.locked{filter:grayscale(1) brightness(.5)}
-@media(max-width:1000px){.trade-cols{grid-template-columns:repeat(2,1fr)}.trade-stats-grid{grid-template-columns:1fr 1fr!important}}
+@media(max-width:1000px){.trade-cols{grid-template-columns:1fr 1fr}.trade-col-split{flex-direction:column}.trade-col-divider{width:auto;height:2px;background:linear-gradient(90deg,transparent,#e3a931 15%,#e3a931 85%,transparent)}.trade-stats-grid{grid-template-columns:1fr 1fr!important}}
 @media(max-width:600px){.trade-cols{grid-template-columns:1fr}.trade-stats-grid{grid-template-columns:1fr!important}.trade-hero-pack{display:none}.stat-cell{border-left:none;border-top:1px solid rgba(255,255,255,.12);padding:14px 0 0}}
 .trade-tab{flex:1;padding:9px;border-radius:8px;font-size:.78rem;font-weight:700;cursor:pointer;border:1.5px solid rgba(200,168,60,.3);background:transparent;color:rgba(255,255,255,.5);transition:.2s}
 .trade-tab.active{background:rgba(200,168,60,.15);border-color:rgba(200,168,60,.7);color:#f0d060}
@@ -530,7 +541,7 @@ body{background:#000509}
 </div>
 
 <!-- TRADE MODAL -->
-<div id="trade-modal" style="display:none;position:fixed;left:0;right:0;top:64px;bottom:0;background:radial-gradient(ellipse at top,#0f3020,#081109 70%);z-index:300;flex-direction:column;overflow-y:auto;padding:20px 24px 48px">
+<div id="trade-modal" style="display:none;position:fixed;left:0;right:0;top:64px;bottom:0;background:radial-gradient(circle at 50% 50%,rgba(25,87,57,1) 0%,rgba(13,46,33,.945) 50%,rgba(6,26,21,.918) 75%,rgba(0,5,9,.89) 100%);z-index:300;flex-direction:column;overflow-y:auto;padding:20px 24px 48px">
   <div style="width:100%;max-width:1360px;margin:0 auto">
     <!-- banner (imagem do Figma) + botão voltar sobreposto -->
     <div style="position:relative;margin-bottom:22px">
@@ -539,11 +550,11 @@ body{background:#000509}
     </div>
 
     <!-- stats -->
-    <div style="border:1.5px solid rgba(200,168,60,.45);border-radius:16px;padding:22px 24px;margin-bottom:22px;display:grid;grid-template-columns:1.3fr 1fr 1fr 1fr;gap:0" class="trade-stats-grid">
+    <div style="border:2px solid #e3a931;background:#0a1414;border-radius:24px;padding:22px 24px;margin-bottom:30px;display:grid;grid-template-columns:1.3fr 1fr 1fr 1fr;gap:0" class="trade-stats-grid">
       <div style="padding-right:24px">
-        <div style="color:#f0a020;font-size:.85rem;font-weight:800;letter-spacing:.04em">ÁLBUM COMPLETO</div>
+        <div style="color:rgba(235,188,0,.98);font-size:.85rem;font-weight:600;letter-spacing:.02em">ÁLBUM COMPLETO</div>
         <div style="display:flex;align-items:center;gap:14px;margin-top:8px">
-          <div id="stat-pct" style="font-size:3rem;font-weight:900;color:#fff;line-height:1">0%</div>
+          <div id="stat-pct" style="font-size:3.4rem;font-weight:500;color:#fdfdf9;line-height:1">0%</div>
           <div style="font-size:3rem;line-height:1">🏆</div>
         </div>
         <div style="height:9px;background:rgba(255,255,255,.12);border-radius:6px;margin-top:12px;overflow:hidden"><div id="stat-bar" style="height:100%;width:0%;background:linear-gradient(90deg,#16a34a,#4ade80);border-radius:6px;transition:width .4s"></div></div>
@@ -562,51 +573,61 @@ body{background:#000509}
       </div>
     </div>
 
-    <!-- 4 columns -->
+    <!-- 3 columns (a do meio é dividida internamente em 2 painéis) -->
     <div class="trade-cols">
       <!-- 1. dicas / slack -->
       <div class="trade-col">
-        <div class="trade-col-title" style="color:#4ade80;text-align:center">DICAS PARA TROCAR FIGURINHA</div>
-        <p class="trade-col-sub" style="margin-top:10px;text-align:center">Que tal sair perguntando para a galera? Só ir na nossa thread do canal <b style="color:#fff">#stone-design</b> no Slack e comentar:</p>
-        <div style="flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:6px">
-          <svg width="40" height="40" viewBox="0 0 40 40" fill="none"><rect x="15" y="1" width="8" height="10" rx="4" fill="#36C5F0"/><rect x="29" y="15" width="10" height="8" rx="4" fill="#2EB67D"/><rect x="17" y="29" width="8" height="10" rx="4" fill="#ECB22E"/><rect x="1" y="17" width="10" height="8" rx="4" fill="#E01E5A"/></svg>
+        <div class="trade-col-title" style="font-size:.72rem">DICAS PARA TROCAR FIGURINHA</div>
+        <p class="trade-col-sub" style="margin-top:10px">Que tal sair perguntando para a galera? Só ir na nossa thread do canal <b style="color:#fff">#stone-design</b> no Slack e comentar:</p>
+        <div style="flex:1;display:flex;align-items:center;justify-content:center">
+          <svg width="52" height="52" viewBox="0 0 40 40" fill="none"><rect x="15" y="1" width="8" height="10" rx="4" fill="#36C5F0"/><rect x="29" y="15" width="10" height="8" rx="4" fill="#2EB67D"/><rect x="17" y="29" width="8" height="10" rx="4" fill="#ECB22E"/><rect x="1" y="17" width="10" height="8" rx="4" fill="#E01E5A"/></svg>
         </div>
-        <p class="trade-col-sub" style="text-align:center">Assim que combinarem, é só gerar o código! 😉</p>
+        <p class="trade-col-sub">Assim que negociarem, é só gerar o código! 😉</p>
       </div>
 
-      <!-- 2. realizar a troca -->
+      <!-- 2. realizar a troca + código gerado (um único card dividido) -->
       <div class="trade-col">
-        <div class="trade-col-title" style="color:#4ade80">➤ REALIZAR A TROCA</div>
-        <p class="trade-col-sub">Escolha a pessoa que você negociou, o que você oferece (sua repetida) e o que quer receber. Depois gere o código.</p>
-        <select id="prop-person" class="trade-select" style="margin-top:10px"><option value="">Selecione uma pessoa</option></select>
-        <div style="display:flex;align-items:center;gap:8px;justify-content:center;margin:10px 0 12px">
-          <div style="text-align:center"><div style="color:#4ade80;font-size:.66rem;font-weight:800;margin-bottom:5px">EU OFEREÇO</div><div id="prop-offer" onclick="pickProposalOffer()" class="prop-slot" style="border-color:rgba(74,222,128,.6)">+</div></div>
-          <div style="color:rgba(255,255,255,.5);font-size:1.2rem">➡</div>
-          <div style="text-align:center"><div style="color:#c084fc;font-size:.66rem;font-weight:800;margin-bottom:5px">EU QUERO</div><div id="prop-want" onclick="pickProposalWant()" class="prop-slot" style="border-color:rgba(192,132,252,.6)">+</div></div>
-        </div>
-        <button id="prop-send" onclick="sendProposalNew()" class="trade-send" disabled>&lt;/&gt; Gerar o Código</button>
-      </div>
-
-      <!-- 3. código gerado -->
-      <div class="trade-col">
-        <div class="trade-col-title" style="color:#4ade80">✓ CÓDIGO GERADO</div>
-        <p class="trade-col-sub">Ao gerar o código, a troca está preparada! Agora copie e mande para a outra pessoa via Slack ;)</p>
-        <div style="flex:1;display:flex;flex-direction:column;justify-content:center;margin-top:10px">
-          <p id="gen-code-desc" style="color:rgba(255,255,255,.75);font-size:.72rem;line-height:1.5;margin-bottom:10px;display:none"></p>
-          <div style="display:flex;gap:6px;align-items:center">
-            <code id="gen-code-text" style="flex:1;background:rgba(0,0,0,.5);border:1.5px solid rgba(200,168,60,.4);border-radius:8px;padding:12px;font-size:1.5rem;font-weight:800;letter-spacing:.12em;color:#f0d060;text-align:center;font-family:monospace">— — — —</code>
-            <button onclick="copyGenCode()" title="Copiar código" style="background:#c8a83c;border:none;border-radius:8px;padding:0 16px;height:52px;color:#000;font-weight:800;font-size:1.2rem;cursor:pointer;flex-shrink:0">⧉</button>
+        <div class="trade-col-split">
+          <div>
+            <div class="trade-col-title"><svg width="16" height="16" viewBox="0 0 24 24" fill="none"><path d="M3 11l18-8-8 18-2-8-8-2z" fill="#99c65c"/></svg>REALIZAR A TROCA</div>
+            <p class="trade-col-sub" style="margin-top:8px">Escolha a pessoa que você negociou o que você oferece (sua repetida) e o que quer receber. Depois gere o código.</p>
+            <select id="prop-person" class="trade-select" style="margin-top:10px"><option value="">Selecione um pessoa</option></select>
+            <div style="display:flex;align-items:center;gap:8px;justify-content:center;margin:10px 0 12px">
+              <div style="text-align:center"><div style="color:#4ade80;font-size:.66rem;font-weight:800;margin-bottom:5px">EU OFEREÇO</div><div id="prop-offer" onclick="pickProposalOffer()" class="prop-slot" style="border-color:rgba(74,222,128,.6)">+</div></div>
+              <div style="color:rgba(255,255,255,.5);font-size:1.2rem">➡</div>
+              <div style="text-align:center"><div style="color:#c084fc;font-size:.66rem;font-weight:800;margin-bottom:5px">EU QUERO</div><div id="prop-want" onclick="pickProposalWant()" class="prop-slot" style="border-color:rgba(192,132,252,.6)">+</div></div>
+            </div>
+            <button id="prop-send" onclick="sendProposalNew()" class="trade-send" disabled><svg width="14" height="14" viewBox="0 0 24 24" fill="none"><path d="M8 3L3 8l3.5 3.5M16 21l5-5-3.5-3.5M3 8h13a5 5 0 015 5v0M21 16H8a5 5 0 01-5-5v0" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>Gerar o Código</button>
+          </div>
+          <div class="trade-col-divider"></div>
+          <div>
+            <div class="trade-col-title">CÓDIGO GERADO</div>
+            <p class="trade-col-sub" style="margin-top:8px">Ao Gerar o código, a troca está preparada! Agora copie e mande para outra pessoa via slack ;)</p>
+            <div style="flex:1;display:flex;flex-direction:column;justify-content:flex-end">
+              <p id="gen-code-desc" style="color:#fdfdf9;font-size:.7rem;line-height:1.5;margin-bottom:10px;display:none"></p>
+              <div class="trade-code-field">
+                <span class="tcf-ic">&lt;/&gt;</span>
+                <span id="gen-code-text" style="flex:1">————</span>
+                <button class="trade-copy-btn" onclick="copyGenCode()" title="Copiar código">⧉</button>
+              </div>
+            </div>
           </div>
         </div>
       </div>
 
-      <!-- 4. resgatar código -->
+      <!-- 3. resgatar código -->
       <div class="trade-col">
-        <div class="trade-col-title" style="color:#4ade80">🔑 RESGATAR UM CÓDIGO</div>
-        <p class="trade-col-sub">Recebeu um código de troca? Cole abaixo e clique em Confirmar.</p>
-        <input id="paste-code-input" type="text" maxlength="12" placeholder="Cole o código aqui" style="width:100%;margin-top:10px;background:rgba(255,255,255,.07);border:1.5px solid rgba(200,168,60,.35);border-radius:8px;color:#fff;padding:12px;font-size:1rem;text-align:center;letter-spacing:.08em;font-family:monospace">
-        <button onclick="applyPastedCode()" class="trade-send" style="margin-top:8px">✓ Confirmar</button>
-        <div id="paste-code-result"></div>
+        <svg class="trade-key-deco" viewBox="0 0 24 24" fill="none"><path d="M14.5 2a5.5 5.5 0 100 11 5.48 5.48 0 002.7-.7L19 14l1.5-1.5L18 10l1-1-1.5-1.5-1 1-1.2-1.2A5.48 5.48 0 0016.5 5 5.5 5.5 0 0014.5 2zm0 2.2a3.3 3.3 0 110 6.6 3.3 3.3 0 010-6.6z" stroke="#f0d060" stroke-width=".6" fill="none" opacity=".55"/></svg>
+        <div class="trade-col-title">RESGATAR UM CÓDIGO</div>
+        <p class="trade-col-sub" style="margin-top:8px">Recebeu um código de troca?<br>Cole o código abaixo e clique em Confirmar.</p>
+        <div style="flex:1;display:flex;flex-direction:column;justify-content:center;gap:10px">
+          <div class="trade-code-field">
+            <span class="tcf-ic">&lt;/&gt;</span>
+            <input id="paste-code-input" type="text" maxlength="12" placeholder="Cole o código aqui">
+          </div>
+          <button onclick="applyPastedCode()" class="trade-send"><svg width="14" height="14" viewBox="0 0 24 24" fill="none"><path d="M20 6L9 17l-5-5" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/></svg>Confirmar</button>
+          <div id="paste-code-result"></div>
+        </div>
       </div>
     </div>
   </div>
@@ -1845,7 +1866,7 @@ function openTrade() {
   _propOffer = null; _propWant = null;
   populatePersonSelect();
   renderPropSlots();
-  const gt = document.getElementById('gen-code-text'); if (gt) gt.textContent = '— — — —';
+  const gt = document.getElementById('gen-code-text'); if (gt) gt.textContent = '————';
   const gd = document.getElementById('gen-code-desc'); if (gd) gd.style.display = 'none';
   const pin = document.getElementById('paste-code-input'); if (pin) pin.value = '';
   const pr = document.getElementById('paste-code-result'); if (pr) pr.innerHTML = '';
