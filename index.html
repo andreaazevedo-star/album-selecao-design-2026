@@ -2451,12 +2451,16 @@ function devReset() {
 populateLoginSelect();
 
 const savedUser = localStorage.getItem('album_current_user');
-if (savedUser) {
+// só auto-loga se a sessão salva for um nome válido do time (ignora sessões antigas do Google, que eram e-mail)
+if (savedUser && TEAM.some(p => p.name === savedUser)) {
   currentUser = savedUser;
   currentUserName = savedUser;
   const sel = document.getElementById('login-select');
   if (sel) sel.value = savedUser;
   showApp();
+} else {
+  localStorage.removeItem('album_current_user');
+  document.getElementById('login-screen').style.display = 'block';
 }
 </script>
 </body>
