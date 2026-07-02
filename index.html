@@ -1332,8 +1332,10 @@ function renderPackFloat() {
   container.innerHTML = '';
   const collected = getCollected();
   const total = packFloatCards.length;
-  const fanAngles = [-16, -8, 0, 8, 16];
-  const fanX     = [-56, -28, 0, 28, 56];
+  // Stacked deck (like Figma): back cards offset up-right, front card bottom-left
+  const fanAngles = [4, 2, 0, -2, -4];
+  const fanX      = [40, 22, 4, -14, -30];
+  const fanY      = [-46, -24, -4, 14, 32];
 
   packFloatCards.forEach((p, i) => {
     const alreadyHad = collected.includes(p.id);
@@ -1342,13 +1344,14 @@ function renderPackFloat() {
     const sqName = sq ? sq.name : (p.isTecnico ? 'Comissão Técnica' : 'Seleção');
     const angle = fanAngles[i] !== undefined ? fanAngles[i] : 0;
     const xOff  = fanX[i]     !== undefined ? fanX[i]     : 0;
+    const yOff  = fanY[i]     !== undefined ? fanY[i]     : 0;
     const photoHtml = p.photo
       ? `<img class="stk-photo" src="${p.photo}" alt="" onerror="this.style.display='none'">`
       : `<div class="stk-initials">${getInitials(p.name)}</div>`;
 
     const div = document.createElement('div');
     div.className = 'pf-card';
-    div.style.cssText = `--sq:${color};transform:translateX(calc(-50% + ${xOff}px)) rotate(${angle}deg);z-index:${i+1};animation:popIn ${0.18+i*0.07}s ease backwards`;
+    div.style.cssText = `--sq:${color};transform:translate(calc(-50% + ${xOff}px), ${yOff}px) rotate(${angle}deg);z-index:${i+1};animation:popIn ${0.18+i*0.07}s ease backwards`;
     div.setAttribute('draggable', 'true');
     div.setAttribute('data-player-id', p.id);
     div.innerHTML = `
