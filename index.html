@@ -253,11 +253,10 @@ body{background:#000509}
 .badge-rep{position:absolute;top:50%;left:50%;transform:translate(-50%,-50%) rotate(-8deg);background:rgba(0,0,0,.75);border:1px solid rgba(255,255,255,.5);color:#fff;font-size:.62rem;padding:3px 10px;border-radius:5px;font-weight:800;letter-spacing:.06em;z-index:6;box-shadow:0 2px 8px rgba(0,0,0,.6);pointer-events:none}
 #pack-float{position:fixed;top:112px;right:24px;z-index:200;display:none;flex-direction:column;align-items:flex-end;gap:8px;pointer-events:none}
 #pack-float-fan{position:relative;width:300px;height:330px;pointer-events:auto}
-.pf-card{position:absolute;bottom:0;left:50%;width:152px;height:218px;border-radius:10px;overflow:hidden;cursor:grab;box-shadow:0 6px 22px rgba(0,0,0,.75);background:linear-gradient(160deg,var(--sq,#065f46) -10%,#050a07 55%);transform-origin:bottom center;user-select:none;transition:filter .15s}
-.pf-card:hover{filter:brightness(1.12)}
-.pf-card.dragging{opacity:.3;cursor:grabbing}
-/* FIFA sticker card */
-.stk-photo{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;object-position:center top}
+.pf-card{position:absolute;bottom:0;left:50%;width:152px;height:216px;border-radius:8px;overflow:hidden;box-shadow:0 6px 22px rgba(0,0,0,.75);transform-origin:bottom center;user-select:none;transition:filter .15s}
+.pf-card:hover{filter:brightness(1.08)}
+/* sticker card = full baked-in FIFA image */
+.stk-photo{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;object-position:center}
 .stk-initials{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;color:rgba(255,255,255,.35);font-size:2.4rem;font-weight:800}
 .stk-veil{position:absolute;inset:0;background:linear-gradient(180deg,rgba(5,10,7,.5) 0%,rgba(5,10,7,0) 26%,rgba(5,10,7,.1) 52%,rgba(5,10,7,.93) 100%)}
 .stk-border{position:absolute;inset:3px;border:1.5px solid var(--sq,#065f46);border-radius:7px;box-shadow:inset 0 0 14px rgba(0,0,0,.65);pointer-events:none;z-index:2}
@@ -412,10 +411,8 @@ body{background:#000509}
 </button>
 
 <!-- PACK FLOAT -->
-<div id="pack-float" style="display:none">
+<div id="pack-float" style="display:none" onclick="closePackFloat()">
   <div id="pack-float-fan"></div>
-  <div id="pack-float-hint"></div>
-  <button id="pack-float-save" onclick="savePackFloat()">Guardar restantes ✓</button>
 </div>
 
 <!-- INSTRUCTIONS MODAL -->
@@ -1317,7 +1314,19 @@ function openPack() {
     return;
   }
   const drawn = drawCards(5);
-  pendingPackCards = drawn;
+  // Auto-collect: reveal is display-only (no drag). Persist immediately.
+  const collected = getCollected();
+  const dupes = getDupes();
+  let newCount = 0, dupeCount = 0;
+  drawn.forEach(p => {
+    if (!collected.includes(p.id)) { collected.push(p.id); newCount++; }
+    else { dupes.push(p.id); dupeCount++; }
+  });
+  saveCollected(collected);
+  saveDupes(dupes);
+  incPacksToday();
+  updateFAB();
+  refreshCurrentPage();
   showPackOverlay(drawn);
 }
 
@@ -1325,6 +1334,13 @@ function showPackOverlay(cards) {
   packFloatCards = [...cards];
   renderPackFloat();
   document.getElementById('pack-float').style.display = 'flex';
+}
+
+function closePackFloat() {
+  packFloatCards = [];
+  pendingPackCards = [];
+  document.getElementById('pack-float').style.display = 'none';
+  refreshCurrentPage();
 }
 
 function renderPackFloat() {
@@ -1352,35 +1368,10 @@ function renderPackFloat() {
     const div = document.createElement('div');
     div.className = 'pf-card';
     div.style.cssText = `--sq:${color};transform:translate(calc(-50% + ${xOff}px), ${yOff}px) rotate(${angle}deg);z-index:${i+1};animation:popIn ${0.18+i*0.07}s ease backwards`;
-    div.setAttribute('draggable', 'true');
     div.setAttribute('data-player-id', p.id);
-    div.innerHTML = `
-      ${alreadyHad ? '<div class="badge-rep">REP</div>' : '<div class="badge-nova">NOVA</div>'}
-      ${photoHtml}
-      <div class="stk-veil"></div>
-      <div class="stk-border"></div>
-      <span class="stk-corner tl"></span><span class="stk-corner tr"></span><span class="stk-corner bl"></span><span class="stk-corner br"></span>
-      <div class="stk-shield"><div class="stk-shield-sel">SELEÇÃO DE</div><div class="stk-shield-yr">DESIGN 2026</div></div>
-      <div class="stk-role"><div class="stk-stars">★★</div><div class="stk-jog">JOGADOR</div></div>
-      <div class="stk-stats">
-        <div class="stk-stat"><span class="ic">👥</span>COLABORAÇÃO</div>
-        <div class="stk-stat"><span class="ic">📈</span>RESULTADOS</div>
-        <div class="stk-stat"><span class="ic">🛡️</span>CONFIANÇA</div>
-      </div>
-      <div class="stk-name"><div class="stk-name-txt">${p.name}</div><div class="stk-squad-pill">${sqName}</div></div>`;
-
-    div.addEventListener('dragstart', e => {
-      e.dataTransfer.setData('text/plain', String(p.id));
-      setTimeout(() => div.classList.add('dragging'), 0);
-    });
-    div.addEventListener('dragend', () => div.classList.remove('dragging'));
+    div.innerHTML = photoHtml;
     container.appendChild(div);
   });
-
-  const hint = document.getElementById('pack-float-hint');
-  hint.textContent = total > 0
-    ? `${total} figurinha${total>1?'s':''} — arraste para o álbum`
-    : 'Todas colocadas! 🎉';
 }
 
 function dropStickerOnAlbum(event, targetPlayerId) {
