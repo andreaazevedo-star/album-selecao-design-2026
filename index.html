@@ -290,14 +290,14 @@ body{background:#000509}
 #pack-float-save:hover{background:rgba(0,176,100,.98)}
 /* pack zoom overlay */
 #pack-zoom{position:fixed;inset:0;top:64px;z-index:10001;background:rgba(6,20,14,.86);backdrop-filter:blur(3px);display:none;align-items:center;justify-content:center;gap:min(4vw,60px)}
-#pack-zoom-card{position:relative;height:min(72vh,560px);aspect-ratio:282/400;border-radius:14px;overflow:hidden;box-shadow:0 20px 60px rgba(0,0,0,.7);animation:popIn .22s ease backwards}
+#pack-zoom-card{position:relative;width:333px;height:500px;border-radius:14px;overflow:hidden;background:#050a07;box-shadow:0 20px 60px rgba(0,0,0,.7);animation:popIn .22s ease backwards}
 #pack-zoom-card-inner{width:100%;height:100%}
-.pz-close{position:absolute;top:10px;right:10px;z-index:3;width:34px;height:34px;border-radius:50%;background:rgba(0,0,0,.55);border:1.5px solid rgba(255,255,255,.35);cursor:pointer;display:flex;align-items:center;justify-content:center;transition:.15s}
-.pz-close:hover{background:rgba(0,0,0,.8)}
+.pz-close{position:fixed;top:80px;right:24px;z-index:3;width:42px;height:42px;border-radius:50%;background:rgba(0,0,0,.55);border:1.5px solid rgba(255,255,255,.35);cursor:pointer;display:flex;align-items:center;justify-content:center;transition:.15s}
+.pz-close:hover{background:rgba(0,0,0,.85);transform:scale(1.06)}
 .pz-nav{width:52px;height:52px;border-radius:50%;background:#0d3d1c;border:1.5px solid rgba(200,168,60,.5);cursor:pointer;display:flex;align-items:center;justify-content:center;transition:.15s;flex-shrink:0;box-shadow:0 4px 14px rgba(0,0,0,.5)}
 .pz-nav:hover{background:#1a5c30;transform:scale(1.06)}
 #pack-zoom-count{position:fixed;bottom:24px;left:50%;transform:translateX(-50%);color:rgba(255,255,255,.85);font-size:.85rem;font-weight:700;letter-spacing:.05em;text-shadow:0 1px 4px rgba(0,0,0,.9)}
-@media(max-width:900px){#pack-zoom{gap:8px}#pack-zoom-card{height:min(64vh,460px)}.pz-nav{width:44px;height:44px}}
+@media(max-width:900px){#pack-zoom{gap:8px}#pack-zoom-card{width:min(333px,72vw);height:auto;aspect-ratio:333/500}.pz-nav{width:44px;height:44px}.pz-close{top:74px;right:12px}}
 /* drop zones */
 .stk{transition:outline .12s}
 .stk.drop-hover{outline:3px solid #f0d060!important;outline-offset:2px;background:rgba(240,208,96,.07)!important}
@@ -438,10 +438,10 @@ body{background:#000509}
   <button class="pz-nav pz-prev" onclick="zoomNav(-1)" aria-label="Anterior">
     <svg width="26" height="26" viewBox="0 0 20 20" fill="none"><path d="M13 4l-6 6 6 6" stroke="white" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg>
   </button>
+  <button class="pz-close" onclick="closeZoom()" aria-label="Fechar">
+    <svg width="20" height="20" viewBox="0 0 20 20" fill="none"><path d="M5 5l10 10M15 5L5 15" stroke="white" stroke-width="2.2" stroke-linecap="round"/></svg>
+  </button>
   <div id="pack-zoom-card">
-    <button class="pz-close" onclick="closeZoom()" aria-label="Fechar">
-      <svg width="18" height="18" viewBox="0 0 20 20" fill="none"><path d="M5 5l10 10M15 5L5 15" stroke="white" stroke-width="2.2" stroke-linecap="round"/></svg>
-    </button>
     <div id="pack-zoom-card-inner"></div>
   </div>
   <button class="pz-nav pz-next" onclick="zoomNav(1)" aria-label="Próxima">
@@ -614,6 +614,10 @@ const TEAM = [
   { id:63, name:'Raffael Costa',        role:'Product Designer',      squad:9, squads:[9],   isTecnico:false, isSpecial:false, isCross:false, photo:'imgs/novos-negocios/63.png' },
   { id:64, name:'Sérgio Fontes',        role:'Product Designer',      squad:9, squads:[9],   isTecnico:false, isSpecial:false, isCross:false, photo:'imgs/novos-negocios/64.png' },
 ];
+
+// Cache-bust sticker photos (images updated 2026-07-01 to high-res sources)
+const IMG_VER = '2';
+TEAM.forEach(p => { if (p.photo) p.photo += '?v=' + IMG_VER; });
 
 const SPREADS = [
   { left: 'cc-left',    right: 'cc-right'       },  // contra capa + sumário
