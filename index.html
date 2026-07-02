@@ -632,13 +632,13 @@ body{background:#000509}
       <!-- 2. oferecer proposta -->
       <div class="trade-col">
         <div class="trade-col-title">✈️ OFERECER UMA PROPOSTA</div>
-        <p class="trade-col-sub">Escolha a figurinha que deseja oferecer e a que gostaria de receber. Depois escolha a pessoa e envie.</p>
+        <p class="trade-col-sub">Escolha a pessoa, o que você oferece (sua repetida) e o que quer receber (repetida dela). Depois é só enviar.</p>
+        <select id="prop-person" class="trade-select" style="margin-top:10px"><option value="">Selecione uma pessoa</option></select>
         <div style="display:flex;align-items:center;gap:8px;justify-content:center;margin:6px 0 12px">
           <div style="text-align:center"><div style="color:#4ade80;font-size:.66rem;font-weight:800;margin-bottom:5px">EU OFEREÇO</div><div id="prop-offer" onclick="pickProposalOffer()" class="prop-slot" style="border-color:rgba(74,222,128,.6)">+</div></div>
           <div style="color:rgba(255,255,255,.5);font-size:1.2rem">➡</div>
           <div style="text-align:center"><div style="color:#c084fc;font-size:.66rem;font-weight:800;margin-bottom:5px">EU QUERO</div><div id="prop-want" onclick="pickProposalWant()" class="prop-slot" style="border-color:rgba(192,132,252,.6)">+</div></div>
         </div>
-        <select id="prop-person" class="trade-select"><option value="">Selecione uma pessoa</option></select>
         <button id="prop-send" onclick="sendProposalNew()" class="trade-send" disabled>✈ Enviar Proposta</button>
       </div>
       <!-- 3. caixa de entrada -->
@@ -2018,7 +2018,7 @@ function populatePersonSelect() {
   sel.innerHTML = '<option value="">Selecione uma pessoa</option>' +
     others.map(p => `<option value="${p.id}">${prettyProfileName(p)}</option>`).join('');
   if (others.some(p => p.id === cur)) sel.value = cur;
-  sel.onchange = updatePropSendState;
+  sel.onchange = () => { _propWant = null; renderPropSlots(); };  // "eu quero" depende da pessoa
 }
 
 function computeRecommendations() {
@@ -2086,13 +2086,15 @@ function renderPropSlots() {
 function pickProposalOffer() {
   const dupes = [...new Set(getDupes())];
   if (!dupes.length) { showToast('Você não tem repetidas para oferecer'); return; }
-  openGenericPicker('O que você oferece (repetidas)', dupes, id => { _propOffer = id; renderPropSlots(); });
+  openGenericPicker('Suas repetidas — escolha o que oferecer', dupes, id => { _propOffer = id; renderPropSlots(); });
 }
 function pickProposalWant() {
-  const collected = getCollected();
-  const missing = TEAM.filter(p => !collected.includes(p.id)).map(p => p.id);
-  if (!missing.length) { showToast('Você já tem todas! 🎉'); return; }
-  openGenericPicker('O que você quer (faltantes)', missing, id => { _propWant = id; renderPropSlots(); });
+  const person = document.getElementById('prop-person').value;
+  if (!person) { showToast('Selecione a pessoa primeiro ☝️'); return; }
+  const prof = _allProfiles.find(p => p.id === person);
+  const theirDupes = prof ? [...new Set(prof.dupes || [])] : [];
+  if (!theirDupes.length) { showToast(nameOf(person) + ' não tem repetidas para oferecer'); return; }
+  openGenericPicker('Repetidas de ' + nameOf(person) + ' — escolha o que quer', theirDupes, id => { _propWant = id; renderPropSlots(); });
 }
 function updatePropSendState() {
   const person = document.getElementById('prop-person').value;
