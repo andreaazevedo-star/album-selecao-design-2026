@@ -39,10 +39,10 @@ body{background:#000509}
 .trade-col-title{color:#99c65c;font-size:1rem;font-weight:600;letter-spacing:.02em;text-align:center;display:flex;align-items:center;justify-content:center;gap:6px}
 .trade-col-sub{color:#fdfdf9;font-size:.72rem;line-height:1.5;text-align:center}
 .trade-col-split{display:flex;flex:1;gap:0}
-.trade-col-split>div{flex:1;display:flex;flex-direction:column;padding:0 16px}
-.trade-col-split>div:first-child{padding-left:0}
-.trade-col-split>div:last-child{padding-right:0}
-.trade-col-divider{width:2px;background:linear-gradient(180deg,transparent,#e3a931 15%,#e3a931 85%,transparent);flex-shrink:0}
+.trade-col-split>div:not(.trade-col-divider){flex:1;display:flex;flex-direction:column;padding:0 16px}
+.trade-col-split>div:not(.trade-col-divider):first-child{padding-left:0}
+.trade-col-split>div:not(.trade-col-divider):last-child{padding-right:0}
+.trade-col-divider{width:2px;flex:0 0 2px;background:linear-gradient(180deg,transparent,#e3a931 15%,#e3a931 85%,transparent)}
 .prop-slot{width:78px;height:110px;border:2px dashed;border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:1.6rem;color:rgba(255,255,255,.6);cursor:pointer;overflow:hidden;background:rgba(255,255,255,.03)}
 .prop-slot img{width:100%;height:100%;object-fit:contain}
 .trade-select{width:100%;background:#1c2024;border:1.5px solid #ebbc00;color:#fff;border-radius:8px;height:40px;padding:0 12px;font-size:.82rem;margin-bottom:10px;cursor:pointer}
@@ -61,7 +61,7 @@ body{background:#000509}
 .trade-mini-card{width:74px;height:104px;border-radius:8px;overflow:hidden;background:#0d1e0d;flex-shrink:0}
 .trade-mini-card img{width:100%;height:100%;object-fit:contain;display:block}
 .trade-empty{color:rgba(255,255,255,.4);font-size:.78rem;text-align:center;padding:24px 8px}
-.trade-key-deco{position:absolute;right:-10px;top:50%;transform:translateY(-50%);width:110px;height:110px;opacity:.9;pointer-events:none}
+.trade-key-deco{position:absolute;right:-10px;top:10px;width:140px;height:140px;opacity:.85;pointer-events:none}
 .stat-cell{border-left:1px solid rgba(255,255,255,.12);padding:0 20px;display:flex;flex-direction:column;align-items:center;justify-content:space-between;gap:12px}
 .stat-top{display:flex;align-items:center;gap:12px}
 .stat-ico{font-size:2.9rem;line-height:1}
@@ -579,10 +579,14 @@ body{background:#000509}
     <div class="trade-cols">
       <!-- 1. dicas / slack -->
       <div class="trade-col">
-        <div class="trade-col-title" style="font-size:.72rem">DICAS PARA TROCAR FIGURINHA</div>
+        <div class="trade-col-title" style="font-size:.72rem"><svg width="16" height="16" viewBox="0 0 24 24" fill="none"><path d="M21 15a2 2 0 01-2 2H7l-4 4V5a2 2 0 012-2h14a2 2 0 012 2z" stroke="#99c65c" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>DICAS PARA TROCAR FIGURINHAA</div>
         <p class="trade-col-sub" style="margin-top:10px">Que tal sair perguntando para a galera? Só ir na nossa thread do canal <b style="color:#fff">#stone-design</b> no Slack e comentar:</p>
-        <div style="flex:1;display:flex;align-items:center;justify-content:center">
-          <svg width="52" height="52" viewBox="0 0 40 40" fill="none"><rect x="15" y="1" width="8" height="10" rx="4" fill="#36C5F0"/><rect x="29" y="15" width="10" height="8" rx="4" fill="#2EB67D"/><rect x="17" y="29" width="8" height="10" rx="4" fill="#ECB22E"/><rect x="1" y="17" width="10" height="8" rx="4" fill="#E01E5A"/></svg>
+        <div style="flex:1;display:flex;align-items:center;gap:12px;margin:12px 0">
+          <div style="display:flex;flex-direction:column;gap:8px;flex:1">
+            <div style="background:#1a7f37;border-radius:12px 12px 12px 4px;padding:8px 14px;color:#fff;font-size:.72rem;font-weight:600;width:fit-content">"Alguém quer trocar o Fulano?"</div>
+            <div style="background:#1a7f37;border-radius:12px 12px 12px 4px;padding:8px 14px;color:#fff;font-size:.72rem;font-weight:600;width:fit-content">"Quero o Fulano!" 🤝</div>
+          </div>
+          <svg width="52" height="52" viewBox="0 0 40 40" fill="none" style="flex-shrink:0"><rect x="15" y="1" width="8" height="10" rx="4" fill="#36C5F0"/><rect x="29" y="15" width="10" height="8" rx="4" fill="#2EB67D"/><rect x="17" y="29" width="8" height="10" rx="4" fill="#ECB22E"/><rect x="1" y="17" width="10" height="8" rx="4" fill="#E01E5A"/></svg>
         </div>
         <p class="trade-col-sub">Assim que negociarem, é só gerar o código! 😉</p>
       </div>
@@ -619,7 +623,7 @@ body{background:#000509}
 
       <!-- 3. resgatar código -->
       <div class="trade-col">
-        <svg class="trade-key-deco" viewBox="0 0 24 24" fill="none"><path d="M14.5 2a5.5 5.5 0 100 11 5.48 5.48 0 002.7-.7L19 14l1.5-1.5L18 10l1-1-1.5-1.5-1 1-1.2-1.2A5.48 5.48 0 0016.5 5 5.5 5.5 0 0014.5 2zm0 2.2a3.3 3.3 0 110 6.6 3.3 3.3 0 010-6.6z" stroke="#f0d060" stroke-width=".6" fill="none" opacity=".55"/></svg>
+        <svg class="trade-key-deco" viewBox="0 0 100 100" fill="none" style="width:140px;height:140px;filter:drop-shadow(0 0 12px rgba(240,208,96,.4))"><circle cx="35" cy="35" r="18" stroke="#f0d060" stroke-width="3" fill="none"/><circle cx="35" cy="35" r="8" stroke="#f0d060" stroke-width="2" fill="none" opacity=".5"/><line x1="53" y1="35" x2="90" y2="35" stroke="#f0d060" stroke-width="3" stroke-linecap="round"/><line x1="75" y1="35" x2="75" y2="48" stroke="#f0d060" stroke-width="3" stroke-linecap="round"/><line x1="83" y1="35" x2="83" y2="45" stroke="#f0d060" stroke-width="3" stroke-linecap="round"/></svg>
         <div class="trade-col-title">RESGATAR UM CÓDIGO</div>
         <p class="trade-col-sub" style="margin-top:8px">Recebeu um código de troca?<br>Cole o código abaixo e clique em Confirmar.</p>
         <div style="flex:1;display:flex;flex-direction:column;justify-content:center;gap:10px">
