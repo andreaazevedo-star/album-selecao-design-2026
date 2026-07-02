@@ -8,123 +8,7 @@
 <meta http-equiv="Expires" content="0">
 <title>Seleção do Design 2026</title>
 <!-- ===================== FIREBASE (Mercado de Trocas) ===================== -->
-<script type="module">
-  import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
-  import { getAuth, GoogleAuthProvider, signInWithPopup, signOut, onAuthStateChanged, setPersistence, browserLocalPersistence }
-    from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
-
-  const firebaseConfig = {
-    apiKey: "AIzaSyBdXH-fsof1iHykoGBw_JssxkklRwSoxlY",
-    authDomain: "album-selecao-design.firebaseapp.com",
-    projectId: "album-selecao-design",
-    storageBucket: "album-selecao-design.firebasestorage.app",
-    messagingSenderId: "52540044722",
-    appId: "1:52540044722:web:19fe4b3e3fc09123e9e0ab"
-  };
-  const app = initializeApp(firebaseConfig);
-  const auth = getAuth(app);
-  setPersistence(auth, browserLocalPersistence).catch(()=>{});
-
-  // ===== Firestore via REST (plain fetch) — evita o WebChannel bloqueado por extensão de CORS / proxy =====
-  const KEY = firebaseConfig.apiKey;
-  const FS  = `https://firestore.googleapis.com/v1/projects/${firebaseConfig.projectId}/databases/(default)/documents`;
-
-  function enc(v) {
-    if (typeof v === 'number') return Number.isInteger(v) ? { integerValue: String(v) } : { doubleValue: v };
-    if (typeof v === 'string') return { stringValue: v };
-    if (typeof v === 'boolean') return { booleanValue: v };
-    if (Array.isArray(v)) return { arrayValue: { values: v.map(enc) } };
-    if (v == null) return { nullValue: null };
-    return { stringValue: String(v) };
-  }
-  function dec(v) {
-    if (!v) return null;
-    if ('integerValue' in v) return parseInt(v.integerValue, 10);
-    if ('doubleValue' in v)  return v.doubleValue;
-    if ('stringValue' in v)  return v.stringValue;
-    if ('booleanValue' in v) return v.booleanValue;
-    if ('arrayValue' in v)   return (v.arrayValue.values || []).map(dec);
-    if ('timestampValue' in v) return v.timestampValue;
-    return null;
-  }
-  function encFields(obj) { const f = {}; for (const k in obj) f[k] = enc(obj[k]); return { fields: f }; }
-  function decDoc(d) { const o = { id: d.name.split('/').pop() }; const f = d.fields || {}; for (const k in f) o[k] = dec(f[k]); return o; }
-
-  async function fsGet(path) {
-    const r = await fetch(`${FS}/${path}?key=${KEY}`);
-    if (r.status === 404) return null;
-    if (!r.ok) throw new Error('GET ' + r.status);
-    return r.json();
-  }
-  async function fsList(coll) {
-    const r = await fetch(`${FS}/${coll}?key=${KEY}&pageSize=300`);
-    if (!r.ok) throw new Error('LIST ' + r.status);
-    const j = await r.json();
-    return (j.documents || []).map(decDoc);
-  }
-  function fsSet(coll, id, obj) {  // full-document upsert
-    return fetch(`${FS}/${coll}/${encodeURIComponent(id)}?key=${KEY}`, {
-      method: 'PATCH', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(encFields(obj))
-    }).then(r => { if (!r.ok) throw new Error('SET ' + r.status); return r.json(); });
-  }
-  function fsCreate(coll, obj) {   // auto-id
-    return fetch(`${FS}/${coll}?key=${KEY}`, {
-      method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(encFields(obj))
-    }).then(r => { if (!r.ok) throw new Error('CREATE ' + r.status); return r.json(); });
-  }
-  function fsPatchField(coll, id, field, value) {
-    return fetch(`${FS}/${coll}/${encodeURIComponent(id)}?key=${KEY}&updateMask.fieldPaths=${field}`, {
-      method: 'PATCH', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ fields: { [field]: enc(value) } })
-    }).then(r => { if (!r.ok) throw new Error('PATCH ' + r.status); return r.json(); });
-  }
-
-  function giveCard(prof, id) {
-    const di = prof.dupes.indexOf(id);
-    if (di !== -1) prof.dupes.splice(di, 1);
-    else { const ci = prof.collected.indexOf(id); if (ci !== -1) prof.collected.splice(ci, 1); }
-  }
-  function receiveCard(prof, id) {
-    if (prof.collected.includes(id)) prof.dupes.push(id);
-    else prof.collected.push(id);
-  }
-  function nowIso() { return new Date().toISOString(); }
-
-  // polling helper for "listeners"
-  function poll(fn, cb, ms) {
-    let stopped = false;
-    async function tick() { if (stopped) return; try { cb(await fn()); } catch(e) { console.warn('poll', e); } if (!stopped) setTimeout(tick, ms); }
-    tick();
-    return () => { stopped = true; };
-  }
-
-  window.fb = {
-    ready: true,
-    signInGoogle: () => signInWithPopup(auth, new GoogleAuthProvider()),
-    signOutUser: () => signOut(auth),
-    onAuth: (cb) => onAuthStateChanged(auth, cb),
-    publishProfile: (id, collected, dupes, name) =>
-      fsSet('players', id, { name: name || id, collected, dupes, updatedAt: nowIso() }),
-    getProfile: async (id) => { const d = await fsGet('players/' + encodeURIComponent(id)); return d ? decDoc(d) : null; },
-    getAllProfiles: () => fsList('players'),
-    sendProposal: (p) => fsCreate('proposals', { ...p, status: 'pending', createdAt: nowIso() }),
-    listenInbox: (user, cb) => poll(async () => (await fsList('proposals')).filter(p => p.to === user), cb, 5000),
-    listenOutbox: (user, cb) => poll(async () => (await fsList('proposals')).filter(p => p.from === user), cb, 5000),
-    updateProposal: (id, status) => fsPatchField('proposals', id, 'status', status),
-    applyTrade: async (fromUser, toUser, offerId, wantId) => {
-      const fd = await fsGet('players/' + encodeURIComponent(fromUser));
-      const td = await fsGet('players/' + encodeURIComponent(toUser));
-      const fp = fd ? decDoc(fd) : { collected: [], dupes: [], name: fromUser };
-      const tp = td ? decDoc(td) : { collected: [], dupes: [], name: toUser };
-      fp.collected = fp.collected || []; fp.dupes = fp.dupes || [];
-      tp.collected = tp.collected || []; tp.dupes = tp.dupes || [];
-      giveCard(fp, offerId); receiveCard(fp, wantId);
-      giveCard(tp, wantId);  receiveCard(tp, offerId);
-      await fsSet('players', fromUser, { name: fp.name || fromUser, collected: fp.collected, dupes: fp.dupes, updatedAt: nowIso() });
-      await fsSet('players', toUser,   { name: tp.name || toUser,   collected: tp.collected, dupes: tp.dupes, updatedAt: nowIso() });
-    }
-  };
-  if (window.__onFbReady) window.__onFbReady();
-</script>
+<!-- (Firebase removido — app 100% local, funciona na VPN) -->
 <!-- ======================================================================= -->
 <style>
 *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
@@ -549,12 +433,15 @@ body{background:#000509}
 
   <div class="login-card">
     <div class="login-frame">
-      <p style="color:rgba(255,255,255,.75);font-size:.9rem;text-align:center;margin-bottom:16px;line-height:1.5">Entre com seu e-mail Google para acessar seu álbum.</p>
-      <button id="login-btn" class="login-btn" onclick="doLoginGoogle()" style="display:flex;align-items:center;justify-content:center;gap:10px">
-        <svg width="20" height="20" viewBox="0 0 48 48"><path fill="#FFC107" d="M43.6 20.5H42V20H24v8h11.3C33.7 32.7 29.3 36 24 36c-6.6 0-12-5.4-12-12s5.4-12 12-12c3.1 0 5.9 1.2 8 3.1l5.7-5.7C34.5 6.1 29.5 4 24 4 12.9 4 4 12.9 4 24s8.9 20 20 20 20-8.9 20-20c0-1.3-.1-2.3-.4-3.5z"/><path fill="#FF3D00" d="M6.3 14.7l6.6 4.8C14.7 15.1 19 12 24 12c3.1 0 5.9 1.2 8 3.1l5.7-5.7C34.5 6.1 29.5 4 24 4 16.3 4 9.7 8.3 6.3 14.7z"/><path fill="#4CAF50" d="M24 44c5.2 0 10-2 13.6-5.2l-6.3-5.3C29.2 35 26.7 36 24 36c-5.3 0-9.7-3.3-11.3-8l-6.5 5C9.5 39.6 16.2 44 24 44z"/><path fill="#1976D2" d="M43.6 20.5H42V20H24v8h11.3c-.8 2.2-2.2 4.1-4 5.5l6.3 5.3C41.4 36.3 44 30.7 44 24c0-1.3-.1-2.3-.4-3.5z"/></svg>
-        Entrar com Google
-      </button>
-      <p style="color:rgba(255,255,255,.4);font-size:.7rem;text-align:center;margin-top:14px">Use sua conta @stone.com.br</p>
+      <div class="login-field">
+        <span class="login-field-icon">👤</span>
+        <select id="login-select"><option value="">Selecione seu nome...</option></select>
+      </div>
+      <div class="login-field">
+        <span class="login-field-icon">🔒</span>
+        <input id="login-password" type="password" placeholder="Senha de acesso" onkeydown="if(event.key==='Enter')doLogin()" style="width:100%;padding:12px 16px;border-radius:6px;background:rgba(0,0,0,0.75);color:#fff;border:1.5px solid rgba(200,168,60,0.4);font-size:1rem">
+      </div>
+      <button id="login-btn" class="login-btn" onclick="doLogin()">ENTRAR &nbsp;→</button>
     </div>
   </div>
 </div>
@@ -677,37 +564,42 @@ body{background:#000509}
 
     <!-- 4 columns -->
     <div class="trade-cols">
-      <!-- 1. recomendadas -->
+      <!-- 1. como funciona -->
       <div class="trade-col">
-        <div class="trade-col-title">🤝 TROCAS RECOMENDADAS</div>
-        <p class="trade-col-sub">O sistema cruza suas figurinhas com as que outras pessoas precisam, sugerindo trocas para você.</p>
-        <div id="rec-body" style="flex:1"></div>
-        <div id="rec-nav" style="display:none;align-items:center;justify-content:space-between;margin-top:10px">
-          <span id="rec-count" style="color:rgba(255,255,255,.5);font-size:.7rem"></span>
-          <span><button onclick="recNav(-1)" class="trade-navbtn">← Anterior</button><button onclick="recNav(1)" class="trade-navbtn">Próximo →</button></span>
-        </div>
+        <div class="trade-col-title">🤝 COMO TROCAR</div>
+        <p class="trade-col-sub">Combine a troca com a pessoa no <b style="color:#fff">#stone-design</b> no Slack. Depois:</p>
+        <ol style="color:rgba(255,255,255,.7);font-size:.74rem;line-height:1.6;margin:12px 0 0 16px;padding:0">
+          <li>Em <b>Oferecer</b>: escolha a pessoa, o que você dá e o que quer receber → <b>Gerar código</b>.</li>
+          <li>Mande o código pra pessoa no Slack.</li>
+          <li>Ela cola o código em <b>Receber troca</b> e pronto — a figurinha vai pro pacote de cada um.</li>
+        </ol>
       </div>
       <!-- 2. oferecer proposta -->
       <div class="trade-col">
-        <div class="trade-col-title">✈️ OFERECER UMA PROPOSTA</div>
-        <p class="trade-col-sub">Escolha a pessoa, o que você oferece (sua repetida) e o que quer receber (repetida dela). Depois é só enviar.</p>
+        <div class="trade-col-title">✈️ OFERECER (GERAR CÓDIGO)</div>
+        <p class="trade-col-sub">Escolha a pessoa, o que você oferece (sua repetida) e o que quer receber. Depois gere o código.</p>
         <select id="prop-person" class="trade-select" style="margin-top:10px"><option value="">Selecione uma pessoa</option></select>
         <div style="display:flex;align-items:center;gap:8px;justify-content:center;margin:6px 0 12px">
           <div style="text-align:center"><div style="color:#4ade80;font-size:.66rem;font-weight:800;margin-bottom:5px">EU OFEREÇO</div><div id="prop-offer" onclick="pickProposalOffer()" class="prop-slot" style="border-color:rgba(74,222,128,.6)">+</div></div>
           <div style="color:rgba(255,255,255,.5);font-size:1.2rem">➡</div>
           <div style="text-align:center"><div style="color:#c084fc;font-size:.66rem;font-weight:800;margin-bottom:5px">EU QUERO</div><div id="prop-want" onclick="pickProposalWant()" class="prop-slot" style="border-color:rgba(192,132,252,.6)">+</div></div>
         </div>
-        <button id="prop-send" onclick="sendProposalNew()" class="trade-send" disabled>✈ Enviar Proposta</button>
-      </div>
-      <!-- 3. caixa de entrada -->
-      <div class="trade-col">
-        <div class="trade-col-title">✉️ CAIXA DE ENTRADA</div>
-        <p class="trade-col-sub">Acompanhe as propostas recebidas e responda às solicitações de troca.</p>
-        <div id="inbox-body" style="flex:1"></div>
-        <div id="inbox-nav" style="display:none;align-items:center;justify-content:space-between;margin-top:10px">
-          <span id="inbox-count" style="color:rgba(255,255,255,.5);font-size:.7rem"></span>
-          <span><button onclick="inboxNav(-1)" class="trade-navbtn">← Anterior</button><button onclick="inboxNav(1)" class="trade-navbtn">Próximo →</button></span>
+        <button id="prop-send" onclick="sendProposalNew()" class="trade-send" disabled>Gerar código de troca</button>
+        <div id="gen-code-box" style="display:none;margin-top:12px;background:rgba(200,168,60,.08);border:1.5px solid rgba(200,168,60,.35);border-radius:8px;padding:10px">
+          <p id="gen-code-desc" style="color:rgba(255,255,255,.8);font-size:.7rem;line-height:1.5;margin-bottom:8px"></p>
+          <div style="display:flex;gap:6px;align-items:flex-start">
+            <code id="gen-code-text" style="flex:1;background:rgba(0,0,0,.5);border-radius:6px;padding:7px;font-size:.62rem;color:#fff;word-break:break-all;font-family:monospace;max-height:60px;overflow-y:auto"></code>
+            <button onclick="copyGenCode()" style="background:#c8a83c;border:none;border-radius:6px;padding:8px 10px;color:#000;font-weight:800;font-size:.7rem;cursor:pointer;flex-shrink:0">📋</button>
+          </div>
         </div>
+      </div>
+      <!-- 3. receber troca (colar código) -->
+      <div class="trade-col">
+        <div class="trade-col-title">✉️ RECEBER TROCA (COLAR CÓDIGO)</div>
+        <p class="trade-col-sub">Cole aqui o código que a pessoa te enviou no Slack pra concluir a troca.</p>
+        <textarea id="paste-code-input" placeholder="Cole o código (TROCA-...) aqui" style="width:100%;height:70px;margin-top:10px;background:rgba(255,255,255,.07);border:1.5px solid rgba(200,168,60,.35);border-radius:8px;color:#fff;padding:10px;font-size:.74rem;resize:none;font-family:monospace"></textarea>
+        <button onclick="applyPastedCode()" class="trade-send" style="margin-top:8px">Aplicar troca</button>
+        <div id="paste-code-result"></div>
       </div>
       <!-- 4. não encontrou -->
       <div class="trade-col">
@@ -893,55 +785,11 @@ function clearPendingPack() {
   if (currentUser) localStorage.removeItem(getPendingKey());
 }
 
-// ===== Firebase sync (Mercado de Trocas) =====
-// Push local collection to the cloud so others can match trades.
-function syncProfileToCloud() {
-  if (!currentUser || !window.fb) return;
-  const collected = getCollected();
-  const dupes = getDupes();
-  window.fb.publishProfile(currentUser, collected, dupes, currentUserName).catch(e => console.warn('publish', e));
-}
-// Pull cloud collection (cloud wins — reflects trades accepted while offline).
-async function syncProfileFromCloud() {
-  if (!currentUser || !window.fb) return;
-  try {
-    const prof = await window.fb.getProfile(currentUser);
-    if (prof) {
-      _suppressCloudSync = true;
-      saveCollected(prof.collected || []);
-      saveDupes(prof.dupes || []);
-      _suppressCloudSync = false;
-      refreshCurrentPage();
-      if (typeof updateFAB === 'function') updateFAB();
-    } else {
-      syncProfileToCloud(); // first time — publish current local state
-    }
-  } catch(e) { console.warn('sync', e); }
-}
-// Called by the Firebase module once it finishes loading — wires Google auth.
-window.__onFbReady = function() {
-  window.fb.onAuth(user => {
-    if (user) {
-      currentUser = user.email;
-      currentUserName = user.displayName || user.email;
-      document.getElementById('login-screen').style.display = 'none';
-      showApp();
-      syncProfileFromCloud();
-      startInboxListener();
-    } else {
-      stopInboxListener();
-      currentUser = null; currentUserName = null;
-      // back to login
-      document.getElementById('login-screen').style.display = 'flex';
-      document.getElementById('login-header').style.display = 'none';
-      document.getElementById('book-scene').style.display = 'none';
-      document.getElementById('fab').style.display = 'none';
-      document.getElementById('switch-user-btn').style.display = 'none';
-      document.getElementById('dev-panel').style.display = 'none';
-      const tm = document.getElementById('trade-modal'); if (tm) tm.style.display = 'none';
-    }
-  });
-};
+// App 100% local (sem backend). Estas funções viraram no-op — mantidas só pra não quebrar chamadas existentes.
+function syncProfileToCloud() {}
+function syncProfileFromCloud() {}
+function startInboxListener() {}
+function stopInboxListener() {}
 
 function getDupes() {
   try { return JSON.parse(localStorage.getItem(getDupesKey()) || '[]'); } catch(e) { return []; }
@@ -1990,45 +1838,33 @@ function closeInstructions() {
 function tradeEncode(obj) { return btoa(unescape(encodeURIComponent(JSON.stringify(obj)))); }
 function tradeDecode(s)   { return JSON.parse(decodeURIComponent(escape(atob(s.trim())))); }
 
-/* ===== MERCADO DE TROCAS (Firebase) ===== */
-let _allProfiles = [], _recList = [], _recIdx = 0;
+/* ===== MERCADO DE TROCAS (local, por codigo) ===== */
 let _propOffer = null, _propWant = null;
-let _inbox = [], _inboxIdx = 0, _inboxUnsub = null, _outboxUnsub = null;
-let _inboxIn = [], _inboxOut = [];
 
 function openTrade() {
-  if (!currentUser) { showToast('Faça login primeiro!'); return; }
+  if (!currentUser) { showToast('Faca login primeiro!'); return; }
   document.getElementById('trade-modal').style.display = 'flex';
   renderTradeStats();
   _propOffer = null; _propWant = null;
+  populatePersonSelect();
   renderPropSlots();
-  renderInbox();
-  if (!window.fb) { showToast('Conectando ao servidor de trocas…'); return; }
-  loadTradeData();
+  const box = document.getElementById('gen-code-box'); if (box) box.style.display = 'none';
+  const pin = document.getElementById('paste-code-input'); if (pin) pin.value = '';
+  const pr = document.getElementById('paste-code-result'); if (pr) pr.innerHTML = '';
 }
-function closeTrade() {
-  document.getElementById('trade-modal').style.display = 'none';
-}
+function closeTrade() { document.getElementById('trade-modal').style.display = 'none'; }
 
-// Galeria de figurinhas por categoria (coletadas / repetidas / faltantes)
 function openCardGallery(type) {
   const collected = getCollected();
   const dupesArr = getDupes();
   let ids, title, locked = false;
-  if (type === 'collected') { ids = collected.slice(); title = '📗 Figurinhas Coletadas'; }
-  else if (type === 'dupes') { ids = [...new Set(dupesArr)]; title = '🔄 Figurinhas Repetidas'; }
-  else { ids = TEAM.filter(p => !collected.includes(p.id)).map(p => p.id); title = '🃏 Figurinhas que Faltam'; locked = true; }
-  document.getElementById('cg-title').textContent = `${title} (${ids.length})`;
+  if (type === 'collected') { ids = collected.slice(); title = 'Figurinhas Coletadas'; }
+  else if (type === 'dupes') { ids = [...new Set(dupesArr)]; title = 'Figurinhas Repetidas'; }
+  else { ids = TEAM.filter(p => !collected.includes(p.id)).map(p => p.id); title = 'Figurinhas que Faltam'; locked = true; }
+  document.getElementById('cg-title').textContent = title + ' (' + ids.length + ')';
   const grid = document.getElementById('cg-grid');
-  if (!ids.length) {
-    grid.innerHTML = '<div class="trade-empty" style="grid-column:1/-1">Nenhuma figurinha nesta categoria.</div>';
-  } else {
-    grid.innerHTML = ids.map(id => {
-      const p = getPlayer(id); if (!p) return '';
-      const cnt = type === 'dupes' ? dupesArr.filter(x => x === id).length : 0;
-      return `<div class="cg-card${locked ? ' locked' : ''}">${p.photo ? `<img src="${p.photo}" alt="${p.name}">` : ''}${cnt > 1 ? `<div style="position:absolute"></div>` : ''}</div>`;
-    }).join('');
-  }
+  if (!ids.length) grid.innerHTML = '<div class="trade-empty" style="grid-column:1/-1">Nenhuma figurinha nesta categoria.</div>';
+  else grid.innerHTML = ids.map(id => { const p = getPlayer(id); if (!p) return ''; return '<div class="cg-card' + (locked ? ' locked' : '') + '">' + (p.photo ? '<img src="' + p.photo + '" alt="' + p.name + '">' : '') + '</div>'; }).join('');
   document.getElementById('card-gallery').style.display = 'flex';
 }
 function closeCardGallery() { document.getElementById('card-gallery').style.display = 'none'; }
@@ -2045,149 +1881,85 @@ function renderTradeStats() {
   document.getElementById('stat-missing').textContent = total - have;
 }
 
-async function loadTradeData() {
-  try { _allProfiles = await window.fb.getAllProfiles(); } catch(e) { _allProfiles = []; }
-  populatePersonSelect();
-  computeRecommendations();
-  renderRecommendations();
-}
-
-// resolve display name from a profile (handles legacy numeric-id profiles)
-function prettyProfileName(prof, fallbackId) {
-  const n = prof && prof.name;
-  if (n && !/^\d+$/.test(String(n).trim())) return n;          // real name
-  const num = Number((n != null ? n : (prof && prof.id != null ? prof.id : fallbackId)));
-  const pl = getPlayer(num);                                    // legacy numeric id → player name
-  if (pl) return pl.name;
-  const id = (prof && prof.id) || fallbackId || '';
-  return String(id).split('@')[0] || 'Colega';
-}
-// email (id) -> display name
-function nameOf(id) {
-  const p = _allProfiles.find(x => x.id === id);
-  return prettyProfileName(p, id);
-}
+function dispName(n) { if (n && !/^\d+$/.test(String(n))) return n; const pl = getPlayer(Number(n)); return pl ? pl.name : n; }
 
 function populatePersonSelect() {
-  const sel = document.getElementById('prop-person');
+  const sel = document.getElementById('prop-person'); if (!sel) return;
+  const others = [...new Set(TEAM.filter(p => p.name !== currentUser).map(p => p.name))].sort((a,b)=>a.localeCompare(b,'pt-BR'));
   const cur = sel.value;
-  const others = _allProfiles.filter(p => p.id !== currentUser)
-    .sort((a,b) => (a.name||'').localeCompare(b.name||'','pt-BR'));
-  sel.innerHTML = '<option value="">Selecione uma pessoa</option>' +
-    others.map(p => `<option value="${p.id}">${prettyProfileName(p)}</option>`).join('');
-  if (others.some(p => p.id === cur)) sel.value = cur;
-  sel.onchange = () => { _propWant = null; renderPropSlots(); };  // "eu quero" depende da pessoa
+  sel.innerHTML = '<option value="">Selecione uma pessoa</option>' + others.map(n => '<option value="'+n+'">'+n+'</option>').join('');
+  if (others.includes(cur)) sel.value = cur;
+  sel.onchange = updateGenBtn;
 }
-
-function computeRecommendations() {
-  _recList = []; _recIdx = 0;
-  const myDupes = [...new Set(getDupes())];
-  const myCollected = getCollected();
-  const myMissing = TEAM.filter(p => !myCollected.includes(p.id)).map(p => p.id);
-  const mutual = [], oneWay = [];
-  _allProfiles.forEach(prof => {
-    if (prof.id === currentUser) return;
-    const theirCollected = prof.collected || [];
-    const theirDupes = [...new Set(prof.dupes || [])];
-    const theirMissing = TEAM.filter(p => !theirCollected.includes(p.id)).map(p => p.id);
-    const iGiveNeeded = myDupes.filter(id => theirMissing.includes(id)); // minhas repetidas que ela precisa
-    const iGet = theirDupes.filter(id => myMissing.includes(id));         // repetidas dela que eu preciso
-
-    let give = null, get = null, isMutual = false;
-    if (iGet.length) {                    // eu ganho uma que preciso
-      get = iGet[0];
-      give = iGiveNeeded.length ? iGiveNeeded[0] : (myDupes.find(d => d !== get) ?? myDupes[0]);
-      isMutual = iGiveNeeded.length > 0;
-    } else if (iGiveNeeded.length) {      // só ajudo (ela está completa/sem faltas p/ mim)
-      give = iGiveNeeded[0];
-      get = theirDupes.find(d => d !== give) ?? theirDupes[0] ?? null;
-    }
-    if (give != null && get != null && give !== get) {
-      const rec = { personId: prof.id, personName: prettyProfileName(prof), give, get };
-      (isMutual ? mutual : oneWay).push(rec);
-    }
-  });
-  _recList = [...mutual, ...oneWay];   // trocas mútuas primeiro
-}
-
-function miniCardHTML(id) {
-  const p = getPlayer(id);
-  return `<div class="trade-mini-card">${p && p.photo ? `<img src="${p.photo}">` : ''}</div>`;
-}
-
-// Envia a proposta recomendada direto (sem preencher formulário)
-function proposeRecommended(personId, giveId, wantId) {
-  if (!window.fb) return;
-  window.fb.sendProposal({ from: currentUser, to: personId, offer: giveId, want: wantId })
-    .then(() => showToast('Proposta enviada para ' + nameOf(personId) + ' ✈️ — veja na Caixa de Entrada'))
-    .catch(e => { showToast('Erro ao enviar proposta'); console.warn(e); });
-}
-
-function renderRecommendations() {
-  const body = document.getElementById('rec-body');
-  const nav = document.getElementById('rec-nav');
-  if (!_recList.length) {
-    body.innerHTML = '<div class="trade-empty">Nenhuma troca recomendada por enquanto.<br>Abra mais pacotes ou volte depois. 🔄</div>';
-    nav.style.display = 'none'; return;
-  }
-  if (_recIdx >= _recList.length) _recIdx = 0;
-  const r = _recList[_recIdx];
-  const giveP = getPlayer(r.give), getP = getPlayer(r.get);
-  body.innerHTML = `
-    <p style="color:rgba(255,255,255,.85);font-size:.78rem;text-align:center;margin:8px 0"><b style="color:#4ade80">${r.personName}</b> pode te ajudar</p>
-    <div class="trade-rec-cards">${miniCardHTML(r.get)}<div style="color:#4ade80;font-size:1.2rem">⇄</div>${miniCardHTML(r.give)}</div>
-    <p style="color:rgba(255,255,255,.55);font-size:.7rem;text-align:center">Você recebe <b style="color:#fff">${getP?getP.name:''}</b> e dá <b style="color:#fff">${giveP?giveP.name:''}</b></p>
-    <button onclick="proposeRecommended('${r.personId}',${r.give},${r.get})" class="trade-send" style="margin-top:10px">Propor esta troca</button>`;
-  document.getElementById('rec-count').textContent = `${_recIdx+1}/${_recList.length} recomendações`;
-  nav.style.display = 'flex';
-}
-function recNav(d) { if (!_recList.length) return; _recIdx = (_recIdx + d + _recList.length) % _recList.length; renderRecommendations(); }
-
-function prefillProposal(person, giveId, getId) {
-  _propOffer = giveId; _propWant = getId;
-  renderPropSlots();
-  const sel = document.getElementById('prop-person'); sel.value = person; updatePropSendState();
-  document.getElementById('prop-send').scrollIntoView({ behavior:'smooth', block:'center' });
-}
-
-function miniImg(id) { const p = getPlayer(id); return p && p.photo ? `<img src="${p.photo}">` : '?'; }
+function miniImg(id) { const p = getPlayer(id); return p && p.photo ? '<img src="'+p.photo+'">' : '?'; }
 function renderPropSlots() {
   document.getElementById('prop-offer').innerHTML = _propOffer != null ? miniImg(_propOffer) : '+';
   document.getElementById('prop-want').innerHTML  = _propWant  != null ? miniImg(_propWant)  : '+';
-  updatePropSendState();
+  updateGenBtn();
 }
 function pickProposalOffer() {
   const dupes = [...new Set(getDupes())];
-  if (!dupes.length) { showToast('Você não tem repetidas para oferecer'); return; }
-  openGenericPicker('Suas repetidas — escolha o que oferecer', dupes, id => { _propOffer = id; renderPropSlots(); });
+  if (!dupes.length) { showToast('Voce nao tem repetidas para oferecer'); return; }
+  openGenericPicker('Suas repetidas - escolha o que oferecer', dupes, id => { _propOffer = id; renderPropSlots(); });
 }
 function pickProposalWant() {
-  const person = document.getElementById('prop-person').value;
-  if (!person) { showToast('Selecione a pessoa primeiro ☝️'); return; }
-  const prof = _allProfiles.find(p => p.id === person);
-  const theirDupes = prof ? [...new Set(prof.dupes || [])] : [];
-  if (!theirDupes.length) { showToast(nameOf(person) + ' não tem repetidas para oferecer'); return; }
-  openGenericPicker('Repetidas de ' + nameOf(person) + ' — escolha o que quer', theirDupes, id => { _propWant = id; renderPropSlots(); });
+  const collected = getCollected();
+  const missing = TEAM.filter(p => !collected.includes(p.id)).map(p => p.id);
+  if (!missing.length) { showToast('Voce ja tem todas!'); return; }
+  openGenericPicker('O que voce quer receber', missing, id => { _propWant = id; renderPropSlots(); });
 }
-function updatePropSendState() {
+function updateGenBtn() {
   const person = document.getElementById('prop-person').value;
-  document.getElementById('prop-send').disabled = !(_propOffer != null && _propWant != null && person);
-}
-function sendProposalNew() {
-  const person = document.getElementById('prop-person').value;
-  if (_propOffer == null || _propWant == null || !person || !window.fb) return;
-  window.fb.sendProposal({ from: currentUser, to: person, offer: _propOffer, want: _propWant })
-    .then(() => { showToast('Proposta enviada para ' + nameOf(person) + ' ✈️'); _propOffer = null; _propWant = null;
-      document.getElementById('prop-person').value = ''; renderPropSlots(); })
-    .catch(e => { showToast('Erro ao enviar proposta'); console.warn(e); });
+  const btn = document.getElementById('prop-send');
+  if (btn) btn.disabled = !(_propOffer != null && _propWant != null && person);
 }
 
+// ---- codigo de troca ----
+function mkTradeCode(o) { return 'TROCA-' + btoa(unescape(encodeURIComponent(JSON.stringify(o)))); }
+function readTradeCode(s) { s = s.trim(); if (s.indexOf('TROCA-') === 0) s = s.slice(6); return JSON.parse(decodeURIComponent(escape(atob(s)))); }
+function appliedKey() { return 'album_appliedcodes_' + currentUser; }
+function getApplied() { try { return JSON.parse(localStorage.getItem(appliedKey()) || '[]'); } catch(e) { return []; } }
+function markApplied(code) { const a = getApplied(); if (!a.includes(code)) { a.push(code); localStorage.setItem(appliedKey(), JSON.stringify(a)); } }
+function giveMyCard(id) { const d = getDupes(); const i = d.indexOf(id); if (i !== -1) { d.splice(i,1); saveDupes(d); } else { const c = getCollected(); const j = c.indexOf(id); if (j !== -1) { c.splice(j,1); saveCollected(c); } } }
+function receiveMyCard(id) { const p = getPlayer(id); if (!p) return; packFloatCards.push(p); pendingPackCards = packFloatCards.slice(); savePendingPack(); renderPackFloat(); document.getElementById('pack-float').style.display = 'flex'; }
+
+function sendProposalNew() {
+  const person = document.getElementById('prop-person').value;
+  if (_propOffer == null || _propWant == null || !person) return;
+  const code = mkTradeCode({ f: currentUser, t: person, o: _propOffer, w: _propWant });
+  giveMyCard(_propOffer); receiveMyCard(_propWant);   // no meu lado: dou offer, recebo want
+  markApplied(code);
+  const offP = getPlayer(_propOffer), wP = getPlayer(_propWant);
+  document.getElementById('gen-code-text').textContent = code;
+  document.getElementById('gen-code-desc').innerHTML = 'Troca com <b>' + person + '</b>: voce deu <b>' + (offP?offP.name:'') + '</b> e recebeu <b>' + (wP?wP.name:'') + '</b> (foi pro seu pacote). Mande o codigo pra ' + person + ' no Slack.';
+  document.getElementById('gen-code-box').style.display = '';
+  _propOffer = null; _propWant = null; renderPropSlots(); renderTradeStats();
+  showToast('Codigo gerado! Cole no Slack pra pessoa');
+}
+function copyGenCode() {
+  const t = document.getElementById('gen-code-text').textContent;
+  navigator.clipboard.writeText(t).then(() => showToast('Codigo copiado!')).catch(() => showToast('Copie o codigo acima'));
+}
+function applyPastedCode() {
+  const raw = document.getElementById('paste-code-input').value.trim();
+  const res = document.getElementById('paste-code-result');
+  if (!raw) return;
+  let p; try { p = readTradeCode(raw); } catch(e) { res.innerHTML = trMsg('error','Codigo invalido.'); return; }
+  if (getApplied().includes(raw)) { res.innerHTML = trMsg('warn','Voce ja aplicou esse codigo.'); return; }
+  if (p.f === currentUser) { res.innerHTML = trMsg('warn','Esse codigo e seu - ja foi aplicado quando voce gerou.'); return; }
+  if (p.t !== currentUser) { res.innerHTML = trMsg('warn','Esse codigo e pra ' + dispName(p.t) + ', nao pra voce.'); return; }
+  giveMyCard(p.w); receiveMyCard(p.o);   // sou destinatario: dou want, recebo offer
+  markApplied(raw);
+  const offP = getPlayer(p.o), wP = getPlayer(p.w);
+  res.innerHTML = trMsg('ok','Troca feita com <b>' + dispName(p.f) + '</b>! Voce deu <b>' + (wP?wP.name:'') + '</b> e recebeu <b>' + (offP?offP.name:'') + '</b> (foi pro seu pacote).');
+  document.getElementById('paste-code-input').value = '';
+  renderTradeStats();
+}
 function openGenericPicker(title, ids, cb) {
   document.getElementById('picker-title').textContent = title;
   document.getElementById('picker-sub').textContent = [...new Set(ids)].length + ' carta(s)';
   const grid = document.getElementById('picker-grid'); grid.innerHTML = '';
-  [...new Set(ids)].forEach(id => {
-    const p = getPlayer(id); if (!p) return;
+  [...new Set(ids)].forEach(id => { const p = getPlayer(id); if (!p) return;
     const wrap = document.createElement('div'); wrap.innerHTML = renderCardHTML(p, { noGray:true });
     const card = wrap.firstChild; card.classList.add('picker-card'); card.classList.remove('not-collected');
     card.addEventListener('click', () => { cb(id); closePicker(); });
@@ -2195,87 +1967,10 @@ function openGenericPicker(title, ids, cb) {
   });
   document.getElementById('player-picker').style.display = 'flex';
 }
-
-/* ── Caixa de entrada (tempo real) — recebidas + enviadas ── */
-function getDismissedKey() { return 'album_seenprops_' + currentUser; }
-function getDismissed() { try { return JSON.parse(localStorage.getItem(getDismissedKey()) || '[]'); } catch(e) { return []; } }
-function dismissProposal(id) { const d = getDismissed(); if (!d.includes(id)) { d.push(id); localStorage.setItem(getDismissedKey(), JSON.stringify(d)); } rebuildInbox(); }
-
-function startInboxListener() {
-  if (!window.fb || !currentUser) return;
-  stopInboxListener();
-  _inboxUnsub = window.fb.listenInbox(currentUser, list => { _inboxIn = list; rebuildInbox(); });
-  _outboxUnsub = window.fb.listenOutbox(currentUser, list => {
-    const hadResult = list.some(p => p.status === 'accepted' || p.status === 'rejected');
-    _inboxOut = list;
-    if (hadResult) syncProfileFromCloud();   // someone acted on my proposal → refresh my collection
-    rebuildInbox();
-  });
-}
-function stopInboxListener() {
-  if (_inboxUnsub) { _inboxUnsub(); _inboxUnsub = null; }
-  if (_outboxUnsub) { _outboxUnsub(); _outboxUnsub = null; }
-  _inboxIn = []; _inboxOut = []; _inbox = [];
-}
-
-function rebuildInbox() {
-  const dismissed = getDismissed();
-  const received    = _inboxIn.filter(p => p.status === 'pending').map(p => ({ ...p, kind: 'received' }));
-  const sentResult  = _inboxOut.filter(p => (p.status === 'accepted' || p.status === 'rejected') && !dismissed.includes(p.id)).map(p => ({ ...p, kind: 'sent-result' }));
-  const sentPending = _inboxOut.filter(p => p.status === 'pending').map(p => ({ ...p, kind: 'sent-pending' }));
-  _inbox = [...received, ...sentResult, ...sentPending];
-  if (_inboxIdx >= _inbox.length) _inboxIdx = 0;
-  if (document.getElementById('trade-modal').style.display !== 'none') renderInbox();
-}
-
-function renderInbox() {
-  const body = document.getElementById('inbox-body'), nav = document.getElementById('inbox-nav');
-  if (!_inbox.length) { body.innerHTML = '<div class="trade-empty">Nenhuma proposta por aqui ainda.</div>'; nav.style.display = 'none'; return; }
-  if (_inboxIdx >= _inbox.length) _inboxIdx = 0;
-  const p = _inbox[_inboxIdx];
-  const offerP = getPlayer(p.offer), wantP = getPlayer(p.want);
-  const cards = `<div class="trade-rec-cards">${miniCardHTML(p.offer)}<div style="color:#4ade80">⇄</div>${miniCardHTML(p.want)}</div>`;
-  let html = '';
-  if (p.kind === 'received') {
-    html = `
-      <p style="color:rgba(255,255,255,.85);font-size:.76rem;margin:6px 0"><b style="color:#4ade80">${nameOf(p.from)}</b> quer trocar <b>${offerP?offerP.name:''}</b> pela sua <b>${wantP?wantP.name:''}</b></p>
-      ${cards}
-      <div style="display:flex;gap:8px;margin-top:8px">
-        <button onclick="acceptProposal('${p.id}')" class="trade-send" style="background:linear-gradient(135deg,#0d3d1c,#1a5c30);color:#4ade80">Aceitar</button>
-        <button onclick="rejectProposal('${p.id}')" class="trade-send" style="background:rgba(120,20,20,.5);color:#fca5a5;border-color:rgba(255,120,120,.4)">Recusar</button>
-      </div>`;
-  } else if (p.kind === 'sent-pending') {
-    html = `
-      <p style="color:rgba(255,255,255,.85);font-size:.76rem;margin:6px 0">Você propôs a <b style="color:#f0a020">${nameOf(p.to)}</b>: oferece <b>${offerP?offerP.name:''}</b> e recebe <b>${wantP?wantP.name:''}</b></p>
-      ${cards}
-      <p style="color:rgba(255,255,255,.5);font-size:.72rem;text-align:center;margin-top:8px">⏳ Aguardando resposta…</p>`;
-  } else { // sent-result
-    const ok = p.status === 'accepted';
-    html = `
-      <p style="color:rgba(255,255,255,.9);font-size:.78rem;margin:6px 0;font-weight:700">${ok ? '✅' : '❌'} <b style="color:${ok?'#4ade80':'#fca5a5'}">${nameOf(p.to)}</b> ${ok ? 'aceitou' : 'recusou'} sua proposta</p>
-      <p style="color:rgba(255,255,255,.7);font-size:.72rem;margin-bottom:6px">${ok ? `Você deu <b>${offerP?offerP.name:''}</b> e recebeu <b>${wantP?wantP.name:''}</b>` : `Você oferecia <b>${offerP?offerP.name:''}</b> por <b>${wantP?wantP.name:''}</b>`}</p>
-      ${cards}
-      <button onclick="dismissProposal('${p.id}')" class="trade-send" style="margin-top:8px">OK</button>`;
-  }
-  body.innerHTML = html;
-  document.getElementById('inbox-count').textContent = `${_inboxIdx+1}/${_inbox.length}`;
-  nav.style.display = _inbox.length > 1 ? 'flex' : 'none';
-}
-function inboxNav(d) { if (!_inbox.length) return; _inboxIdx = (_inboxIdx + d + _inbox.length) % _inbox.length; renderInbox(); }
-
-async function acceptProposal(id) {
-  const p = _inboxIn.find(x => x.id === id); if (!p || !window.fb) return;
-  try {
-    await window.fb.applyTrade(p.from, currentUser, p.offer, p.want);
-    await window.fb.updateProposal(id, 'accepted');
-    await syncProfileFromCloud();
-    renderTradeStats(); loadTradeData();
-    showToast('Troca aceita! ✨');
-  } catch(e) { showToast('Erro ao aceitar troca'); console.warn(e); }
-}
-function rejectProposal(id) {
-  if (!window.fb) return;
-  window.fb.updateProposal(id, 'rejected').then(() => showToast('Proposta recusada')).catch(e => console.warn(e));
+function trMsg(type, msg) {
+  const bg = { ok:'rgba(0,160,80,.18)', warn:'rgba(200,168,60,.18)', error:'rgba(220,50,50,.18)' };
+  const brd = { ok:'rgba(0,160,80,.45)', warn:'rgba(200,168,60,.45)', error:'rgba(220,50,50,.45)' };
+  return '<div style="background:'+bg[type]+';border:1.5px solid '+brd[type]+';border-radius:8px;padding:12px;color:#fff;font-size:.8rem;line-height:1.5;margin-top:8px">'+msg+'</div>';
 }
 
 /* ── MEU PERFIL ── */
@@ -2588,20 +2283,38 @@ function updateFAB() {
 // ============================================================
 // LOGIN / LOGOUT
 // ============================================================
-function populateLoginSelect() { /* substituído por login Google */ }
+const ACCESS_PASSWORD = 'design2026';  // senha única do time (troque se quiser)
 
-function doLoginGoogle() {
-  if (!window.fb) { showToast('Carregando… tente de novo em 1s'); return; }
-  window.fb.signInGoogle().catch(err => {
-    console.warn('login', err);
-    if (err && err.code === 'auth/popup-blocked') showToast('Permita pop-ups para entrar com o Google');
-    else if (err && err.code !== 'auth/popup-closed-by-user' && err.code !== 'auth/cancelled-popup-request') showToast('Não foi possível entrar. Tente de novo.');
-  });
+function populateLoginSelect() {
+  const sel = document.getElementById('login-select');
+  if (!sel) return;
+  const sorted = [...TEAM].sort((a,b) => a.name.localeCompare(b.name, 'pt-BR'));
+  sel.innerHTML = '<option value="">Selecione seu nome...</option>' +
+    sorted.map(p => `<option value="${p.name}">${p.name}</option>`).join('');
 }
 
-// A troca de usuário/logout real é via signOut; o onAuth listener cuida do resto.
+function doLogin() {
+  const sel = document.getElementById('login-select');
+  const pw = document.getElementById('login-password');
+  if (!sel.value) { showToast('Selecione seu nome!'); return; }
+  if (pw.value !== ACCESS_PASSWORD) { showToast('Senha incorreta 🔒'); return; }
+  currentUser = sel.value;
+  currentUserName = sel.value;
+  localStorage.setItem('album_current_user', currentUser);
+  if (pw) pw.value = '';
+  showApp();
+}
+
 function logout() {
-  if (window.fb) window.fb.signOutUser().catch(e => console.warn(e));
+  currentUser = null; currentUserName = null;
+  localStorage.removeItem('album_current_user');
+  document.getElementById('login-screen').style.display = 'flex';
+  document.getElementById('login-header').style.display = 'none';
+  document.getElementById('book-scene').style.display = 'none';
+  document.getElementById('fab').style.display = 'none';
+  document.getElementById('switch-user-btn').style.display = 'none';
+  document.getElementById('dev-panel').style.display = 'none';
+  const tm = document.getElementById('trade-modal'); if (tm) tm.style.display = 'none';
 }
 
 function setNavVisible(visible) {
@@ -2735,8 +2448,16 @@ function devReset() {
 // ============================================================
 // INIT
 // ============================================================
-// Login e sessão são gerenciados pelo Firebase Auth (Google) via window.__onFbReady.
-// A tela de login já aparece por padrão; o onAuth listener mostra o app quando logado.
+populateLoginSelect();
+
+const savedUser = localStorage.getItem('album_current_user');
+if (savedUser) {
+  currentUser = savedUser;
+  currentUserName = savedUser;
+  const sel = document.getElementById('login-select');
+  if (sel) sel.value = savedUser;
+  showApp();
+}
 </script>
 </body>
 </html>
