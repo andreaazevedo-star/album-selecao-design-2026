@@ -280,6 +280,16 @@ body{background:#000509}
 #pack-float-hint{font-size:.62rem;color:rgba(255,255,255,.8);text-align:right;pointer-events:auto;text-shadow:0 1px 4px rgba(0,0,0,.9);background:rgba(0,0,0,.45);padding:4px 8px;border-radius:6px;max-width:160px}
 #pack-float-save{background:rgba(0,140,80,.92);backdrop-filter:blur(4px);color:#fff;border:1.5px solid rgba(0,200,100,.35);border-radius:8px;padding:8px 14px;font-size:.72rem;font-weight:700;cursor:pointer;pointer-events:auto;transition:.2s;white-space:nowrap}
 #pack-float-save:hover{background:rgba(0,176,100,.98)}
+/* pack zoom overlay */
+#pack-zoom{position:fixed;inset:0;top:64px;z-index:10001;background:rgba(6,20,14,.86);backdrop-filter:blur(3px);display:none;align-items:center;justify-content:center;gap:min(4vw,60px)}
+#pack-zoom-card{position:relative;height:min(72vh,560px);aspect-ratio:282/400;border-radius:14px;overflow:hidden;box-shadow:0 20px 60px rgba(0,0,0,.7);animation:popIn .22s ease backwards}
+#pack-zoom-card-inner{width:100%;height:100%}
+.pz-close{position:absolute;top:10px;right:10px;z-index:3;width:34px;height:34px;border-radius:50%;background:rgba(0,0,0,.55);border:1.5px solid rgba(255,255,255,.35);cursor:pointer;display:flex;align-items:center;justify-content:center;transition:.15s}
+.pz-close:hover{background:rgba(0,0,0,.8)}
+.pz-nav{width:52px;height:52px;border-radius:50%;background:#0d3d1c;border:1.5px solid rgba(200,168,60,.5);cursor:pointer;display:flex;align-items:center;justify-content:center;transition:.15s;flex-shrink:0;box-shadow:0 4px 14px rgba(0,0,0,.5)}
+.pz-nav:hover{background:#1a5c30;transform:scale(1.06)}
+#pack-zoom-count{position:fixed;bottom:24px;left:50%;transform:translateX(-50%);color:rgba(255,255,255,.85);font-size:.85rem;font-weight:700;letter-spacing:.05em;text-shadow:0 1px 4px rgba(0,0,0,.9)}
+@media(max-width:900px){#pack-zoom{gap:8px}#pack-zoom-card{height:min(64vh,460px)}.pz-nav{width:44px;height:44px}}
 /* drop zones */
 .stk{transition:outline .12s}
 .stk.drop-hover{outline:3px solid #f0d060!important;outline-offset:2px;background:rgba(240,208,96,.07)!important}
@@ -411,8 +421,25 @@ body{background:#000509}
 </button>
 
 <!-- PACK FLOAT -->
-<div id="pack-float" style="display:none" onclick="closePackFloat()">
+<div id="pack-float" style="display:none">
   <div id="pack-float-fan"></div>
+  <div id="pack-float-hint">Clique para ampliar · arraste para o álbum</div>
+</div>
+
+<div id="pack-zoom" style="display:none" onclick="if(event.target===this)closeZoom()">
+  <button class="pz-nav pz-prev" onclick="zoomNav(-1)" aria-label="Anterior">
+    <svg width="26" height="26" viewBox="0 0 20 20" fill="none"><path d="M13 4l-6 6 6 6" stroke="white" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+  </button>
+  <div id="pack-zoom-card">
+    <button class="pz-close" onclick="closeZoom()" aria-label="Fechar">
+      <svg width="18" height="18" viewBox="0 0 20 20" fill="none"><path d="M5 5l10 10M15 5L5 15" stroke="white" stroke-width="2.2" stroke-linecap="round"/></svg>
+    </button>
+    <div id="pack-zoom-card-inner"></div>
+  </div>
+  <button class="pz-nav pz-next" onclick="zoomNav(1)" aria-label="Próxima">
+    <svg width="26" height="26" viewBox="0 0 20 20" fill="none"><path d="M7 4l6 6-6 6" stroke="white" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+  </button>
+  <div id="pack-zoom-count"></div>
 </div>
 
 <!-- INSTRUCTIONS MODAL -->
@@ -1314,19 +1341,7 @@ function openPack() {
     return;
   }
   const drawn = drawCards(5);
-  // Auto-collect: reveal is display-only (no drag). Persist immediately.
-  const collected = getCollected();
-  const dupes = getDupes();
-  let newCount = 0, dupeCount = 0;
-  drawn.forEach(p => {
-    if (!collected.includes(p.id)) { collected.push(p.id); newCount++; }
-    else { dupes.push(p.id); dupeCount++; }
-  });
-  saveCollected(collected);
-  saveDupes(dupes);
-  incPacksToday();
-  updateFAB();
-  refreshCurrentPage();
+  pendingPackCards = drawn;
   showPackOverlay(drawn);
 }
 
@@ -1334,13 +1349,6 @@ function showPackOverlay(cards) {
   packFloatCards = [...cards];
   renderPackFloat();
   document.getElementById('pack-float').style.display = 'flex';
-}
-
-function closePackFloat() {
-  packFloatCards = [];
-  pendingPackCards = [];
-  document.getElementById('pack-float').style.display = 'none';
-  refreshCurrentPage();
 }
 
 function renderPackFloat() {
@@ -1368,10 +1376,50 @@ function renderPackFloat() {
     const div = document.createElement('div');
     div.className = 'pf-card';
     div.style.cssText = `--sq:${color};transform:translate(calc(-50% + ${xOff}px), ${yOff}px) rotate(${angle}deg);z-index:${i+1};animation:popIn ${0.18+i*0.07}s ease backwards`;
+    div.setAttribute('draggable', 'true');
     div.setAttribute('data-player-id', p.id);
     div.innerHTML = photoHtml;
+
+    let dragged = false;
+    div.addEventListener('dragstart', e => {
+      dragged = true;
+      e.dataTransfer.setData('text/plain', String(p.id));
+      setTimeout(() => div.classList.add('dragging'), 0);
+    });
+    div.addEventListener('dragend', () => div.classList.remove('dragging'));
+    div.addEventListener('click', () => { if (!dragged) openZoom(p.id); dragged = false; });
     container.appendChild(div);
   });
+}
+
+// ---- Zoom overlay ----
+let zoomIndex = 0;
+function openZoom(playerId) {
+  const idx = packFloatCards.findIndex(p => p.id === playerId);
+  zoomIndex = idx >= 0 ? idx : 0;
+  renderZoom();
+  document.getElementById('pack-zoom').style.display = 'flex';
+}
+function renderZoom() {
+  if (!packFloatCards.length) { closeZoom(); return; }
+  const p = packFloatCards[zoomIndex];
+  const sq = p.squad && SQUADS[p.squad] ? SQUADS[p.squad] : null;
+  const color = sq ? sq.color : '#065f46';
+  const inner = p.photo
+    ? `<img src="${p.photo}" alt="" style="width:100%;height:100%;object-fit:contain;display:block" onerror="this.style.display='none'">`
+    : `<div class="stk-initials">${getInitials(p.name)}</div>`;
+  document.getElementById('pack-zoom-card').style.cssText = `--sq:${color}`;
+  document.getElementById('pack-zoom-card-inner').innerHTML = inner;
+  document.getElementById('pack-zoom-count').textContent = `${zoomIndex+1} / ${packFloatCards.length}`;
+}
+function zoomNav(dir) {
+  const n = packFloatCards.length;
+  if (!n) return;
+  zoomIndex = (zoomIndex + dir + n) % n;
+  renderZoom();
+}
+function closeZoom() {
+  document.getElementById('pack-zoom').style.display = 'none';
 }
 
 function dropStickerOnAlbum(event, targetPlayerId) {
