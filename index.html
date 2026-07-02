@@ -254,8 +254,8 @@ body{background:#000509}
 @keyframes popIn{from{transform:scale(.5) translateY(20px);opacity:0}to{transform:scale(1);opacity:1}}
 .badge-nova{position:absolute;top:50%;left:50%;transform:translate(-50%,-50%) rotate(-8deg);background:#00b06f;color:#fff;font-size:.62rem;padding:3px 10px;border-radius:5px;font-weight:800;letter-spacing:.06em;z-index:6;box-shadow:0 2px 8px rgba(0,0,0,.6);pointer-events:none}
 .badge-rep{position:absolute;top:50%;left:50%;transform:translate(-50%,-50%) rotate(-8deg);background:rgba(0,0,0,.75);border:1px solid rgba(255,255,255,.5);color:#fff;font-size:.62rem;padding:3px 10px;border-radius:5px;font-weight:800;letter-spacing:.06em;z-index:6;box-shadow:0 2px 8px rgba(0,0,0,.6);pointer-events:none}
-#pack-float{position:fixed;top:112px;right:24px;z-index:200;display:none;flex-direction:column;align-items:flex-end;gap:8px;pointer-events:none}
-#pack-float-fan{position:relative;width:300px;height:330px;pointer-events:auto}
+#pack-float{position:fixed;top:112px;right:24px;z-index:200;display:none;flex-direction:column;align-items:center;gap:14px;pointer-events:none}
+#pack-float-fan{position:relative;width:260px;height:268px;pointer-events:auto}
 .pf-card{position:absolute;bottom:0;left:50%;width:152px;height:216px;border-radius:8px;overflow:hidden;box-shadow:0 6px 22px rgba(0,0,0,.75);transform-origin:bottom center;user-select:none;transition:filter .15s}
 .pf-card:hover{filter:brightness(1.08)}
 /* sticker card = full baked-in FIFA image */
@@ -1364,10 +1364,11 @@ function renderPackFloat() {
   container.innerHTML = '';
   const collected = getCollected();
   const total = packFloatCards.length;
-  // Stacked deck (like Figma): back cards offset up-right, front card bottom-left
-  const fanAngles = [4, 2, 0, -2, -4];
-  const fanX      = [40, 22, 4, -14, -30];
-  const fanY      = [-46, -24, -4, 14, 32];
+  // Stacked deck (like Figma): back cards offset up-right, front card bottom-left.
+  // Front card (last) sits at the baseline (yOff 0) so nothing overlaps the hint below.
+  const fanAngles = [5, 3, 1.5, 0, -2];
+  const fanX      = [40, 28, 16, 4, -12];
+  const fanY      = [-44, -33, -22, -11, 0];
 
   packFloatCards.forEach((p, i) => {
     const alreadyHad = collected.includes(p.id);
