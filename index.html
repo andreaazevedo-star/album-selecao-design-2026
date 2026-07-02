@@ -524,8 +524,8 @@ body{background:#000509}
 <!-- INSTRUCTIONS MODAL -->
 <div id="instructions-modal" style="display:none;position:fixed;inset:0;top:64px;background:rgba(28,31,35,0.92);z-index:10000;align-items:center;justify-content:center;overflow-y:auto" onclick="if(event.target===this)closeInstructions()">
   <div style="position:relative;display:inline-block;line-height:0;margin:24px auto">
-    <img src="instrucoes-de-uso.png" alt="Instruções de uso" style="max-width:min(1007px,calc(100vw - 48px));max-height:calc(100vh - 64px - 48px);width:auto;height:auto;border-radius:12px;display:block">
-    <button onclick="closeInstructions()" title="Fechar" style="position:absolute;top:1%;right:1%;width:8%;height:10%;background:transparent;border:none;cursor:pointer;z-index:1;border-radius:8px"></button>
+    <img src="instrucoes-de-uso.png?v=2" alt="Instruções de uso" style="max-width:min(900px,calc(100vw - 48px));max-height:calc(100vh - 64px - 48px);width:auto;height:auto;border-radius:12px;display:block">
+    <button onclick="closeInstructions()" title="Fechar" style="position:absolute;top:1%;right:1.5%;width:7%;height:11%;background:transparent;border:none;cursor:pointer;z-index:1;border-radius:8px"></button>
   </div>
 </div>
 
@@ -564,52 +564,49 @@ body{background:#000509}
 
     <!-- 4 columns -->
     <div class="trade-cols">
-      <!-- 1. como funciona -->
+      <!-- 1. dicas / slack -->
       <div class="trade-col">
-        <div class="trade-col-title">🤝 COMO TROCAR</div>
-        <p class="trade-col-sub">Combine a troca com a pessoa no <b style="color:#fff">#stone-design</b> no Slack. Depois:</p>
-        <ol style="color:rgba(255,255,255,.7);font-size:.74rem;line-height:1.6;margin:12px 0 0 16px;padding:0">
-          <li>Em <b>Oferecer</b>: escolha a pessoa, o que você dá e o que quer receber → <b>Gerar código</b>.</li>
-          <li>Mande o código pra pessoa no Slack.</li>
-          <li>Ela cola o código em <b>Receber troca</b> e pronto — a figurinha vai pro pacote de cada um.</li>
-        </ol>
+        <div class="trade-col-title" style="color:#4ade80;text-align:center">DICAS PARA TROCAR FIGURINHA</div>
+        <p class="trade-col-sub" style="margin-top:10px;text-align:center">Que tal sair perguntando para a galera? Só ir na nossa thread do canal <b style="color:#fff">#stone-design</b> no Slack e comentar:</p>
+        <div style="flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:6px">
+          <svg width="40" height="40" viewBox="0 0 40 40" fill="none"><rect x="15" y="1" width="8" height="10" rx="4" fill="#36C5F0"/><rect x="29" y="15" width="10" height="8" rx="4" fill="#2EB67D"/><rect x="17" y="29" width="8" height="10" rx="4" fill="#ECB22E"/><rect x="1" y="17" width="10" height="8" rx="4" fill="#E01E5A"/></svg>
+        </div>
+        <p class="trade-col-sub" style="text-align:center">Assim que combinarem, é só gerar o código! 😉</p>
       </div>
-      <!-- 2. oferecer proposta -->
+
+      <!-- 2. realizar a troca -->
       <div class="trade-col">
-        <div class="trade-col-title">✈️ OFERECER (GERAR CÓDIGO)</div>
-        <p class="trade-col-sub">Escolha a pessoa, o que você oferece (sua repetida) e o que quer receber. Depois gere o código.</p>
+        <div class="trade-col-title" style="color:#4ade80">➤ REALIZAR A TROCA</div>
+        <p class="trade-col-sub">Escolha a pessoa que você negociou, o que você oferece (sua repetida) e o que quer receber. Depois gere o código.</p>
         <select id="prop-person" class="trade-select" style="margin-top:10px"><option value="">Selecione uma pessoa</option></select>
-        <div style="display:flex;align-items:center;gap:8px;justify-content:center;margin:6px 0 12px">
+        <div style="display:flex;align-items:center;gap:8px;justify-content:center;margin:10px 0 12px">
           <div style="text-align:center"><div style="color:#4ade80;font-size:.66rem;font-weight:800;margin-bottom:5px">EU OFEREÇO</div><div id="prop-offer" onclick="pickProposalOffer()" class="prop-slot" style="border-color:rgba(74,222,128,.6)">+</div></div>
           <div style="color:rgba(255,255,255,.5);font-size:1.2rem">➡</div>
           <div style="text-align:center"><div style="color:#c084fc;font-size:.66rem;font-weight:800;margin-bottom:5px">EU QUERO</div><div id="prop-want" onclick="pickProposalWant()" class="prop-slot" style="border-color:rgba(192,132,252,.6)">+</div></div>
         </div>
-        <button id="prop-send" onclick="sendProposalNew()" class="trade-send" disabled>Gerar código de troca</button>
-        <div id="gen-code-box" style="display:none;margin-top:12px;background:rgba(200,168,60,.08);border:1.5px solid rgba(200,168,60,.35);border-radius:8px;padding:10px">
-          <p id="gen-code-desc" style="color:rgba(255,255,255,.8);font-size:.7rem;line-height:1.5;margin-bottom:8px"></p>
-          <div style="display:flex;gap:6px;align-items:flex-start">
-            <code id="gen-code-text" style="flex:1;background:rgba(0,0,0,.5);border-radius:6px;padding:10px;font-size:1.4rem;font-weight:800;letter-spacing:.1em;color:#f0d060;text-align:center;font-family:monospace"></code>
-            <button onclick="copyGenCode()" title="Copiar código" style="background:#c8a83c;border:none;border-radius:6px;padding:0 14px;color:#000;font-weight:800;font-size:1.1rem;cursor:pointer;flex-shrink:0">⧉</button>
+        <button id="prop-send" onclick="sendProposalNew()" class="trade-send" disabled>&lt;/&gt; Gerar o Código</button>
+      </div>
+
+      <!-- 3. código gerado -->
+      <div class="trade-col">
+        <div class="trade-col-title" style="color:#4ade80">✓ CÓDIGO GERADO</div>
+        <p class="trade-col-sub">Ao gerar o código, a troca está preparada! Agora copie e mande para a outra pessoa via Slack ;)</p>
+        <div style="flex:1;display:flex;flex-direction:column;justify-content:center;margin-top:10px">
+          <p id="gen-code-desc" style="color:rgba(255,255,255,.75);font-size:.72rem;line-height:1.5;margin-bottom:10px;display:none"></p>
+          <div style="display:flex;gap:6px;align-items:center">
+            <code id="gen-code-text" style="flex:1;background:rgba(0,0,0,.5);border:1.5px solid rgba(200,168,60,.4);border-radius:8px;padding:12px;font-size:1.5rem;font-weight:800;letter-spacing:.12em;color:#f0d060;text-align:center;font-family:monospace">— — — —</code>
+            <button onclick="copyGenCode()" title="Copiar código" style="background:#c8a83c;border:none;border-radius:8px;padding:0 16px;height:52px;color:#000;font-weight:800;font-size:1.2rem;cursor:pointer;flex-shrink:0">⧉</button>
           </div>
         </div>
       </div>
-      <!-- 3. receber troca (colar código) -->
+
+      <!-- 4. resgatar código -->
       <div class="trade-col">
-        <div class="trade-col-title">✉️ RECEBER TROCA (COLAR CÓDIGO)</div>
-        <p class="trade-col-sub">Cole aqui o código que a pessoa te enviou no Slack pra concluir a troca.</p>
-        <textarea id="paste-code-input" placeholder="Cole o código (TROCA-...) aqui" style="width:100%;height:70px;margin-top:10px;background:rgba(255,255,255,.07);border:1.5px solid rgba(200,168,60,.35);border-radius:8px;color:#fff;padding:10px;font-size:.74rem;resize:none;font-family:monospace"></textarea>
-        <button onclick="applyPastedCode()" class="trade-send" style="margin-top:8px">Aplicar troca</button>
+        <div class="trade-col-title" style="color:#4ade80">🔑 RESGATAR UM CÓDIGO</div>
+        <p class="trade-col-sub">Recebeu um código de troca? Cole abaixo e clique em Confirmar.</p>
+        <input id="paste-code-input" type="text" maxlength="12" placeholder="Cole o código aqui" style="width:100%;margin-top:10px;background:rgba(255,255,255,.07);border:1.5px solid rgba(200,168,60,.35);border-radius:8px;color:#fff;padding:12px;font-size:1rem;text-align:center;letter-spacing:.08em;font-family:monospace">
+        <button onclick="applyPastedCode()" class="trade-send" style="margin-top:8px">✓ Confirmar</button>
         <div id="paste-code-result"></div>
-      </div>
-      <!-- 4. não encontrou -->
-      <div class="trade-col">
-        <div class="trade-col-title" style="color:#4ade80;text-align:center">📣 NÃO ENCONTROU A TROCA IDEAL?</div>
-        <p class="trade-col-sub" style="margin-top:12px;text-align:center">Que tal sair perguntando para a galera? Só ir na nossa thread do canal <b style="color:#fff">#stone-design</b> no Slack e comentar:</p>
-        <div style="display:flex;flex-direction:column;gap:8px;align-items:center;margin:14px 0">
-          <span style="background:rgba(0,160,80,.18);border:1px solid rgba(0,200,100,.35);color:#4ade80;font-size:.72rem;font-weight:700;border-radius:20px;padding:6px 14px">"Alguém quer trocar o Fulano?"</span>
-          <span style="background:rgba(0,160,80,.18);border:1px solid rgba(0,200,100,.35);color:#4ade80;font-size:.72rem;font-weight:700;border-radius:20px;padding:6px 14px">"Quero o Fulano!" 🙋</span>
-        </div>
-        <p class="trade-col-sub" style="text-align:center">Assim que responderem, é só fazer a oferta na proposta de trocas! 😉</p>
       </div>
     </div>
   </div>
@@ -1848,7 +1845,8 @@ function openTrade() {
   _propOffer = null; _propWant = null;
   populatePersonSelect();
   renderPropSlots();
-  const box = document.getElementById('gen-code-box'); if (box) box.style.display = 'none';
+  const gt = document.getElementById('gen-code-text'); if (gt) gt.textContent = '— — — —';
+  const gd = document.getElementById('gen-code-desc'); if (gd) gd.style.display = 'none';
   const pin = document.getElementById('paste-code-input'); if (pin) pin.value = '';
   const pr = document.getElementById('paste-code-result'); if (pr) pr.innerHTML = '';
 }
@@ -1945,14 +1943,17 @@ function sendProposalNew() {
   markApplied(code);
   const offP = getPlayer(_propOffer), wP = getPlayer(_propWant);
   document.getElementById('gen-code-text').textContent = code;
-  document.getElementById('gen-code-desc').innerHTML = 'Troca com <b>' + person + '</b>: voce deu <b>' + (offP?offP.name:'') + '</b> e recebeu <b>' + (wP?wP.name:'') + '</b> (foi pro seu pacote). Mande o codigo pra ' + person + ' no Slack.';
-  document.getElementById('gen-code-box').style.display = '';
+  const desc = document.getElementById('gen-code-desc');
+  desc.innerHTML = 'Troca com <b>' + person + '</b>: você deu <b>' + (offP?offP.name:'') + '</b> e recebeu <b>' + (wP?wP.name:'') + '</b> (foi pro seu pacote).';
+  desc.style.display = '';
+  document.getElementById('prop-person').value = '';
   _propOffer = null; _propWant = null; renderPropSlots(); renderTradeStats();
-  showToast('Codigo gerado! Cole no Slack pra pessoa');
+  showToast('Código gerado! Copie e mande no Slack ✈️');
 }
 function copyGenCode() {
   const t = document.getElementById('gen-code-text').textContent;
-  navigator.clipboard.writeText(t).then(() => showToast('Codigo copiado!')).catch(() => showToast('Copie o codigo acima'));
+  if (!t || t.indexOf('—') !== -1) { showToast('Gere um código primeiro'); return; }
+  navigator.clipboard.writeText(t).then(() => showToast('Código copiado!')).catch(() => showToast('Copie o código acima'));
 }
 function applyPastedCode() {
   const raw = document.getElementById('paste-code-input').value.trim();
@@ -2392,6 +2393,16 @@ function showApp() {
     setTimeout(() => { cs.style.opacity = '1'; }, 10);
   }
   updateFAB();
+  maybeShowOnboarding();
+}
+
+// Onboarding: mostra "Instruções de uso" uma vez por pessoa, logo após logar, antes da capa.
+function maybeShowOnboarding() {
+  if (!currentUser) return;
+  const key = 'album_seen_instructions_' + currentUser;
+  if (localStorage.getItem(key)) return;
+  localStorage.setItem(key, '1');
+  openInstructions();
 }
 
 // ============================================================
