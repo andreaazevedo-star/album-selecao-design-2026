@@ -277,6 +277,9 @@ body{background:#000509}
 .stk-name{position:absolute;left:0;right:0;bottom:11px;text-align:center;z-index:3;padding:0 6px}
 .stk-name-txt{font-size:.74rem;font-weight:900;color:#fff;letter-spacing:.02em;text-shadow:0 2px 4px #000;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .stk-squad-pill{display:inline-block;margin-top:3px;font-size:.4rem;font-weight:800;color:#fff;background:var(--sq,#065f46);border-radius:20px;padding:2px 9px;letter-spacing:.06em;text-transform:uppercase;box-shadow:0 1px 3px rgba(0,0,0,.5)}
+#pack-float-status{pointer-events:auto;display:none;align-items:center;gap:6px;font-weight:800;border-radius:24px;padding:8px 18px;font-size:.8rem;letter-spacing:.02em;box-shadow:0 3px 12px rgba(0,0,0,.5)}
+#pack-float-status.pf-status-rep{background:#f5820a;color:#3d1f00}
+#pack-float-status.pf-status-new{background:rgba(0,0,0,.5);border:1px solid rgba(255,255,255,.25);color:rgba(255,255,255,.9);font-size:.68rem;font-weight:700}
 #pack-float-hint{font-size:.62rem;color:rgba(255,255,255,.8);text-align:right;pointer-events:auto;text-shadow:0 1px 4px rgba(0,0,0,.9);background:rgba(0,0,0,.45);padding:4px 8px;border-radius:6px;max-width:160px}
 #pack-float-save{background:rgba(0,140,80,.92);backdrop-filter:blur(4px);color:#fff;border:1.5px solid rgba(0,200,100,.35);border-radius:8px;padding:8px 14px;font-size:.72rem;font-weight:700;cursor:pointer;pointer-events:auto;transition:.2s;white-space:nowrap}
 #pack-float-save:hover{background:rgba(0,176,100,.98)}
@@ -423,7 +426,7 @@ body{background:#000509}
 <!-- PACK FLOAT -->
 <div id="pack-float" style="display:none">
   <div id="pack-float-fan"></div>
-  <div id="pack-float-hint">Clique para ampliar · arraste para o álbum</div>
+  <div id="pack-float-status"></div>
 </div>
 
 <div id="pack-zoom" style="display:none" onclick="if(event.target===this)closeZoom()">
@@ -1390,6 +1393,21 @@ function renderPackFloat() {
     div.addEventListener('click', () => { if (!dragged) openZoom(p.id); dragged = false; });
     container.appendChild(div);
   });
+
+  // Status pill for the front (topmost) card
+  const statusEl = document.getElementById('pack-float-status');
+  const front = packFloatCards[packFloatCards.length - 1];
+  if (!front) {
+    statusEl.style.display = 'none';
+  } else if (collected.includes(front.id)) {
+    statusEl.className = 'pf-status-rep';
+    statusEl.innerHTML = '🚩 Repetida';
+    statusEl.style.display = 'inline-flex';
+  } else {
+    statusEl.className = 'pf-status-new';
+    statusEl.textContent = 'Arraste para o álbum';
+    statusEl.style.display = 'inline-flex';
+  }
 }
 
 // ---- Zoom overlay ----
