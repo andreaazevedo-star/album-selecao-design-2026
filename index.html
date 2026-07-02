@@ -2026,15 +2026,30 @@ function computeRecommendations() {
   const myDupes = [...new Set(getDupes())];
   const myCollected = getCollected();
   const myMissing = TEAM.filter(p => !myCollected.includes(p.id)).map(p => p.id);
+  const mutual = [], oneWay = [];
   _allProfiles.forEach(prof => {
     if (prof.id === currentUser) return;
     const theirCollected = prof.collected || [];
     const theirDupes = [...new Set(prof.dupes || [])];
     const theirMissing = TEAM.filter(p => !theirCollected.includes(p.id)).map(p => p.id);
-    const iGive = myDupes.filter(id => theirMissing.includes(id));
-    const iGet  = theirDupes.filter(id => myMissing.includes(id));
-    if (iGive.length && iGet.length) _recList.push({ personId: prof.id, personName: prettyProfileName(prof), give: iGive[0], get: iGet[0] });
+    const iGiveNeeded = myDupes.filter(id => theirMissing.includes(id)); // minhas repetidas que ela precisa
+    const iGet = theirDupes.filter(id => myMissing.includes(id));         // repetidas dela que eu preciso
+
+    let give = null, get = null, isMutual = false;
+    if (iGet.length) {                    // eu ganho uma que preciso
+      get = iGet[0];
+      give = iGiveNeeded.length ? iGiveNeeded[0] : (myDupes.find(d => d !== get) ?? myDupes[0]);
+      isMutual = iGiveNeeded.length > 0;
+    } else if (iGiveNeeded.length) {      // só ajudo (ela está completa/sem faltas p/ mim)
+      give = iGiveNeeded[0];
+      get = theirDupes.find(d => d !== give) ?? theirDupes[0] ?? null;
+    }
+    if (give != null && get != null && give !== get) {
+      const rec = { personId: prof.id, personName: prettyProfileName(prof), give, get };
+      (isMutual ? mutual : oneWay).push(rec);
+    }
   });
+  _recList = [...mutual, ...oneWay];   // trocas mútuas primeiro
 }
 
 function miniCardHTML(id) {
