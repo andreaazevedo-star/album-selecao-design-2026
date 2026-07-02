@@ -99,8 +99,24 @@ body{background:#000509}
 .trade-mini-card{width:74px;height:104px;border-radius:8px;overflow:hidden;background:#0d1e0d;flex-shrink:0}
 .trade-mini-card img{width:100%;height:100%;object-fit:contain;display:block}
 .trade-empty{color:rgba(255,255,255,.4);font-size:.78rem;text-align:center;padding:24px 8px}
-@media(max-width:1000px){.trade-cols{grid-template-columns:repeat(2,1fr)}.trade-stats-grid{grid-template-columns:repeat(2,1fr)!important}}
-@media(max-width:600px){.trade-cols{grid-template-columns:1fr}.trade-stats-grid{grid-template-columns:1fr!important}.trade-hero-pack{display:none}}
+.stat-cell{border-left:1px solid rgba(255,255,255,.12);padding:0 20px;display:flex;flex-direction:column;align-items:center;justify-content:space-between;gap:12px}
+.stat-top{display:flex;align-items:center;gap:12px}
+.stat-ico{font-size:2.9rem;line-height:1}
+.stat-lbl{color:rgba(255,255,255,.75);font-size:.78rem;font-weight:800;letter-spacing:.03em}
+.stat-num{font-size:1.9rem;font-weight:900;line-height:1.05}
+.stat-pill{width:100%;background:rgba(0,0,0,.35);border:1.5px solid rgba(200,168,60,.3);color:rgba(255,255,255,.9);font-size:.74rem;font-weight:800;border-radius:8px;padding:9px 8px;cursor:pointer;transition:.15s}
+.stat-pill:hover{background:rgba(0,160,80,.22);border-color:rgba(0,200,100,.5);color:#4ade80}
+/* card gallery overlay */
+#card-gallery{position:fixed;left:0;right:0;top:64px;bottom:0;z-index:400;background:rgba(6,20,14,.9);backdrop-filter:blur(3px);display:none;flex-direction:column;padding:24px}
+#card-gallery .cg-head{display:flex;align-items:center;justify-content:space-between;max-width:1360px;margin:0 auto 18px;width:100%}
+#card-gallery .cg-title{color:#f0d060;font-size:1.2rem;font-weight:900}
+#card-gallery .cg-close{width:40px;height:40px;border-radius:50%;background:rgba(0,0,0,.5);border:1.5px solid rgba(255,255,255,.3);color:#fff;font-size:1rem;cursor:pointer}
+#card-gallery .cg-grid{max-width:1360px;margin:0 auto;width:100%;display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:16px;overflow-y:auto;padding-bottom:24px}
+#card-gallery .cg-card{border-radius:10px;overflow:hidden;box-shadow:0 6px 18px rgba(0,0,0,.6)}
+#card-gallery .cg-card img{width:100%;display:block}
+#card-gallery .cg-card.locked{filter:grayscale(1) brightness(.5)}
+@media(max-width:1000px){.trade-cols{grid-template-columns:repeat(2,1fr)}.trade-stats-grid{grid-template-columns:1fr 1fr!important}}
+@media(max-width:600px){.trade-cols{grid-template-columns:1fr}.trade-stats-grid{grid-template-columns:1fr!important}.trade-hero-pack{display:none}.stat-cell{border-left:none;border-top:1px solid rgba(255,255,255,.12);padding:14px 0 0}}
 .trade-tab{flex:1;padding:9px;border-radius:8px;font-size:.78rem;font-weight:700;cursor:pointer;border:1.5px solid rgba(200,168,60,.3);background:transparent;color:rgba(255,255,255,.5);transition:.2s}
 .trade-tab.active{background:rgba(200,168,60,.15);border-color:rgba(200,168,60,.7);color:#f0d060}
 .trade-dupe-card{border-radius:8px;overflow:hidden;cursor:pointer;border:2px solid transparent;transition:.2s;background:#0a2218}
@@ -569,32 +585,26 @@ body{background:#000509}
     </div>
 
     <!-- stats -->
-    <div style="border:1.5px solid rgba(200,168,60,.45);border-radius:14px;padding:18px 20px;margin-bottom:22px;display:grid;grid-template-columns:repeat(4,1fr);gap:20px" class="trade-stats-grid">
-      <div>
-        <div style="color:#f0a020;font-size:.8rem;font-weight:800;letter-spacing:.04em">ÁLBUM COMPLETO</div>
-        <div style="display:flex;align-items:center;gap:12px;margin-top:6px">
-          <div><div id="stat-pct" style="font-size:2.6rem;font-weight:900;color:#fff;line-height:1">0%</div></div>
-          <div style="font-size:2.2rem">🏆</div>
+    <div style="border:1.5px solid rgba(200,168,60,.45);border-radius:16px;padding:22px 24px;margin-bottom:22px;display:grid;grid-template-columns:1.3fr 1fr 1fr 1fr;gap:0" class="trade-stats-grid">
+      <div style="padding-right:24px">
+        <div style="color:#f0a020;font-size:.85rem;font-weight:800;letter-spacing:.04em">ÁLBUM COMPLETO</div>
+        <div style="display:flex;align-items:center;gap:14px;margin-top:8px">
+          <div id="stat-pct" style="font-size:3rem;font-weight:900;color:#fff;line-height:1">0%</div>
+          <div style="font-size:3rem;line-height:1">🏆</div>
         </div>
-        <div style="height:8px;background:rgba(255,255,255,.12);border-radius:6px;margin-top:8px;overflow:hidden"><div id="stat-bar" style="height:100%;width:0%;background:linear-gradient(90deg,#16a34a,#4ade80);border-radius:6px;transition:width .4s"></div></div>
+        <div style="height:9px;background:rgba(255,255,255,.12);border-radius:6px;margin-top:12px;overflow:hidden"><div id="stat-bar" style="height:100%;width:0%;background:linear-gradient(90deg,#16a34a,#4ade80);border-radius:6px;transition:width .4s"></div></div>
       </div>
-      <div style="border-left:1px solid rgba(255,255,255,.12);padding-left:20px;text-align:center">
-        <div style="font-size:1.5rem">📗</div>
-        <div style="color:rgba(255,255,255,.7);font-size:.75rem;font-weight:700;margin-top:2px">JÁ TENHO</div>
-        <div id="stat-have" style="font-size:1.6rem;font-weight:900;color:#4ade80">0</div>
-        <div style="color:rgba(255,255,255,.45);font-size:.62rem;margin-top:2px">Figurinhas Coletadas</div>
+      <div class="stat-cell">
+        <div class="stat-top"><div class="stat-ico">📗</div><div><div class="stat-lbl">JÁ TENHO</div><div id="stat-have" class="stat-num" style="color:#4ade80">0</div></div></div>
+        <button class="stat-pill" onclick="openCardGallery('collected')">Figurinhas Coletadas</button>
       </div>
-      <div style="border-left:1px solid rgba(255,255,255,.12);padding-left:20px;text-align:center">
-        <div style="font-size:1.5rem">🔄</div>
-        <div style="color:rgba(255,255,255,.7);font-size:.75rem;font-weight:700;margin-top:2px">REPETIDAS</div>
-        <div id="stat-dupes" style="font-size:1.6rem;font-weight:900;color:#f0a020">0</div>
-        <div style="color:rgba(255,255,255,.45);font-size:.62rem;margin-top:2px">Figurinhas Repetidas</div>
+      <div class="stat-cell">
+        <div class="stat-top"><div class="stat-ico">🔄</div><div><div class="stat-lbl">REPETIDAS</div><div id="stat-dupes" class="stat-num" style="color:#f0a020">0</div></div></div>
+        <button class="stat-pill" onclick="openCardGallery('dupes')">Figurinhas Repetidas</button>
       </div>
-      <div style="border-left:1px solid rgba(255,255,255,.12);padding-left:20px;text-align:center">
-        <div style="font-size:1.5rem">🃏</div>
-        <div style="color:rgba(255,255,255,.7);font-size:.75rem;font-weight:700;margin-top:2px">AINDA NÃO TENHO</div>
-        <div id="stat-missing" style="font-size:1.6rem;font-weight:900;color:#fff">0</div>
-        <div style="color:rgba(255,255,255,.45);font-size:.62rem;margin-top:2px">Figurinhas que Faltam</div>
+      <div class="stat-cell">
+        <div class="stat-top"><div class="stat-ico">🃏</div><div><div class="stat-lbl">AINDA NÃO TENHO</div><div id="stat-missing" class="stat-num" style="color:#fff">0</div></div></div>
+        <button class="stat-pill" onclick="openCardGallery('missing')">Figurinhas que Faltam</button>
       </div>
     </div>
 
@@ -644,6 +654,15 @@ body{background:#000509}
       </div>
     </div>
   </div>
+</div>
+
+<!-- CARD GALLERY (Já tenho / Repetidas / Faltam) -->
+<div id="card-gallery" style="display:none">
+  <div class="cg-head">
+    <div class="cg-title" id="cg-title"></div>
+    <button class="cg-close" onclick="closeCardGallery()">✕</button>
+  </div>
+  <div class="cg-grid" id="cg-grid"></div>
 </div>
 
 <!-- PLAYER PICKER -->
@@ -1898,6 +1917,29 @@ function openTrade() {
 function closeTrade() {
   document.getElementById('trade-modal').style.display = 'none';
 }
+
+// Galeria de figurinhas por categoria (coletadas / repetidas / faltantes)
+function openCardGallery(type) {
+  const collected = getCollected();
+  const dupesArr = getDupes();
+  let ids, title, locked = false;
+  if (type === 'collected') { ids = collected.slice(); title = '📗 Figurinhas Coletadas'; }
+  else if (type === 'dupes') { ids = [...new Set(dupesArr)]; title = '🔄 Figurinhas Repetidas'; }
+  else { ids = TEAM.filter(p => !collected.includes(p.id)).map(p => p.id); title = '🃏 Figurinhas que Faltam'; locked = true; }
+  document.getElementById('cg-title').textContent = `${title} (${ids.length})`;
+  const grid = document.getElementById('cg-grid');
+  if (!ids.length) {
+    grid.innerHTML = '<div class="trade-empty" style="grid-column:1/-1">Nenhuma figurinha nesta categoria.</div>';
+  } else {
+    grid.innerHTML = ids.map(id => {
+      const p = getPlayer(id); if (!p) return '';
+      const cnt = type === 'dupes' ? dupesArr.filter(x => x === id).length : 0;
+      return `<div class="cg-card${locked ? ' locked' : ''}">${p.photo ? `<img src="${p.photo}" alt="${p.name}">` : ''}${cnt > 1 ? `<div style="position:absolute"></div>` : ''}</div>`;
+    }).join('');
+  }
+  document.getElementById('card-gallery').style.display = 'flex';
+}
+function closeCardGallery() { document.getElementById('card-gallery').style.display = 'none'; }
 
 function renderTradeStats() {
   const total = TEAM.length;
