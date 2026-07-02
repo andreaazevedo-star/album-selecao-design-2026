@@ -473,7 +473,7 @@ body{background:#000509}
   <div id="login-header-title">🏆 Seleção de Design 2026 🏆</div>
   <div id="login-header-btns">
     <button class="lh-btn lh-btn-ghost" onclick="openInstructions()">📖 Instruções de uso</button>
-    <button class="lh-btn lh-btn-ghost" onclick="openTrade()">🔄 Trocar figurinhas</button>
+    <button class="lh-btn lh-btn-ghost" onclick="openTrade()">🔄 Mercado de trocas</button>
     <div class="lh-divider"></div>
     <button class="lh-btn-icon" onclick="logout()" title="Sair">
       <svg width="20" height="20" viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg">
@@ -1674,8 +1674,7 @@ function guardarRepetida(playerId) {
     updateFAB();
   }
   refreshCurrentPage();
-  showToast(p.name + ' guardada para troca 🔄');
-  openTrade();
+  showToast(p.name + ' guardada para troca 🔄 — veja no Mercado de trocas');
 }
 
 // ---- Zoom overlay ----
