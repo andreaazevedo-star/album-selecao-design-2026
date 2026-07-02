@@ -306,6 +306,14 @@ body{background:#000509}
 .overlay-slot.drop-hover{outline:3px solid #f0d060;outline-offset:2px}
 .overlay-slot.drop-wrong{animation:shakeCard .35s ease}
 @keyframes shakeCard{0%,100%{transform:translateX(0)}20%{transform:translateX(-6px)}40%{transform:translateX(6px)}60%{transform:translateX(-4px)}80%{transform:translateX(4px)}}
+/* album complete overlay */
+#album-complete{position:fixed;inset:0;top:64px;z-index:10002;background:rgba(6,20,14,.8);backdrop-filter:blur(2px);display:none;align-items:center;justify-content:center}
+#album-complete .ac-card{position:relative;max-width:min(460px,88vw);background:linear-gradient(160deg,#0d3d1c,#061a0e);border:1.5px solid rgba(200,168,60,.55);border-radius:18px;padding:36px 30px 30px;text-align:center;box-shadow:0 24px 70px rgba(0,0,0,.7);animation:popIn .28s ease backwards}
+#album-complete .ac-trophy{font-size:3.4rem;line-height:1;margin-bottom:10px}
+#album-complete .ac-title{font-size:1.5rem;font-weight:900;color:#f0d060;letter-spacing:.01em;margin-bottom:10px}
+#album-complete .ac-sub{font-size:.95rem;color:rgba(255,255,255,.9);line-height:1.5}
+#album-complete .ac-close{position:absolute;top:12px;right:12px;width:36px;height:36px;border-radius:50%;background:rgba(0,0,0,.4);border:1.5px solid rgba(255,255,255,.3);cursor:pointer;display:flex;align-items:center;justify-content:center;transition:.15s}
+#album-complete .ac-close:hover{background:rgba(0,0,0,.75)}
 @media(max-width:1100px){#pack-float{top:270px;right:8px}#pack-float-fan{width:250px;height:290px}.pf-card{width:128px;height:184px}}
 @media(max-width:900px){#pack-float{top:auto;bottom:130px;right:8px}}
 
@@ -432,6 +440,18 @@ body{background:#000509}
 <div id="pack-float" style="display:none">
   <div id="pack-float-fan"></div>
   <div id="pack-float-status"></div>
+</div>
+
+<!-- ALBUM COMPLETE -->
+<div id="album-complete" style="display:none" onclick="if(event.target===this)closeAlbumComplete()">
+  <div class="ac-card">
+    <button class="ac-close" onclick="closeAlbumComplete()" aria-label="Fechar">
+      <svg width="18" height="18" viewBox="0 0 20 20" fill="none"><path d="M5 5l10 10M15 5L5 15" stroke="white" stroke-width="2.2" stroke-linecap="round"/></svg>
+    </button>
+    <div class="ac-trophy">🏆</div>
+    <div class="ac-title">Álbum completo!</div>
+    <div class="ac-sub">Parabéns! Você colou todas as figurinhas da Seleção de Design 2026. 🎉</div>
+  </div>
 </div>
 
 <div id="pack-zoom" style="display:none" onclick="if(event.target===this)closeZoom()">
@@ -1521,7 +1541,8 @@ function dropStickerOnAlbum(event, targetPlayerId) {
   const p = packFloatCards.splice(idx, 1)[0];
   const collected = getCollected();
   const dupes = getDupes();
-  if (!collected.includes(p.id)) { collected.push(p.id); saveCollected(collected); showToast(p.name + ' colada! ✨'); }
+  let justCollected = false;
+  if (!collected.includes(p.id)) { collected.push(p.id); saveCollected(collected); showToast(p.name + ' colada! ✨'); justCollected = true; }
   else { dupes.push(p.id); saveDupes(dupes); showToast(p.name + ' já coletada — repetida 🔄'); }
   renderPackFloat();
   savePendingPack();
@@ -1533,6 +1554,18 @@ function dropStickerOnAlbum(event, targetPlayerId) {
     showToast('Pacote completo! 🎉');
   }
   refreshCurrentPage();
+  if (justCollected && isAlbumComplete()) showAlbumComplete();
+}
+
+function isAlbumComplete() {
+  const collected = getCollected();
+  return TEAM.every(p => collected.includes(p.id));
+}
+function showAlbumComplete() {
+  document.getElementById('album-complete').style.display = 'flex';
+}
+function closeAlbumComplete() {
+  document.getElementById('album-complete').style.display = 'none';
 }
 
 function savePackFloat() {
