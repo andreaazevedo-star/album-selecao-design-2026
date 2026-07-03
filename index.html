@@ -734,6 +734,7 @@ const TEAM = [
   { id:62, name:'Flora Lins',           role:'Product Designer',      squad:9, squads:[9],   isTecnico:false, isSpecial:false, isCross:false, photo:'imgs/novos-negocios/62.png' },
   { id:63, name:'Raffael Costa',        role:'Product Designer',      squad:9, squads:[9],   isTecnico:false, isSpecial:false, isCross:false, photo:'imgs/novos-negocios/63.png' },
   { id:64, name:'Sérgio Fontes',        role:'Product Designer',      squad:9, squads:[9],   isTecnico:false, isSpecial:false, isCross:false, photo:'imgs/novos-negocios/64.png' },
+  { id:99, name:'ENIGMA',               role:'QA Tester',             squad:0, squads:[],    isTecnico:false, isSpecial:false, isCross:false, photo:'' },
 ];
 
 // Cache-bust sticker photos (images updated 2026-07-01 to high-res sources)
@@ -1500,7 +1501,7 @@ function closePicker() {
 function openPack() {
   // If there's still an open pack pending, just re-show it instead of drawing a new one
   if (packFloatCards.length) { document.getElementById('pack-float').style.display = 'flex'; return; }
-  if (getPacksToday() >= getMaxPacks()) {
+  if (currentUser !== 'ENIGMA' && getPacksToday() >= getMaxPacks()) {
     const h = new Date().getHours();
     const msg = h < 8  ? 'Pacotes abrem às 08h! ⏰'
               : h < 13 ? 'Pacotes esgotados! Próximos às 13h ⏰'
