@@ -385,7 +385,7 @@ body{background:#000509}
 .picker-empty{color:rgba(253,253,249,.4);font-size:.9rem;line-height:1.6}
 
 /* ===== TOAST ===== */
-.toast{position:fixed;bottom:80px;left:50%;transform:translateX(-50%);background:rgba(0,0,0,.85);color:#fff;padding:12px 24px;border-radius:30px;font-size:.9rem;z-index:200;opacity:0;transition:opacity .3s;white-space:nowrap;pointer-events:none}
+.toast{position:fixed;bottom:80px;left:50%;transform:translateX(-50%);background:rgba(0,0,0,.85);color:#fff;padding:12px 24px;border-radius:30px;font-size:.9rem;z-index:10000;opacity:0;transition:opacity .3s;white-space:nowrap;pointer-events:none}
 .toast.show{opacity:1}
 
 /* ===== SCROLLBAR ===== */
@@ -429,6 +429,9 @@ body{background:#000509}
   <div id="login-header-btns">
     <button class="lh-btn lh-btn-ghost" onclick="openInstructions()">📖 Instruções de uso</button>
     <button class="lh-btn lh-btn-ghost" onclick="openTrade()">🔄 Mercado de trocas</button>
+    <button class="lh-btn lh-btn-ghost" onclick="exportProgress()">💾 Salvar progresso</button>
+    <button class="lh-btn lh-btn-ghost" onclick="document.getElementById('import-file').click()">📂 Restaurar</button>
+    <input type="file" id="import-file" accept=".json" style="display:none" onchange="importProgress(event)">
     <div class="lh-divider"></div>
     <button class="lh-btn-icon" onclick="logout()" title="Sair">
       <svg width="20" height="20" viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg">
@@ -2487,6 +2490,59 @@ document.getElementById('player-picker').addEventListener('click', function(e) {
 // INIT
 // ============================================================
 populateLoginSelect();
+
+function exportProgress() {
+  if (!currentUser) return;
+  const today = new Date().toISOString().split('T')[0];
+  const data = {
+    version: 1,
+    user: currentUser,
+    exportedAt: new Date().toISOString(),
+    collected: getCollected(),
+    dupes: getDupes(),
+    dream: getDream(),
+    captain: getCaptain(),
+    appliedCodes: getApplied(),
+    packsToday: { date: today, count: getPacksToday() }
+  };
+  const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(blob);
+  a.download = 'album-' + currentUser.replace(/\s+/g, '-').toLowerCase() + '-' + today + '.json';
+  a.click();
+  URL.revokeObjectURL(a.href);
+  showToast('Progresso salvo! 💾');
+}
+
+function importProgress(ev) {
+  const file = ev.target.files[0];
+  if (!file) return;
+  const reader = new FileReader();
+  reader.onload = function(e) {
+    try {
+      const data = JSON.parse(e.target.result);
+      if (!data.version || !data.user) throw new Error('Arquivo inválido');
+      if (data.user !== currentUser) {
+        if (!confirm('Esse backup é de "' + data.user + '" mas você está logado como "' + currentUser + '". Importar mesmo assim?')) return;
+      }
+      if (data.collected) saveCollected(data.collected);
+      if (data.dupes) saveDupes(data.dupes);
+      if (data.dream) saveDream(data.dream);
+      if (data.captain != null) setCaptain(data.captain);
+      if (data.appliedCodes) localStorage.setItem(appliedKey(), JSON.stringify(data.appliedCodes));
+      if (data.packsToday && data.packsToday.date === new Date().toISOString().split('T')[0]) {
+        localStorage.setItem('album_packs_' + currentUser + '_' + data.packsToday.date, String(data.packsToday.count));
+      }
+      showToast('Progresso restaurado! ✅');
+      renderSpread();
+      updateFAB();
+    } catch(err) {
+      showToast('Erro ao importar: ' + err.message);
+    }
+  };
+  reader.readAsText(file);
+  ev.target.value = '';
+}
 
 const savedUser = localStorage.getItem('album_current_user');
 // só auto-loga se a sessão salva for um nome válido do time (ignora sessões antigas do Google, que eram e-mail)
