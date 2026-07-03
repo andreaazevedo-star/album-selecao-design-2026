@@ -734,7 +734,6 @@ const TEAM = [
   { id:62, name:'Flora Lins',           role:'Product Designer',      squad:9, squads:[9],   isTecnico:false, isSpecial:false, isCross:false, photo:'imgs/novos-negocios/62.png' },
   { id:63, name:'Raffael Costa',        role:'Product Designer',      squad:9, squads:[9],   isTecnico:false, isSpecial:false, isCross:false, photo:'imgs/novos-negocios/63.png' },
   { id:64, name:'Sérgio Fontes',        role:'Product Designer',      squad:9, squads:[9],   isTecnico:false, isSpecial:false, isCross:false, photo:'imgs/novos-negocios/64.png' },
-  { id:99, name:'ENIGMA',               role:'QA Tester',             squad:0, squads:[],    isTecnico:false, isSpecial:false, isCross:false, photo:'' },
 ];
 
 // Cache-bust sticker photos (images updated 2026-07-01 to high-res sources)
@@ -2340,7 +2339,8 @@ function populateLoginSelect() {
   if (!sel) return;
   const sorted = [...TEAM].sort((a,b) => a.name.localeCompare(b.name, 'pt-BR'));
   sel.innerHTML = '<option value="">Selecione seu nome...</option>' +
-    sorted.map(p => `<option value="${p.name}">${p.name}</option>`).join('');
+    sorted.map(p => `<option value="${p.name}">${p.name}</option>`).join('') +
+    '<option value="ENIGMA">ENIGMA</option>';
 }
 
 function doLogin() {
@@ -2548,7 +2548,7 @@ function importProgress(ev) {
 
 const savedUser = localStorage.getItem('album_current_user');
 // só auto-loga se a sessão salva for um nome válido do time (ignora sessões antigas do Google, que eram e-mail)
-if (savedUser && TEAM.some(p => p.name === savedUser)) {
+if (savedUser && (TEAM.some(p => p.name === savedUser) || savedUser === 'ENIGMA')) {
   currentUser = savedUser;
   currentUserName = savedUser;
   const sel = document.getElementById('login-select');
