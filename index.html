@@ -1500,6 +1500,10 @@ function closePicker() {
 function openPack() {
   // If there's still an open pack pending, just re-show it instead of drawing a new one
   if (packFloatCards.length) { document.getElementById('pack-float').style.display = 'flex'; return; }
+  const dow = new Date().getDay();
+  if (currentUser !== 'ENIGMA' && (dow === 0 || dow === 6)) {
+    showToast('Pacotes só abrem de segunda a sexta! 📅'); return;
+  }
   if (currentUser !== 'ENIGMA' && getPacksToday() >= getMaxPacks()) {
     const h = new Date().getHours();
     const msg = h < 8  ? 'Pacotes abrem às 08h! ⏰'
