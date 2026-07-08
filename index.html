@@ -1500,19 +1500,6 @@ function closePicker() {
 function openPack() {
   // If there's still an open pack pending, just re-show it instead of drawing a new one
   if (packFloatCards.length) { document.getElementById('pack-float').style.display = 'flex'; return; }
-  const dow = new Date().getDay();
-  if (currentUser !== 'ENIGMA' && (dow === 0 || dow === 6)) {
-    showToast('Pacotes só abrem de segunda a sexta! 📅'); return;
-  }
-  if (currentUser !== 'ENIGMA' && getPacksToday() >= getMaxPacks()) {
-    const h = new Date().getHours();
-    const msg = h < 8  ? 'Pacotes abrem às 08h! ⏰'
-              : h < 13 ? 'Pacotes esgotados! Próximos às 13h ⏰'
-              : h < 17 ? 'Pacotes esgotados! Próximos às 17h ⏰'
-              : 'Pacotes de hoje esgotados! Volte amanhã 🌅';
-    showToast(msg);
-    return;
-  }
   const drawn = drawCards(5);
   incPacksToday();          // pack is consumed at open (persists even if browser closes)
   pendingPackCards = drawn;
@@ -2344,7 +2331,7 @@ function populateLoginSelect() {
   const sorted = [...TEAM].sort((a,b) => a.name.localeCompare(b.name, 'pt-BR'));
   sel.innerHTML = '<option value="">Selecione seu nome...</option>' +
     sorted.map(p => `<option value="${p.name}">${p.name}</option>`).join('') +
-    '<option value="ENIGMA">ENIGMA</option>';
+    '';
 }
 
 function doLogin() {
@@ -2552,7 +2539,7 @@ function importProgress(ev) {
 
 const savedUser = localStorage.getItem('album_current_user');
 // só auto-loga se a sessão salva for um nome válido do time (ignora sessões antigas do Google, que eram e-mail)
-if (savedUser && (TEAM.some(p => p.name === savedUser) || savedUser === 'ENIGMA')) {
+if (savedUser && TEAM.some(p => p.name === savedUser)) {
   currentUser = savedUser;
   currentUserName = savedUser;
   const sel = document.getElementById('login-select');
