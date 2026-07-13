@@ -2296,28 +2296,13 @@ function showResult(el,type,msg){el.innerHTML=tradeMsg(type,msg);}
 /* ===== END TRADE v2 ===== */
 
 function updateFAB() {
-  const used = getPacksToday();
-  const remaining = getMaxPacks() - used;
-  const exhausted = used >= getMaxPacks();
   const fab = document.getElementById('fab');
   const status = document.getElementById('fab-status');
   const img = fab.querySelector('img');
-  fab.disabled = exhausted;
-  if (exhausted) {
-    img.classList.add('exhausted');
-    status.className = 'fab-msg';
-    const h = new Date().getHours();
-    const nextMsg = h < 8  ? 'Pacotes abrem às 08h!'
-                  : h < 13 ? 'Próximos às 13h!'
-                  : h < 17 ? 'Próximos às 17h!'
-                  : 'Volte amanhã!';
-    status.innerHTML = '😱 Pacotes esgotados.<br>' + nextMsg;
-  } else {
-    img.classList.remove('exhausted');
-    status.className = 'fab-tag';
-    const label = remaining === getMaxPacks() ? 'Figurinhas disponíveis' : `${remaining} pacote${remaining > 1 ? 's' : ''} restante${remaining > 1 ? 's' : ''}`;
-    status.innerHTML = `<span class="fab-tag-dot"></span><span id="fab-status-text">${label}</span>`;
-  }
+  fab.disabled = false;
+  img.classList.remove('exhausted');
+  status.className = 'fab-tag';
+  status.innerHTML = '<span class="fab-tag-dot"></span><span id="fab-status-text">Figurinhas disponíveis</span>';
 }
 
 // ============================================================
