@@ -2316,7 +2316,7 @@ function populateLoginSelect() {
   const sorted = [...TEAM].sort((a,b) => a.name.localeCompare(b.name, 'pt-BR'));
   sel.innerHTML = '<option value="">Selecione seu nome...</option>' +
     sorted.map(p => `<option value="${p.name}">${p.name}</option>`).join('') +
-    '';
+    '<option value="Caroline Portz">Caroline Portz</option>';
 }
 
 function doLogin() {
@@ -2524,7 +2524,8 @@ function importProgress(ev) {
 
 const savedUser = localStorage.getItem('album_current_user');
 // só auto-loga se a sessão salva for um nome válido do time (ignora sessões antigas do Google, que eram e-mail)
-if (savedUser && TEAM.some(p => p.name === savedUser)) {
+const GUEST_USERS = ['Caroline Portz'];
+if (savedUser && (TEAM.some(p => p.name === savedUser) || GUEST_USERS.includes(savedUser))) {
   currentUser = savedUser;
   currentUserName = savedUser;
   const sel = document.getElementById('login-select');
